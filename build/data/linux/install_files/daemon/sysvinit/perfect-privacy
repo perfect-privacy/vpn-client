@@ -1,0 +1,41 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          perfect-privacy-vpnd
+# Required-Start:    $remote_fs $syslog $network $named $time
+# Required-Stop:     $remote_fs $syslog $network $named $time
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: The daemon for the Perfect Privacy VPN client
+# Description:       The daemon for the Perfect Privacy VPN client
+### END INIT INFO
+
+DAEMON_NAME="perfect-privacy"
+DAEMON="/opt/perfect-privacy/perfect-privacy"
+
+. /lib/lsb/init-functions
+
+function_exists() {
+    type -t $1 > /dev/null 2>&1
+    return $?
+}
+
+check_for_upstart() {
+    if function_exists "init_is_upstart"; then
+        if init_is_upstart; then
+            echo "ERROR: Managed by upstart. Use [initctl] {start|stop|restart} $DAEMON_NAME instead."
+            exit $1
+        fi
+    fi
+}
+
+check_for_upstart
+
+case $1 in
+    start|stop|restart)
+         ${DAEMON} daemon $1
+        ;;
+    *)
+        ${DAEMON} daemon -h
+        exit 1
+esac

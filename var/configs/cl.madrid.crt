@@ -1,0 +1,138 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            9a:c1:7f:4a:63:df:d6:c3
+    Signature Algorithm: sha512WithRSAEncryption
+        Issuer: C=CH, ST=Zug, L=Zug, O=Perfect Privacy, CN=Perfect Privacy/emailAddress=admin@perfect-privacy.com
+        Validity
+            Not Before: Jan  8 00:00:00 2023 GMT
+            Not After : Sep  4 00:00:00 2024 GMT
+        Subject: C=CH, ST=Zug, O=Perfect Privacy, CN=Client_madrid.perfect-privacy.com/emailAddress=admin@perfect-privacy.com
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (4096 bit)
+                Modulus:
+                    00:c2:f8:71:be:fb:37:b3:08:35:a4:61:c0:eb:ab:
+                    88:39:8d:6a:16:15:ca:be:fd:1b:8b:76:2a:1f:c9:
+                    f2:cb:f1:48:09:23:b0:91:46:1a:89:25:a8:b3:49:
+                    68:47:db:bb:3c:78:71:31:33:e9:7f:07:2c:7d:43:
+                    18:2c:55:2f:81:6e:c1:f7:3b:17:93:7b:4f:67:1e:
+                    89:b6:c8:ab:35:f6:76:83:85:ee:dd:94:1a:ee:47:
+                    12:f1:16:75:ec:2a:b1:52:05:dc:93:bb:52:d5:f3:
+                    be:97:aa:0e:ab:0d:b2:f1:1f:f9:d5:9c:19:94:54:
+                    6b:fb:1b:55:6c:ba:16:cf:b2:58:2e:b9:bd:ce:16:
+                    b1:10:fc:54:ae:05:dc:8e:66:c8:b3:53:b5:03:d1:
+                    9d:e2:bc:51:07:55:8d:9c:36:cb:15:56:05:a6:69:
+                    d7:e6:6d:61:b9:0b:be:83:a3:58:89:4d:1e:69:ba:
+                    f8:9b:10:72:ad:cf:57:96:c5:43:94:b4:15:82:81:
+                    79:dc:c1:32:f2:84:57:94:33:f7:b9:0d:0c:2f:d6:
+                    1d:b3:ef:28:bb:84:a7:88:c5:07:17:dd:a0:98:a0:
+                    13:b6:13:73:41:24:33:d2:fe:ac:e0:39:9d:cf:0e:
+                    b4:e5:ee:cc:05:73:60:dc:e2:42:dc:01:de:af:df:
+                    cd:d5:36:b2:a0:97:f1:03:c0:be:f3:19:12:d8:9c:
+                    f2:d5:77:7b:d6:1f:ff:b7:4e:77:38:78:f3:8b:58:
+                    42:23:d0:3f:2b:36:37:d0:12:7b:96:44:59:a6:7d:
+                    a4:3e:23:08:a5:a5:f4:f9:3f:b6:66:53:c5:0c:48:
+                    5a:61:ba:89:5f:2f:e8:b2:a8:6f:5b:74:93:76:a0:
+                    67:07:d3:db:fe:d7:eb:d4:cf:12:50:93:43:fd:b0:
+                    3e:0e:8f:1f:c3:68:4b:f4:3c:f1:e2:19:e7:6a:95:
+                    4b:74:f5:51:44:73:73:3c:b7:ae:57:e6:63:9e:c8:
+                    26:54:10:13:f5:10:cc:f0:00:e6:7c:6f:6d:2e:c5:
+                    7e:29:25:48:db:5a:a2:6a:cb:a2:78:97:50:9d:33:
+                    db:e3:98:06:21:a9:f5:a8:21:b0:9d:5c:03:ae:9e:
+                    bb:39:3a:ac:97:5c:0d:0b:e3:37:1d:f0:cf:e9:d0:
+                    10:8e:6c:ba:d9:9a:f2:11:5f:83:b2:fb:30:f2:31:
+                    a1:1d:74:d2:07:f3:47:0a:0a:7f:d0:57:f3:d1:29:
+                    9b:03:36:2f:9f:78:cf:ac:d3:fd:57:70:df:88:60:
+                    7b:aa:d8:3c:e0:0e:e7:28:f3:15:4f:82:c6:db:37:
+                    74:6b:b1:f6:13:5f:ec:b4:9f:f5:c0:ec:2d:df:a9:
+                    02:c8:77
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            Netscape Comment: 
+                VPN User Certificate
+            Netscape Cert Type: 
+                SSL Client
+            X509v3 Key Usage: 
+                Digital Signature
+            X509v3 Extended Key Usage: 
+                TLS Web Client Authentication
+            X509v3 Subject Key Identifier: 
+                C8:9A:9C:56:07:50:B0:C3:37:3C:E0:3D:7D:36:3B:5E:B6:B0:24:A3
+            X509v3 Authority Key Identifier: 
+                keyid:86:4F:B8:6D:18:2A:1B:3C:8F:27:34:29:F0:81:9F:BA:6E:61:0E:E1
+                DirName:/C=CH/ST=Zug/L=Zug/O=Perfect Privacy/CN=Perfect Privacy/emailAddress=admin@perfect-privacy.com
+                serial:FA:11:B5:C4:AA:69:AF:69
+
+    Signature Algorithm: sha512WithRSAEncryption
+         7e:3e:0c:a6:01:92:b9:f4:84:09:2b:3f:39:17:7b:bf:08:e8:
+         1d:65:a3:a5:79:5d:c4:d9:49:3e:3d:f7:7d:63:41:97:1e:a4:
+         46:84:4e:29:ac:30:90:30:dc:8e:4f:9e:9a:7d:fc:2f:66:19:
+         d6:19:ec:97:6e:9b:e8:84:df:3a:ac:79:5a:47:5e:58:f8:36:
+         9e:23:c8:70:b0:5a:86:06:89:d2:28:4e:12:ea:b6:34:7b:b9:
+         da:7d:45:6c:28:a5:4a:8f:cf:81:7e:52:91:f9:f2:0d:db:73:
+         3c:e8:01:da:4f:16:dd:23:c0:b6:8d:5d:df:64:1c:a1:b7:f6:
+         4e:25:3a:66:77:a9:aa:12:10:1f:ac:73:94:5d:d0:9b:ec:2d:
+         88:4f:53:6c:e7:25:9e:3d:2d:92:20:f3:5b:d8:bd:a9:99:d6:
+         be:0b:31:8f:6f:da:44:7d:4e:c0:d1:89:43:b6:63:fa:3a:74:
+         20:00:88:18:6e:d5:65:3a:d1:c6:4b:1c:e0:ac:3c:cc:1a:a1:
+         bf:e6:39:df:17:2c:88:17:a7:75:f5:83:73:73:8a:0b:6a:7e:
+         06:86:ad:75:6d:0c:20:9f:96:e5:58:5a:5e:07:5f:f6:6a:c4:
+         09:8f:b2:7f:f3:9f:59:02:74:2f:70:3e:62:30:bc:de:14:21:
+         79:7b:e3:f5:4b:47:e6:3d:ae:8d:76:5b:54:ad:45:0f:bc:a8:
+         d7:82:e4:c2:84:b3:39:60:62:da:94:e1:56:97:d6:4e:7c:95:
+         aa:0a:44:bd:df:f9:a7:14:d1:ae:67:f8:29:2c:e0:66:2c:44:
+         42:2a:bd:a7:96:80:96:90:58:81:d6:99:f2:68:be:d6:09:90:
+         15:df:20:d3:f2:70:b5:01:c9:ba:15:5d:d3:b7:46:d7:ac:d5:
+         e0:c0:09:dc:2b:8e:2f:22:4f:da:2e:9b:cf:01:0a:92:bf:87:
+         73:64:f2:79:91:f0:6a:09:1e:61:37:f6:50:2d:68:5f:6f:1b:
+         a1:42:07:75:8e:40:5f:86:90:27:79:46:10:11:9d:11:ad:ab:
+         4a:72:59:0d:0c:11:e9:71:25:b5:d7:ca:cc:a5:2d:89:d0:84:
+         d2:19:ef:a9:86:b6:22:3f:47:d6:e6:3e:eb:c3:56:30:af:ff:
+         b6:f1:c7:a6:d2:57:e1:0a:cc:6e:3a:04:c3:3d:a2:21:a7:7c:
+         f2:42:e5:44:20:0e:62:4a:ab:46:af:0f:57:ab:11:e5:56:f4:
+         33:83:39:1a:67:8d:49:a6:bd:3e:5f:f6:f1:d7:f2:a4:df:66:
+         86:08:ed:bf:e5:c8:7c:bc:e1:98:14:4a:8e:1a:93:62:4e:dc:
+         1c:47:f5:88:5f:69:6a:be
+-----BEGIN CERTIFICATE-----
+MIIG4DCCBMigAwIBAgIJAJrBf0pj39bDMA0GCSqGSIb3DQEBDQUAMIGHMQswCQYD
+VQQGEwJDSDEMMAoGA1UECBMDWnVnMQwwCgYDVQQHEwNadWcxGDAWBgNVBAoTD1Bl
+cmZlY3QgUHJpdmFjeTEYMBYGA1UEAxMPUGVyZmVjdCBQcml2YWN5MSgwJgYJKoZI
+hvcNAQkBFhlhZG1pbkBwZXJmZWN0LXByaXZhY3kuY29tMB4XDTIzMDEwODAwMDAw
+MFoXDTI0MDkwNDAwMDAwMFowgYsxCzAJBgNVBAYTAkNIMQwwCgYDVQQIEwNadWcx
+GDAWBgNVBAoTD1BlcmZlY3QgUHJpdmFjeTEqMCgGA1UEAxQhQ2xpZW50X21hZHJp
+ZC5wZXJmZWN0LXByaXZhY3kuY29tMSgwJgYJKoZIhvcNAQkBFhlhZG1pbkBwZXJm
+ZWN0LXByaXZhY3kuY29tMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA
+wvhxvvs3swg1pGHA66uIOY1qFhXKvv0bi3YqH8nyy/FICSOwkUYaiSWos0loR9u7
+PHhxMTPpfwcsfUMYLFUvgW7B9zsXk3tPZx6JtsirNfZ2g4Xu3ZQa7kcS8RZ17Cqx
+UgXck7tS1fO+l6oOqw2y8R/51ZwZlFRr+xtVbLoWz7JYLrm9zhaxEPxUrgXcjmbI
+s1O1A9Gd4rxRB1WNnDbLFVYFpmnX5m1huQu+g6NYiU0eabr4mxByrc9XlsVDlLQV
+goF53MEy8oRXlDP3uQ0ML9Yds+8ou4SniMUHF92gmKATthNzQSQz0v6s4Dmdzw60
+5e7MBXNg3OJC3AHer9/N1TayoJfxA8C+8xkS2Jzy1Xd71h//t053OHjzi1hCI9A/
+KzY30BJ7lkRZpn2kPiMIpaX0+T+2ZlPFDEhaYbqJXy/osqhvW3STdqBnB9Pb/tfr
+1M8SUJND/bA+Do8fw2hL9Dzx4hnnapVLdPVRRHNzPLeuV+ZjnsgmVBAT9RDM8ADm
+fG9tLsV+KSVI21qiasuieJdQnTPb45gGIan1qCGwnVwDrp67OTqsl1wNC+M3HfDP
+6dAQjmy62ZryEV+Dsvsw8jGhHXTSB/NHCgp/0Ffz0SmbAzYvn3jPrNP9V3DfiGB7
+qtg84A7nKPMVT4LG2zd0a7H2E1/stJ/1wOwt36kCyHcCAwEAAaOCAUcwggFDMAkG
+A1UdEwQCMAAwIwYJYIZIAYb4QgENBBYWFFZQTiBVc2VyIENlcnRpZmljYXRlMBEG
+CWCGSAGG+EIBAQQEAwIHgDALBgNVHQ8EBAMCB4AwEwYDVR0lBAwwCgYIKwYBBQUH
+AwIwHQYDVR0OBBYEFMianFYHULDDNzzgPX02O162sCSjMIG8BgNVHSMEgbQwgbGA
+FIZPuG0YKhs8jyc0KfCBn7puYQ7hoYGNpIGKMIGHMQswCQYDVQQGEwJDSDEMMAoG
+A1UECBMDWnVnMQwwCgYDVQQHEwNadWcxGDAWBgNVBAoTD1BlcmZlY3QgUHJpdmFj
+eTEYMBYGA1UEAxMPUGVyZmVjdCBQcml2YWN5MSgwJgYJKoZIhvcNAQkBFhlhZG1p
+bkBwZXJmZWN0LXByaXZhY3kuY29tggkA+hG1xKppr2kwDQYJKoZIhvcNAQENBQAD
+ggIBAH4+DKYBkrn0hAkrPzkXe78I6B1lo6V5XcTZST49931jQZcepEaETimsMJAw
+3I5Pnpp9/C9mGdYZ7Jdum+iE3zqseVpHXlj4Np4jyHCwWoYGidIoThLqtjR7udp9
+RWwopUqPz4F+UpH58g3bczzoAdpPFt0jwLaNXd9kHKG39k4lOmZ3qaoSEB+sc5Rd
+0JvsLYhPU2znJZ49LZIg81vYvamZ1r4LMY9v2kR9TsDRiUO2Y/o6dCAAiBhu1WU6
+0cZLHOCsPMwaob/mOd8XLIgXp3X1g3NzigtqfgaGrXVtDCCfluVYWl4HX/ZqxAmP
+sn/zn1kCdC9wPmIwvN4UIXl74/VLR+Y9ro12W1StRQ+8qNeC5MKEszlgYtqU4VaX
+1k58laoKRL3f+acU0a5n+Cks4GYsREIqvaeWgJaQWIHWmfJovtYJkBXfINPycLUB
+yboVXdO3Rtes1eDACdwrji8iT9oum88BCpK/h3Nk8nmR8GoJHmE39lAtaF9vG6FC
+B3WOQF+GkCd5RhARnRGtq0pyWQ0MEelxJbXXysylLYnQhNIZ76mGtiI/R9bmPuvD
+VjCv/7bxx6bSV+EKzG46BMM9oiGnfPJC5UQgDmJKq0avD1erEeVW9DODORpnjUmm
+vT5f9vHX8qTfZoYI7b/lyHy84ZgUSo4ak2JO3BxH9YhfaWq+
+-----END CERTIFICATE-----

@@ -1,0 +1,42 @@
+#!/bin/bash -e
+
+#DEBHELPER#
+
+action="$1"
+
+APT_DIR="/etc/apt/sources.list.d"
+
+get_apt_val() {
+    apt-config dump|sed -e "/^$1 /"'!d' -e "s/^$1 \"\(.*\)\".*/\1/"
+}
+
+
+set_apt_dir() {
+    local dir="$(get_apt_val 'Dir')"
+    local dir_etc="$dir$(get_apt_val 'Dir::Etc')"
+    local dir_etc_sourceparts="$dir_etc$(get_apt_val 'Dir::Etc::sourceparts')"
+    APT_DIR="$dir_etc_sourceparts"
+}
+
+set_apt_dir
+SOURCESLIST_PATH="$APT_DIR/perfect-privacy-vpn.list"
+
+remove_pubkey() {
+    apt-key del "1BF5B90E" > /dev/null 2>&1
+}
+
+remove_sourceslist() {
+    rm -f "$SOURCESLIST_PATH" "$SOURCESLIST_PATH.distUpgrade"
+}
+
+remove_configs() {
+    rm -rf /etc/perfect-privacy-vpnd/
+}
+
+
+remove_pubkey
+remove_sourceslist
+
+if [ "$action" == "purge" ]; then
+    remove_configs
+fi

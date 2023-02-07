@@ -1,0 +1,1 @@
+from .components.mainview import MainView

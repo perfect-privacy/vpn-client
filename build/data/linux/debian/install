@@ -1,0 +1,6 @@
+install_files/perfect-privacy-vpn.desktop usr/share/applications/
+install_files/icons/* usr/share/icons/hicolor/
+install_files/cron/perfect-privacy-vpn /etc/cron.daily/
+install_files/polkit/com.perfect-privacy.perfect-privacy-vpn.policy /usr/share/polkit-1/actions/
+install_files/man/*.gz /usr/share/man/man1/
+output/* opt/perfect_privacy/perfect-privacy-vpn/

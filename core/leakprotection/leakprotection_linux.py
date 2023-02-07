@@ -1,0 +1,3 @@
+from .leakprotection_generic import LeakProtection_Generic
+
+class LeakProtection_linux(LeakProtection_Generic):pass

@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+#DEBHELPER#
+
+/etc/cron.daily/perfect-privacy-vpn
+
+set +e
+# update desktop cache (for unity)
+desktop-file-install --dir=/usr/share/applications/ /usr/share/applications/perfect-privacy-vpn.desktop

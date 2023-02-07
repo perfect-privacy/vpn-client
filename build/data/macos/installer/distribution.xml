@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<installer-script minSpecVersion="1.000000">
+    <title>Perfect Privacy</title>
+    <background mime-type="image/png" file="pp_icon_512.png" scaling="proportional"/>
+    <welcome file="welcome.html" mime-type="text/html" />
+    <conclusion file="conclusion.html" mime-type="text/html" />
+    <options customize="never" allow-external-scripts="no"/>
+    <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+    <options rootVolumeOnly="true"/>
+    <installation-check script="installCheck();"/>
+    <script>
+    function installCheck() {
+        if(!(system.compareVersions(system.version.ProductVersion, '10.6.0') >= 0)) {
+            my.result.title = 'Unable to install';
+            my.result.message = 'Perfect Privacy VPN requires Mac OS X 10.6 or later.';
+            my.result.type = 'Fatal';
+            return false;
+        }
+        /*
+        if(system.files.fileExistsAtPath('/Applications/perfect-privacy/')) {
+            my.result.title = 'Previous Installation Detected';
+            my.result.message = 'A previous installation of Perfect Privacy VPN exists at /Applications/perfect-privacy/. This installer will remove the previous installation prior to installing. Please back up any data before proceeding.';
+            my.result.type = 'Warning';
+            return false;
+        }
+        */
+        return true;
+    }
+    </script>
+    <choices-outline>
+        <line choice="install"/>
+    </choices-outline>
+    <choice id="install" title="Perfect Privacy Installer">
+        <pkg-ref id="perfect-privacy.pkg"/>
+    </choice>
+    <pkg-ref id="perfect-privacy.pkg" auth="Root">perfect-privacy.pkg</pkg-ref>
+</installer-script>

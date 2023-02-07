@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+%:
+ifneq ($(shell dh -l | grep -xF translations),)
+	dh $@ --with python3,translations
+else
+	dh $@ --with python3
+endif
+
+#override_dh_auto_install:
+#	python setup.py install --root=debian/perfect-privacy-vpn --install-layout=deb --install-scripts=/opt/perfect_privacy/perfect-privacy-vpn/bin --install-data=/opt/perfect_privacy/perfect-privacy-vpn --install-lib=/opt/perfect_privacy/perfect-privacy-vpn
+
+override_dh_python3:
+	dh_python3 /opt/perfect_privacy/perfect-privacy-vpn
+

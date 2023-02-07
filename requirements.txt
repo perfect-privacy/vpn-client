@@ -1,0 +1,14 @@
+wheel
+requests
+bson
+jinja2
+whichcraft
+pyinstaller
+psutil
+pyhtmlgui>=3.10
+markupsafe==2.1.1
+werkzeug
+flask
+flask-sock
+pyqt5
+PyQtWebEngine

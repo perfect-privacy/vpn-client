@@ -1,0 +1,28 @@
+#!/bin/bash
+echo "Pre installation process started"
+
+if test -f "/Library/LaunchDaemons/perfect-privacy-service.plist"; then
+  launchctl unload /Library/LaunchDaemons/perfect-privacy-service.plist
+  while [ "1$(launchctl list|grep com.perfect-privacy.service|cut -f1)" -gt 1 ]; do
+    sleep 1  # wait for service to stop
+  done
+fi
+
+killall perfect-privacy
+killall perfect-privacy-service
+killall pp.obfs4proxy
+killall pp.openvpn
+killall pp.stunnel
+killall -9 perfect-privacy
+killall -9 perfect-privacy-service
+killall -9 pp.obfs4proxy
+killall -9 pp.stunnel
+killall -9 pp.openvpn
+
+if test -f "/Applications/Perfect\ Privacy.app/Contents/MacOS/var/storage.db"; then
+  cp /Applications/Perfect\ Privacy.app/Contents/MacOS/var/storage.db /tmp/
+fi
+
+if test -d "/Applications/Perfect\ Privacy.app"; then
+  rm -r /Applications/Perfect\ Privacy.app
+fi

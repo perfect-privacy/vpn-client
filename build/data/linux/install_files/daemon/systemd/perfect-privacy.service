@@ -1,0 +1,14 @@
+[Unit]
+Description=The daemon for the Perfect Privacy VPN client
+After=network.target auditd.service
+
+[Service]
+Type=forking
+PIDFile=/var/run/perfect-privacy.pid
+ExecStart=/opt/perfect-privacy/perfect-privacy daemon start
+ExecStop=/opt/perfect-privacy/perfect-privacy daemon stop
+TimeoutSec=20
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
