@@ -27,7 +27,7 @@ class MainApp():
             self.window.on_closed_event.attach_observer(self.app.hide_osx_dock)
             self.window.on_show_event.attach_observer(self.app.show_osx_dock)
             self.app.on_activated_event.attach_observer(self.window.show)
-            self.app.on_about_to_quit_event.attach_observer(confirm_exit)
+            #self.app.on_about_to_quit_event.attach_observer(...)
         else:
             self.window.on_minimized_event.attach_observer(self.window.hide)
             self.tray.on_left_clicked.attach_observer(self.window.show)

@@ -1,3 +1,4 @@
+
 windows/stealth/pp.obfs4proxy.exe
     - https://www.torproject.org/download/
     - download, install
@@ -66,3 +67,8 @@ windows/tapwindows/latest
 macos/openvpn/openvpn
     - Download and install tunnelblick 
     - get openvpn binary from Tunnelblick.app/Content/Resources/openvpn/
+    
+ 
+Or download https://github.com/perfect-privacy/vpn-client/releases/download/ThirdpartySoftwareUpdate/thirdparty.zip
+ ready to use. 
+ 

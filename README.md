@@ -16,6 +16,9 @@ On MacOS also run:
 
     pip install -r requirements_mac.txt
 
+Download third party (openvpn, obfsproxy, stunnel) binarys 
+[zip(github)](https://github.com/perfect-privacy/vpn-client/releases/download/ThirdpartySoftwareUpdate/thirdparty.zip)
+and unpack to thirdparty/
 
 
 #### Running as Developer

@@ -13,7 +13,7 @@ except:
 datas = [
     ( os.path.join(root_folder, "gui"       , "default" , "templates"            ) , os.path.join("gui", "default", "templates")),
     ( os.path.join(root_folder, "gui"       , "default" , "static"               ) , os.path.join("gui", "default", "static")),
-    ( os.path.join(os.path.split(pyhtmlgui.__file__)[0], "assets")                 , "pyhtmlgui/assets")
+    ( os.path.join(os.path.split(pyhtmlgui.__file__)[0], "templates")                 , "pyhtmlgui/templates")
 ]
 
 a = Analysis(
