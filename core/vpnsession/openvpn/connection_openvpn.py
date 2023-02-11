@@ -167,7 +167,7 @@ class OpenVPNConnection(VPNConnection):
                 args.extend(["--fragment", "1300"])
                 args.extend(["--mssfix"])
 
-        if self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.wintun:
+        if self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.wintun and PLATFORM == PLATFORMS.windows:
             args.extend(["--windows-driver", "wintun"])
 
         if self.stealth_plugin is not None:
