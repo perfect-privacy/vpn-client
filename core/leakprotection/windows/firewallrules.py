@@ -339,8 +339,11 @@ class FirewallReset():
     def run(self):
         rules = powershell.execute('Get-NetFirewallRule | ConvertTo-Json', as_data=True)
         for rule in rules:
-            name = rule["name"].lower()
-            if "perfect" in name and "privacy" in name:
-                powershell.execute('Remove-NetFirewallRule -Name "%s"' % rule["name"])
+            try:
+                name = rule["Name"].lower()
+                if "perfect" in name and "privacy" in name:
+                    powershell.execute('Remove-NetFirewallRule -Name "%s"' % rule["name"])
+            except:
+                pass
         powershell.execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
 
