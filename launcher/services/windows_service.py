@@ -55,12 +55,14 @@ class Windows_Service(win32serviceutil.ServiceFramework):
 
     def stop(self):
         self.core.quit()
-        for instance in self.gui._gui_instances:
-            instance.call_javascript("exit_app()", args=[], skip_results=True)
+        for endpoint in self.gui._endpoints.values():
+            for instance in endpoint._gui_instances:
+                instance.call_javascript("exit_app()", args=[], skip_results=True)
         self.gui.stop()
         self.isrunning = False
 
     def main(self):
+        self.gui.join()
         while self.isrunning is True:
             time.sleep(1)
 
