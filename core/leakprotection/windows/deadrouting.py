@@ -3,8 +3,7 @@ from core.libs.subcommand import SubCommand
 from config.files import ROUTE, NETSH
 
 class DeadRouting():
-    def __init__(self, core):
-        self.core = core
+    def __init__(self):
         self.whitelisted_server_ip = None
         self.is_enabled = False
 
@@ -33,8 +32,8 @@ class DeadRouting():
             SubCommand().run(NETSH, ["interface", "ipv6", "add", "route", "2000::/4", "interface=1", "store=active"])
             SubCommand().run(NETSH, ["interface", "ipv6", "add", "route", "3000::/4", "interface=1", "store=active"])
 
-    def disable(self):
-        if self.is_enabled is True:
+    def disable(self, force=False):
+        if self.is_enabled is True or force is True:
             self.is_enabled = False
             #if self.whitelisted_server_ip is not None: don't delete here, active connection will delete it on down
             #    SubCommand().run(ROUTE, ["delete", self.whitelisted_server_ip, "mask", "255.255.255.255"])

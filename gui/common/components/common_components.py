@@ -27,9 +27,10 @@ class SelectComponent(PyHtmlView):
                 return option[1]
 
     def set_value(self, value ):
-        print("set value", value)
-        if type(self.options[0][0]) == int:
+        try:
             value = int(value)
+        except:
+            pass
         self.subject.set(value)
 
 class SelectComponentWithSelect(PyHtmlView):
@@ -47,8 +48,10 @@ class SelectComponentWithSelect(PyHtmlView):
         self.label = label
 
     def set_value(self, value ):
-        if type(self.options[0][0]) == int:
+        try:
             value = int(value)
+        except:
+            pass
         self.subject.set(value)
 
 
@@ -69,7 +72,7 @@ class CheckboxComponent(PyHtmlView):
 
 class TextinputComponent(PyHtmlView):
     TEMPLATE_STR = '''
-        <input  onchange='$("#textfield_{{ pyview.uid }}").val()' 
+        <input  onchange='pyview.subject.set($("#textfield_{{ pyview.uid }}").val())' 
             class="form-check-input" type="text" value="{{pyview.subject.get()}}" id="textfield_{{ pyview.uid }}"  
         >
         <label class="form-check-label" for="textfield_{{ pyview.uid }}">

@@ -1,3 +1,5 @@
+import time
+
 from pyhtmlgui import PyHtmlView
 from gui.common.components import CheckboxComponent
 
@@ -13,8 +15,8 @@ class TrackstopView(PyHtmlView):
             <h1>TrackStop</h1>
             <p>
                 The TrackStop feature allows you to block unwanted domains directly on VPN level.  You can choose what kind of domains you want to block by activating one or more of the filters.
-                <br>
-                Note: Understand what a filter does block before activating and testing it. It might take up to 3 minutes for any changes.
+                Note: It might take up to 3 minutes for any changes to apply on our Servers. 
+                If you update your filter settings on our website, it might take some time for the settings below to refresh. <a onclick="pyview.refresh()">Refresh Now</a> 
             </p>
             
             <div class="boxes">
@@ -92,3 +94,10 @@ class TrackstopView(PyHtmlView):
         self.block_fraud = CheckboxComponent(subject.userapi.trackstop.block_fraud, self, label="")
         self.block_google = CheckboxComponent(subject.userapi.trackstop.block_google, self, label="")
         self.block_social = CheckboxComponent(subject.userapi.trackstop.block_social, self, label="")
+        self._last_update_requested = 0
+
+    def refresh(self):
+        if self._last_update_requested + 3 > time.time():
+            return
+        self._last_update_requested = time.time()
+        self.subject.userapi.request_update()

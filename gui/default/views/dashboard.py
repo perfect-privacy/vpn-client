@@ -1,3 +1,6 @@
+import threading
+import time
+
 from pyhtmlgui import PyHtmlView, ObservableListView
 
 from .modals.confirm_logout import ConfirmLogoutModalView
@@ -70,13 +73,20 @@ class DashboardView(PyHtmlView):
         self.leakProtectionStateView = LeakProtectionStateView(subject.leakprotection.state, self)
         self.defaultPortforwardingView = DefaultPortforwardingView(subject, self)
         self.vpnStatusView = VpnStatusView(subject, self)
-
         self.add_observable(subject.userapi.credentials_valid)
+        self._bg_thread = threading.Thread(target=self.bg_thread, daemon=True)
+        self._bg_thread.start()
 
     def login(self, username, password):
         self.username_input = username
         if username != "" and password != "":
             self.subject.userapi.new_credentials(username, password)
+
+    def bg_thread(self):
+        while True:
+            if self.is_visible is True:
+                self.subject.userapi.request_update()
+            time.sleep(10*60)
 
 
 class VpnStatusView(PyHtmlView):

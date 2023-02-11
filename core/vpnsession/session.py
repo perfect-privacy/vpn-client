@@ -6,7 +6,6 @@ from threading import Thread, Event
 import traceback
 import random
 from core.libs.generic_state import GenericState
-from gettext import gettext as _
 from config.constants import VPN_PROTOCOLS
 from core.vpnsession.openvpn import OpenVPNConnection
 import time
@@ -96,7 +95,7 @@ class Session(Observable):
                     self.add_hop(servergroup)
         self._hops_stored.set(",".join([hop.servergroup.identifier for hop in self.hops]))
 
-        self._controller_thread = Thread(target=self._long_running_controller_thread)
+        self._controller_thread = Thread(target=self._long_running_controller_thread, daemon=True)
 
     def _on_state_changed(self, sender, new_state, **kwargs):
         self._logger.debug("connection controller state changed: {}".format(new_state))
@@ -128,7 +127,6 @@ class Session(Observable):
                         loop_is_running = False
                         break
                     else:
-
                         self._logger.error("couldn't exit controller: there are still connections alive")
 
 
@@ -150,9 +148,9 @@ class Session(Observable):
                         self._logger.info("connecting")
 
                         if self._get_number_of_non_idle_connections() == 0:
-                            self.state.set(SessionState.CONNECTING,_("Connecting"))
+                            self.state.set(SessionState.CONNECTING,"Connecting")
                         else:
-                            self.state.set(SessionState.CONNECTING,_("Reconnecting"))
+                            self.state.set(SessionState.CONNECTING,"Reconnecting")
 
                         if len(self.hops) > 0:
                             try:
@@ -161,7 +159,7 @@ class Session(Observable):
                             except Exception as e:
                                 self._logger.debug(traceback.format_exc())
                                 self._logger.error("unable to create the cascade: {}".format(e))
-                                self.state.set(SessionState.CONNECTING, _("Unable to connect"))
+                                self.state.set(SessionState.CONNECTING, "Unable to connect")
                             else:
                                 try:
                                     self._logger.debug("connecting all")
@@ -169,24 +167,24 @@ class Session(Observable):
                                     self._logger.debug("all connected")
                                 except VPNConnectionError:
                                     self._logger.info("connecting failed, retrying in a few moments")
-                                    self.state.set(self.state.get(), _("Connecting failed. Retrying in a few moments."))
+                                    self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
                                     self._disconnect_all()
                                 except:
                                     self._logger.info("connecting failed, retrying in a few moments")
                                     self._logger.debug(traceback.format_exc())
                                     reporter.report_error(traceback=traceback.format_exc())
-                                    self.state.set(self.state.get(), _("Connecting failed. Retrying in a few moments."))
+                                    self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
                                     self._disconnect_all()
                                 else:
                                     self._logger.info("all connected")
-                                    self.state.set(SessionState.CONNECTED, _("Connection established"))
+                                    self.state.set(SessionState.CONNECTED, "Connection established")
 
                         else:
                             self.state.set(SessionState.IDLE)
                 else:
                     if self._get_number_of_non_idle_connections() != 0:
                         self._logger.info("disconnecting")
-                        self.state.set(SessionState.DISCONNECTING, _("Disconnecting"))
+                        self.state.set(SessionState.DISCONNECTING, "Disconnecting")
                         self._disconnect_all()
 
                         if self._get_number_of_non_idle_connections() == 0:
@@ -354,7 +352,7 @@ class Session(Observable):
         hop_number = 0
         for hop in self.hops:
             hop_number += 1
-            self.state.set(self.state.get(),_("Connecting to {}").format(hop.selected_server.name))
+            self.state.set(self.state.get(),"Connecting to {}".format(hop.selected_server.name))
             if hop.connection is None:
                 raise Exception("Hops has no connection")
 
@@ -425,67 +423,3 @@ class Session(Observable):
             self._logger.error("controller thread didn't shut down within 20 seconds")
         else:
             self._logger.debug("controller thread did shut down successfully")
-
-
-
-
-'''
-        #self.serverGroupList = SessionServerGroupList(self.core)
-        #self.serverGroupList.attach_observer(self._on_cascading_list_change)
-
-        # TODO self._dns_manager.on_primary_interface_change.connect(self._on_primary_interface_changed)
-        #self.leakprotection.primary_interface = self._dns_manager.primary_interface
-
-        #self._connection_controller = VPNConnectionController(self.core, self)
-        #self._connection_controller.on_state_changed.connect(self._on_connection_controller_state_changed)
-        #self._connection_controller.on_connection_state_changed.connect( self._on_connection_controller_connection_state_changed)
-        #self._connection_controller.set_credentials(self.core.settings.account.username.get(), self.core.settings.account.password.get())
-
-        #self.on_state_change = Signal()
-        #self._current_state = self._connection_controller.state
-'''
-
-'''
-
-
-
-    #@property
-    #def state_message(self):
-    #    return self._connection_controller.state_message
-    #@property
-    #def connection_states(self):
-    #    return self._connection_controller.connection_states
-    #@property
-    #def state_statemessage_connectionstates(self):
-    #    return self._connection_controller.state_statemessage_connectionstates
-    #@property
-    #def state_statemessage_connection_names_and_states(self):
-    #    return self._connection_controller.state_statemessage_connection_names_and_states
-    #@property
-    #def can_connect_or_disconnect(self):
-    #    return True if len(self.hops) > 0 else False
-
-    #def _on_cascading_list_change(self, sender):
-    #    pass
-
-    #def _on_primary_interface_changed(self, sender, primary_interface):
-    #    self._logger.debug("primary interface is now '{}'".format(primary_interface))
-    #    self.core.settings.primary_interface = primary_interface
-    #    self.core.settings.apply_changes()
-
-    #def _on_settings_credentials_updated(self,sender):
-    #    #if event.action == "updated":
-    #    pass
-    #    #self._connection_controller.set_credentials(self.core.settings.account.username.get(), self.core.settings.account.password.get())
-
-    #def _on_settings_leakprotection_updated(self,sender):
-    #    #if event.action == "updated":
-    #    self._update_leakprotection_state()
-
-    #def _on_general_global_preferences_changed(self, sender):
-    #    self._connection_controller.set_credentials(self._settings.credentials.username,  self._settings.credentials.password)
-    #    self._update_leakprotection_state()
-
-'''
-
-# /Connect, Disconnect

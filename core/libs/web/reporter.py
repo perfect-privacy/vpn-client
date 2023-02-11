@@ -44,7 +44,7 @@ class Reporter(object):
         self._is_running = True
         self._cancel_pause_event = Event()
         self._wakeup_event = Event()
-        self._report_thread = Thread(target=self._report_thread_run)
+        self._report_thread = Thread(target=self._report_thread_run, daemon=True)
         self._report_thread.start()
 
     def enable(self):

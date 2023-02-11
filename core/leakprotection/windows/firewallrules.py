@@ -23,7 +23,6 @@ class FirewallRule():
         if not hasattr(self, "local_ports")     : self.local_ports      = None
         if not hasattr(self, "local_addresses") : self.local_addresses  = None
         if not hasattr(self, "applicationName") : self.applicationName  = None
-        #self.is_enabled = PermanentProperty(self.__class__.__name__ + ".is_enabled", False)
         self._is_enabled = None
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -40,7 +39,6 @@ class FirewallRule():
         if self.is_enabled is False:
             self._logger.info("%s activating" % self.__class__.__name__)
             new_rule_cmd = "New-NetFirewallRule %s" % self._build()
-            self._logger.debug(new_rule_cmd)
             powershell.execute(new_rule_cmd)
         self.is_enabled = True
 
@@ -48,7 +46,6 @@ class FirewallRule():
         if self.is_enabled is True:
             self._logger.info("%s disabling" % self.__class__.__name__)
             delete_rule_cmd = 'Remove-NetFirewallRule -Name "%s"' % self.name
-            self._logger.debug(delete_rule_cmd)
             powershell.execute(delete_rule_cmd)
         self.is_enabled = False
 
@@ -78,7 +75,6 @@ class FirewallRule():
             args.append('-Program   "%s"' % self.applicationName)
         return " ".join(args)
 
-
 class FirewallRuleOutgoingProfileDefaultBlock():
     # https://docs.microsoft.com/en-us/powershell/module/netsecurity/set-netfirewallprofile?view=win10-ps
     def __init__(self):
@@ -100,9 +96,11 @@ class FirewallRuleOutgoingProfileDefaultBlock():
             return
         if self.default_profiles.get() is not None:
             self._logger.info("%s disabling" % self.__class__.__name__)
-            for profile in self.default_profiles.get():
-                powershell.execute("Set-NetFirewallProfile -Profile %s -DefaultOutboundAction %s" % (profile["Profile"],  profile["DefaultOutboundAction"]))
+            #for profile in self.default_profiles.get(): # this would be better, for user whos default profile is not "allow", but this results in many more problems
+            #    powershell.execute("Set-NetFirewallProfile -Profile %s -DefaultOutboundAction %s" % (profile["Profile"],  profile["DefaultOutboundAction"]))
             self.default_profiles.set(None)
+            powershell.execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
+
         self.is_enabled.set(False)
 
 class FirewallRuleAllowConnectionToServer(FirewallRule):
@@ -337,203 +335,12 @@ class FirewallRuleBlockIpv6Dhcp(FirewallRule):
         self.local_ports = [546]
         super().__init__()
 
+class FirewallReset():
+    def run(self):
+        rules = powershell.execute('Get-NetFirewallRule | ConvertTo-Json', as_data=True)
+        for rule in rules:
+            name = rule["name"].lower()
+            if "perfect" in name and "privacy" in name:
+                powershell.execute('Remove-NetFirewallRule -Name "%s"' % rule["name"])
+        powershell.execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
 
-
-
-'''
-
-class FirewallRuleAllowIpSec(FirewallRule):
-    def __init__(self):
-        self.name = "Perfect Privacy IPSEC"
-        self.description = "Allow Perfect Privacy IPSEC"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-        self.remotePorts = "500,4500"
-        self.protocol = NET_FW_IP_PROTOCOL_UDP
-
-    def set_ips(self, serverips):
-        if (self.validate(serverips) == False):
-            self.remove()
-            self.remoteAddresses = serverips
-            self.create()
-
-class FirewallRuleAllowIpSecEncapsulation(FirewallRule):
-
-    def __init__(self):
-        self.name = "Perfect Privacy IPSEC Encapsulation"
-        self.description = "Allow Perfect Privacy IPSEC Encapsulation"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-        self.protocol = 4
-
-    def add(self, serverips):
-        if (self.validate(serverips) == False):
-            self.remove()
-            self.remoteAddresses = serverips
-            self.create()
-
-class FirewallRuleAllowIpSecEncapsulationV6(FirewallRule):
-    def __init__(self):
-        self.name = "Perfect Privacy IPSEC Encapsulation Ipv6"
-        self.description = "Allow Perfect Privacy IPSEC Encapsulation Ipv6"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-        self.protocol = 41
-
-    def add(self, serverips):
-        if (self.validate(serverips) == False):
-            self.remove()
-            self.remoteAddresses = serverips
-            self.create()
-
-class FirewallRuleAllowDns(FirewallRule):
-    def __init__(self):
-        self.name = "Perfect Privacy VPN DNS"
-        self.description = "Allow Perfect Privacy VPN DNS"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-        self.protocol = 17
-        self.remotePorts = "53"
-
-    def add(self, nameservers):
-    
-        if (self.validate(nameservers) == False):
-            self.remove()
-            self.remoteAddresses = nameservers
-            self.create()
-'''
-'''
-class FirewallRuleAllowStunnelBinary(FirewallRule):
-    def __init__(self):
-        self.name = "Perfect Privacy Stunnel Binary"
-        self.description = "Allow Perfect Stunnel Binary"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-
-    def add(self, applicationName):
-        if (self.validate() == False):
-            self.remove()
-            self.applicationName = applicationName
-            self.create()
-
-class FirewallRuleAllowObfsproxyBinary(FirewallRule):
-
-    def __init__(self):
-        self.name = "Perfect Privacy Obfsproxy Binary"
-        self.description = "Allow Perfect Obfsproxy Binary"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-
-    def add(self,applicationName):
-        if (self.validate() == False)
-            self.remove()
-            self.applicationName = applicationName
-            self.create()
-
-class FirewallRuleAllowSSHBinary(FirewallRule):
-    def __init__(self):
-        self.name = "Perfect Privacy SSH Binary"
-        self.description = "Allow Perfect SSH Binary"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-
-    def add(self, applicationName):
-        if (self.validate() == False):
-            self.remove()
-            self.applicationName = applicationName
-            self.create()
-
-class FirewallRuleAllowOpenVpnBinary(FirewallRule):
-
-    def __init__(self):
-        self.name = "Perfect Privacy OpenVPN Binary"
-        self.description = "Allow Perfect OpenVPN Binary"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-
-    def add(self,applicationName):
-        if (self.validate() == False):
-            self.remove()
-            self.applicationName = applicationName
-            self.create()
-
-class FirewallRuleAllowGui(FirewallRule):
-
-    def __init__(self):
-        self.name = "Perfect Privacy VPN GUI"
-        self.description = "Allow Perfect Privacy VPN GUI"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-
-    def add(self, applicationName):
-        if (self.validate() == False):
-            self.remove()
-            self.applicationName = applicationName
-            self.create()
-
-
-
-class FirewallRuleAllowPortForwardTcp(FirewallRule):
-
-    def __init__(self):
-        self.name = "Perfect Privacy VPN Portforwarding TCP"
-        self.description = "Perfect Privacy VPN Portforwarding TCP"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_IN
-        self.protocol = NET_FW_IP_PROTOCOL_TCP
-
-    def add(self, ports):
-        if (self.validate(ports) == False):
-            self.remove()
-            self.local_ports = ports
-            self.create()
-
-class FirewallRuleAllowPortForwardUdp(FirewallRule):
-
-    def __init__(self):
-        self.name = "Perfect Privacy VPN Portforwarding UDP"
-        self.description = "Perfect Privacy VPN Portforwarding UDP"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_IN
-        self.protocol = NET_FW_IP_PROTOCOL_UDP
-
-    def add(self,ports):
-        if (self.validate(ports) == False):
-            self.remove()
-            self.local_ports = ports
-            self.create()
-
-
-
-
-class FirewallRuleAllowIcmp(FirewallRule):
-
-    def __init__(self):
-        self.name = "Perfect Privacy VPN ICMP"
-        self.description = "allow Perfect Privacy VPN ICMP"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-        self.protocol = 1
-
-    def add(self,serverips):
-        if (self.validate(serverips) == False):
-            self.remove()
-            self.remoteAddresses = serverips
-            self.create()
-
-
-
-class FirewallRuleBlockOutgoingAllowedSystemRules(FirewallRule):
-    def __init__(self):
-        self.name = "Perfect Privacy VPN Networking LAN"
-        self.description = "Allow Perfect Privacy VPN Networking LAN"
-        self.action = NET_FW_ACTION_ALLOW
-        self.direction = NET_FW_RULE_DIR_OUT
-        self.remote_addresses = "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
-
-    def add(self):
-        if (self.validate() == False):
-            self.remove()
-            self.create()
-
-'''

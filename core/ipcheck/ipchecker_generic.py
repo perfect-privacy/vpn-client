@@ -31,16 +31,15 @@ class GenericIPChecker(object):
         :type expected_ipv6_addresses: list[str]
         :rtype: IPCheckerResult
         """
-        t4 = Thread(target=self._check_runner, kwargs={"expected_ip_addresses": expected_ipv4_addresses, "get_func": "_get4", "result": result4})
-        t6 = Thread(target=self._check_runner, kwargs={"expected_ip_addresses": expected_ipv6_addresses, "get_func": "_get6", "result": result6})
+        t4 = Thread(daemon=True, target=self._check_runner, kwargs={"expected_ip_addresses": expected_ipv4_addresses, "get_func": "_get4", "result": result4, "use_alt": True})
+        t6 = Thread(daemon=True, target=self._check_runner, kwargs={"expected_ip_addresses": expected_ipv6_addresses, "get_func": "_get6", "result": result6, "use_alt": False})
         t4.start()
         t6.start()
         t4.join()
         t6.join()
 
 
-
-    def _check_runner(self, expected_ip_addresses, get_func, result):
+    def _check_runner(self, expected_ip_addresses, get_func, result, use_alt=True):
         """
         :type expected_ip_addresses: list[str]
         :type get_func: str
@@ -48,19 +47,17 @@ class GenericIPChecker(object):
         :type result: IPCheckerResult
         """
         public_ip, public_dns, public_city, public_country = None, None, None, None
-        use_alt = True
+        successfull = False
         for i in range(2):
             try:
                 response = getattr(self, get_func)()
                 public_ip, public_dns, public_city, public_country = self._parse_response(response)
-                use_alt = False
+                successfull = True
                 break
             except:
                 time.sleep(1)
 
-        if use_alt is True or public_ip is None:
-            self._logger.debug("checking IP failed, trying fallback checker")
-
+        if use_alt is True and ( successfull is False or public_ip is None):
             try:
                 response = getattr(self._fallback_checker, get_func)()
                 public_ip, public_dns, public_city, public_country = self._fallback_checker._parse_response(response)
@@ -71,8 +68,6 @@ class GenericIPChecker(object):
             result.clear()
             return
         vpn_connected = public_ip in expected_ip_addresses
-
-        #self._logger.debug("vpn connected: {} (public ip '{}' {}in expected ips {}".format(vpn_connected, public_ip, "" if vpn_connected else "not ", expected_ip_addresses))
 
         result.update(vpn_connected=vpn_connected,
                       public_ip=public_ip,

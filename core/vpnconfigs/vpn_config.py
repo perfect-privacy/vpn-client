@@ -24,8 +24,8 @@ class VPNServerConfig(object):
         self.primary_ipv6 = ""
         self.alternative_ipv4 = []
         self.alternative_ipv6 = []
-        self.dns_ipv4 = []
-        self.dns_ipv6 = []
+        self.dns_ipv4 = ""
+        self.dns_ipv6 = ""
 
         self.ssh_fingerprint = ""
         self.ssh_fingerprint_algorithm = ""

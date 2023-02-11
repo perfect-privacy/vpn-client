@@ -38,9 +38,10 @@ class DeviceManager(Observable):
         self.wintun_devices = []
         self.tapwindows_devices = []
         self.state = DeviceManagerState()
-        self.core.openVpnDriver.on_driver_changed.attach_observer(self._on_driver_changed)
-        self.core.settings.vpn.openvpn.cascading_max_hops.attach_observer(self._on_cascading_max_hops_changed)
-        self.core.settings.vpn.openvpn.driver.attach_observer(self._on_settings_driver_changed)
+        if self.core is not None:
+            self.core.openVpnDriver.on_driver_changed.attach_observer(self._on_driver_changed)
+            self.core.settings.vpn.openvpn.cascading_max_hops.attach_observer(self._on_cascading_max_hops_changed)
+            self.core.settings.vpn.openvpn.driver.attach_observer(self._on_settings_driver_changed)
 
         self._is_running = True
         self._wakeup_event = threading.Event()
@@ -79,6 +80,11 @@ class DeviceManager(Observable):
     def shutdown(self):
         self._is_running = False
         self._wakeup_event.set()
+
+    def uninstall(self):
+         devices = [d for d in self._enum_devices() if d.type in ["wintun", "tap-windows6"] and d.name.startswith("Perfect Privacy")]
+         for device in devices:
+             success, stdout, stderr = SubCommand().run(TAPCTL, ["delete", "{%s}" % device.guid])
 
     def _worker_thread(self):
         while self._is_running is True:

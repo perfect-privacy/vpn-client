@@ -1,3 +1,5 @@
+import time
+
 from pyhtmlgui import PyHtmlView
 
 from config.constants import PROTECTION_SCOPES, PLATFORMS
@@ -13,19 +15,17 @@ class LeakProtectionView(PyHtmlView):
                 <section>
                     <h3>
                         Leak Protection Mode:
-                        <div class="input"> 
+                        <div class="input">
                         <label for="select_auto">  </label>
-                        <select id="select_auto" disabled class="form-control">            
+                        <select id="select_auto" disabled class="form-control">
                             <option value="auto"> AUTO </option>
                          </select>
-                        </div>    
-                    </h3> 
+                        </div>
+                    </h3>
                      <div> In simple mode, leak protection is automatically managed for you</div>
-                </section>	    
-            </div> 
+                </section>
+            </div>
           {% else %}
-         
-          
           
           <p>Use these settings to protect against data leaks in case your VPN connection drops.</p>
             <div class="boxes">
@@ -33,28 +33,27 @@ class LeakProtectionView(PyHtmlView):
                     <h3>
                         Leak Protection Scope:
                         <div class="input"> {{ pyview.firewall_scope.render() }} </div>    
-                    </h3> 
+                    </h3>
                     <div> You can choose from three different security levels for leak protection: 
-                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
-                    <div class="tooltip" style="display:none">
-                        <b>Tunnel:</b> In this mode, leak protection is only active when you are connected to the VPN. If you disconnect the VPN manually, leak protection is deactivated and you can access the internet without VPN.
-                        <br>
-                        <b>Program:</b> In this mode, leak protection is always active as long as the VPN manager is running. If you disconnect the VPN, no program can access the internet until you establish a new connection.
-                        <br>
-                        <b>Permanent:</b> In this mode, leak protection is always active, even when the VPN software is not running. This is useful for devices that should never send unencrypted traffic and should always use the VPN for internet connectivity.
+                        <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                        <div class="tooltip" style="display:none">
+                            <b>Tunnel:</b> In this mode, leak protection is only active when you are connected to the VPN. If you disconnect the VPN manually, leak protection is deactivated and you can access the internet without VPN.
+                            <br>
+                            <b>Program:</b> In this mode, leak protection is always active as long as the VPN manager is running. If you disconnect the VPN, no program can access the internet until you establish a new connection.
+                            <br>
+                            <b>Permanent:</b> In this mode, leak protection is always active, even when the VPN software is not running. This is useful for devices that should never send unencrypted traffic and should always use the VPN for internet connectivity.
+                        </div>
                     </div>
-                </section>	    
-            </div>  
-                        
+                </section>
+            </div>
+
             {% if pyview.subject.settings.leakprotection.leakprotection_scope.get() != "disabled"  %}
                 <span>You can also use the following specific settings to protect against leaks. </span>
                 <br>
+                <h3>Details</h3>
+                <div class="boxes">
                 
-                {% if pyview.PLATFORM == pyview.PLATFORMS.windows %}
-                    <h3>Details</h3>
-                    <div class="boxes">
-                    
-
+                    {% if pyview.PLATFORM == pyview.PLATFORMS.windows %}
                         <section>
                             <h3>
                                 Block access to local router
@@ -66,6 +65,7 @@ class LeakProtectionView(PyHtmlView):
                                 <div class="tooltip" style="display:none">
                                     This setting prevents programs from determining your external IP address through SMTP and XSS, which is possible with some routers. Please note that access to network printers or hard drives connected to the router may also be blocked by the firewall
                                 </div>
+                            </div>
                         </section> 
                         
                         {% if pyview.subject.settings.interface_level.get()  == "expert" %}
@@ -139,47 +139,45 @@ class LeakProtectionView(PyHtmlView):
                                         If your ISP provides an IPv6 address, it is possible that it will assign your computer a local IPv6 address that includes your public IP address assigned by the ISP. Enable this option to prevent this type of leak.
                                     </div>
                                 </div>
-                                
                             </section> 
-                                                                
-
-                        {% endif %}    
-                        <section>
-                           <h3>
-                                Prevent DNS Leak
-                                <div class="input"> {{ pyview.enable_dnsleak_protection.render() }} </div>
-                            </h3> 
-                            <div>
-                                Ensure that you are using the VPN tunnel for Domain Name Service (DNS) requests.
-                                <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
-                                <div class="tooltip" style="display:none">
+                        {% endif %}  
+                    {% endif %}		
+                    <section>
+                       <h3>
+                            Prevent DNS Leak
+                            <div class="input"> {{ pyview.enable_dnsleak_protection.render() }} </div>
+                        </h3> 
+                        <div>
+                            Ensure that you are using the VPN tunnel for Domain Name Service (DNS) requests.
+                            <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                            <div class="tooltip" style="display:none">
                                 DNS translates the domain name of a website into IP addresses, which is necessary to establish a connection to the server hosting the web page or service. A DNS leak occurs when you are using your provider's DNS server instead of the VPN tunnel.
-                                </div>    
+                            </div>    
+                        </div>
+                    </section>     
+                    {% if pyview.subject.settings.leakprotection.enable_dnsleak_protection.get() == true and pyview.subject.settings.interface_level.get()  == "expert" %}             
+                        <section>
+                            <h3>
+                                Custom DNS Servers
+                                <div class="input"> {{ pyview.use_custom_dns_servers.render() }} </div>
+                            </h3>  
+                            <div>
+                               You may want to use your own DNS servers instead of automatically selected Perfect Privacy Servers. 
                             </div>
-                        </section>     
-                        {% if pyview.subject.settings.leakprotection.enable_dnsleak_protection.get() == true and pyview.subject.settings.interface_level.get()  == "expert" %}             
-                            <section>
-                                <h3>
-                                    Custom DNS Servers
-                                    <div class="input"> {{ pyview.use_custom_dns_servers.render() }} </div>
-                                </h3>  
-                                <div>
-                                   You may want to use your own DNS servers instead of automatically selected Perfect Privacy Servers. 
-                                </div>
+                            {% if pyview.subject.settings.leakprotection.use_custom_dns_servers.get() == true %}
                                 <div style="width:45%;float:left;margin:10px;">
                                     {{pyview.custom_dns_server_1.render()}}
                                 </div>
                                 <div style="width:45%;float:left;margin:10px;">
                                     {{pyview.custom_dns_server_2.render()}}
                                 </div>
-                                
-                            </section>        
-                        {% endif %}        
-                    </div>	
-                {% endif %}					
+                            {% endif %}
+                        </section>        
+                    {% endif %}        
+                </div>	  			
             {% endif %}	
-             {% endif %}				
-        </div>
+        {% endif %}				
+    </div>
     
     '''
 
@@ -212,8 +210,8 @@ class LeakProtectionView(PyHtmlView):
         self.custom_dns_server_1          = TextinputComponent(subject.settings.leakprotection.custom_dns_server_1        , self, label="Nameserver 1")
         self.custom_dns_server_2          = TextinputComponent(subject.settings.leakprotection.custom_dns_server_2        , self, label="Nameserver 2")
         self.add_observable(subject.settings.leakprotection.enable_dnsleak_protection, self._on_object_updated)
+        self.add_observable(subject.settings.leakprotection.use_custom_dns_servers, self._on_object_updated)
         self.add_observable(subject.settings.leakprotection.leakprotection_scope     , self._on_object_updated)
-
 
     def _on_object_updated(self, source, **kwargs):
         self.update()

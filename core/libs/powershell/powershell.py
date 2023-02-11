@@ -13,7 +13,6 @@ class Powershell():
 
     def execute(self, command, as_data = False):
         self.lock.acquire()
-        print("POWERSHELL", command)
         try:
             if as_data is True:
                 if not command.endswith("ConvertTo-Json"):

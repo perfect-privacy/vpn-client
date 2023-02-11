@@ -1,3 +1,5 @@
+import time
+
 from pyhtmlgui import PyHtmlView
 from gui.common.components import CheckboxComponent, SelectComponent
 from config.constants import VPN_PROTOCOLS, OPENVPN_CIPHER, OPENVPN_PROTOCOLS, OPENVPN_TLS_METHOD, OPENVPN_DRIVER, \
@@ -12,13 +14,16 @@ class PreferencesView(PyHtmlView):
         <div class="boxes">
             <section>
                 <h3>
-                    Start with Windows
+                    Start with {{pyview.osname}}
                     <div class="input"> {{ pyview.start_on_boot.render() }} </div>
                 </h3>
                 <div>If checked, the application will automatically start when you log into your computer.</div>
             </section>
         </div>   
         <h2>External IP</h2>
+        Note: It might take up to 3 minutes for any changes to apply on our Servers. 
+        If you update your external ip settings on our website, it might take some time for the settings below to refresh. <a onclick="pyview.refresh()">Refresh Now</a> 
+
         <div class="boxes">
             <section>
                 <h3>
@@ -183,12 +188,24 @@ class PreferencesView(PyHtmlView):
         self.neuro_routing = CheckboxComponent(subject.userapi.neuro_routing, self, label="")
         self.start_on_boot = CheckboxComponent(subject.settings.startup.start_on_boot, self)
         self.updater = UpdaterView(subject, self)
+
+        self.osname = ""
         if PLATFORM == PLATFORMS.windows:
             self.openvpndriver = StatusOpenVpnDriverView(subject.openVpnDriver, self)
             self.deviceManager = StatusNetworkDevicesView(subject.deviceManager, self)
+            self.osname = "Windows"
+        if PLATFORM == PLATFORMS.macos:
+            self.osname = "MacOS"
+        self._last_update_requested = 0
 
     def _on_object_updated(self, source, **kwargs):
         self.update()
+
+    def refresh(self):
+        if self._last_update_requested + 3 > time.time():
+            return
+        self._last_update_requested = time.time()
+        self.subject.userapi.request_update()
 
 
 class UpdaterView(PyHtmlView):

@@ -123,7 +123,11 @@ class OpenVPNConnection(VPNConnection):
             self.core.leakprotection.whitelist_server(public_ip_address=self.external_host_ip, port=self.external_host_port, protocol=self.openvpn_protocol)
             if PLATFORM == PLATFORMS.macos:
                 os.system("killall pp.obfs4proxy pp.openvpn pp.stunnel")
-            time.sleep(1)
+            if PLATFORM == PLATFORMS.windows:
+                os.system("TaskKill /IM pp.openvpn.exe /F")
+                os.system("TaskKill /IM pp.obfs4proxy.exe /F")
+                os.system("TaskKill /IM pp.tstunnel.exe /F")
+                os.system("TaskKill /IM pp.plink.exe /F")
 
         self.state.set(VpnConnectionState.CONNECTING, _("Connecting: Starting OpenVPN process"))
 
@@ -136,7 +140,6 @@ class OpenVPNConnection(VPNConnection):
 
 
         management_port = self._get_free_tcp_port()
-        self._logger.debug("setting management port to {}".format(management_port))
 
         args = [
             OPENVPN,
@@ -155,6 +158,7 @@ class OpenVPNConnection(VPNConnection):
 
         if self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt:
             args.extend(["--tls-crypt", "ta.tls-crypt.key"])
+            args.extend(["--tun-mtu-extra", "32"])
 
         if self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:
             args.extend(["--tls-auth", "ta.tls-auth.%s.key" % self.servergroup.vpn_server_config.groupname, "1"])
@@ -184,7 +188,6 @@ class OpenVPNConnection(VPNConnection):
             self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
             raise VPNConnectionError()
 
-        self._logger.info("OpenVPN process started with PID {}".format(self._openvpn_process.pid))
         self._logger.debug("connecting to management interface")
         self.state.set(VpnConnectionState.CONNECTING, _("Connecting: Connecting to management interface"))
 

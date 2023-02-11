@@ -237,7 +237,6 @@ Section Uninstall
 	Delete "$DESKTOP\Perfect Privacy.lnk"
 	RMDir /r /REBOOTOK "$INSTDIR"
 	RMDir /r /REBOOTOK "$SMPROGRAMS\Perfect Privacy"
-
 	DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
 	DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
 	SetAutoClose true

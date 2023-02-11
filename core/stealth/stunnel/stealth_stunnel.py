@@ -21,7 +21,7 @@ class StealthStunnel(StealthCommon):
         else:
             self._stunnel_host =  self._servergroup.vpn_server_config.stunnel_ip
             self._stunnel_port = self._core.settings.stealth.stealth_port.get()
-        if core.settings.vpn.openvpn.tls_method == OPENVPN_TLS_METHOD.tls_crypt:
+        if core.settings.vpn.openvpn.tls_method.get() == OPENVPN_TLS_METHOD.tls_crypt:
             ports = STEALTH_PORTS.stunnel_tlscrypt
         else:
             ports = STEALTH_PORTS.stunnel

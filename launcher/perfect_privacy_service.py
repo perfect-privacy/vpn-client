@@ -18,11 +18,6 @@ except:
         open("crash.log", "w").write("%s" % tb)
         os._exit(1)
 
-'''
-perfect-privacy.py <option>
-    uninstall    :  reset firewall, network, and everything we changed after the original installer ran
-'''
-
 
 def _compare_version_numbers(new_version_number, old_version_number):
     new_split = new_version_number.split(".")
@@ -85,9 +80,15 @@ if __name__ == "__main__":
         except:
             option = None
 
-        #check_install_autoupdate()
         if option == "uninstall":   # run silent uninstall, disable firewall, dns, network stuff we installed
-            pass
+            from core.leakprotection import LeakProtection
+            LeakProtection(core=None).reset()
+            if PLATFORM == PLATFORMS.windows:
+                from core.devicemanager import DeviceManager
+                DeviceManager(None).uninstall()
+                shortcut_path = os.path.join("c:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp", "Perfect Privacy.lnk")
+                if os.path.exists(shortcut_path):
+                    os.remove(shortcut_path)
         else:
             if PLATFORM == PLATFORMS.macos:
                 from launcher.services.macos_service import MacOS_Service

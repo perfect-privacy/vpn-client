@@ -15,8 +15,8 @@ from .windows.firewallrules import \
     FirewallRuleBlockDefaultGateway, \
     FirewallRuleBlockDNS,\
     FirewallRuleBlockIpv6RouteAnnouncements,\
-    FirewallRuleBlockIpv6Dhcp
-
+    FirewallRuleBlockIpv6Dhcp, \
+    FirewallReset
 
 class LeakProtection_windows(LeakProtection_Generic):
     def __init__(self, core=None):
@@ -26,8 +26,8 @@ class LeakProtection_windows(LeakProtection_Generic):
         self.core = core
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        self.deadrouting = DeadRouting(self.core)
         self.networkInterfaces = NetworkInterfaces(self.core)
+        self.deadrouting = DeadRouting()
         self.firewallRuleOutgoingProfileDefaultBlock = FirewallRuleOutgoingProfileDefaultBlock()
         self.firewallRuleAllowConnectionToServer = FirewallRuleAllowConnectionToServer()
         self.firewallRuleAllowNetworkingLan = FirewallRuleAllowNetworkingLan()
@@ -39,6 +39,7 @@ class LeakProtection_windows(LeakProtection_Generic):
         self.firewallRuleBlockDNS = FirewallRuleBlockDNS()
         self.firewallRuleBlockIpv6RouteAnnouncements = FirewallRuleBlockIpv6RouteAnnouncements()
         self.firewallRuleBlockIpv6Dhcp = FirewallRuleBlockIpv6Dhcp()
+        self.firewallReset = FirewallReset()
 
         self.firewallRules = [
             self.firewallRuleOutgoingProfileDefaultBlock,
@@ -129,3 +130,8 @@ class LeakProtection_windows(LeakProtection_Generic):
             rule.disable()
         self.networkInterfaces.enableIpv6()
         self.networkInterfaces.disableDnsLeakProtection()
+
+    def reset(self):
+        self.deadrouting.disable(force=True)
+        self.networkInterfaces.disableDnsLeakProtection()
+        self.firewallReset.run()

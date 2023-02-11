@@ -8,6 +8,7 @@ if test -f "/Library/LaunchDaemons/perfect-privacy-service.plist"; then
   done
 fi
 
+
 killall perfect-privacy
 killall perfect-privacy-service
 killall pp.obfs4proxy
@@ -19,10 +20,10 @@ killall -9 pp.obfs4proxy
 killall -9 pp.stunnel
 killall -9 pp.openvpn
 
-if test -f "/Applications/Perfect\ Privacy.app/Contents/MacOS/var/storage.db"; then
+if test -f "/Applications/Perfect Privacy.app/Contents/MacOS/var/storage.db"; then
   cp /Applications/Perfect\ Privacy.app/Contents/MacOS/var/storage.db /tmp/
 fi
 
-if test -d "/Applications/Perfect\ Privacy.app"; then
+if test -d "/Applications/Perfect Privacy.app"; then
   rm -r /Applications/Perfect\ Privacy.app
 fi

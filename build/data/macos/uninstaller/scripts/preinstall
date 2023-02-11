@@ -6,19 +6,28 @@ if test -f "/Library/LaunchDaemons/perfect-privacy-service.plist"; then
   while [ "1$(launchctl list|grep com.perfect-privacy.service|cut -f1)" -gt 1 ]; do
     sleep 1  # wait for service to stop
   done
+  rm /Library/LaunchDaemons/perfect-privacy-service.plist
 fi
+
+if test -f "/Library/LaunchAgents/perfect-privacy.plist"; then
+  launchctl unload /Library/LaunchAgents/perfect-privacy.plist
+  rm /Library/LaunchAgents/perfect-privacy.plist
+fi
+
 
 killall perfect-privacy
 killall perfect-privacy-service
 killall pp.obfs4proxy
 killall pp.openvpn
 killall pp.stunnel
+sleep 2
 killall -9 perfect-privacy
 killall -9 perfect-privacy-service
 killall -9 pp.obfs4proxy
 killall -9 pp.stunnel
 killall -9 pp.openvpn
 
-if test -d "/Applications/Perfect\ Privacy.app"; then
+if test -d "/Applications/Perfect Privacy.app"; then
+  /Applications/Perfect\ Privacy.app/Contents/MacOS/perfect-privacy-service uninstall
   rm -r /Applications/Perfect\ Privacy.app
 fi

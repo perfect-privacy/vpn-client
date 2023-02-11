@@ -1,6 +1,9 @@
 from pyhtmlgui import PyHtmlView
+
+from config.config import PLATFORM
 from gui.common.components import CheckboxComponent, SelectComponent, TextinputComponent
-from config.constants import STEALTH_METHODS, STEALTH_PORTS, VPN_PROTOCOLS
+from config.constants import STEALTH_METHODS, STEALTH_PORTS, VPN_PROTOCOLS, OPENVPN_TLS_METHOD, PLATFORMS
+
 
 class StealthView(PyHtmlView):
     TEMPLATE_STR = '''
@@ -90,16 +93,16 @@ Stealth VPN is designed to obfuscate your VPN traffic, making it difficult to bl
         super(StealthView, self).__init__(subject, parent)
         self.STEALTH_METHODS = STEALTH_METHODS  # make available in template
         self.VPN_PROTOCOLS = VPN_PROTOCOLS
-        self.stealth_method = SelectComponent(subject.settings.stealth.stealth_method, self,
-                                                 options=[
-                                                     (STEALTH_METHODS.no_stealth, "No Stealth"),
-                                                     (STEALTH_METHODS.stunnel   , "Stunnel"),
-                                                     (STEALTH_METHODS.socks     , "Socks"),
-                                                     (STEALTH_METHODS.http      , "HTTP"),
-                                                     (STEALTH_METHODS.ssh       , "SSH"),
-                                                     (STEALTH_METHODS.obfs      , "OBFS"),
-                                                 ])
-        #self.add_observable(self.subject.stealth.stealth_method, self._on_default_event_updated)
+        options = [
+             (STEALTH_METHODS.no_stealth, "No Stealth"),
+             (STEALTH_METHODS.stunnel   , "Stunnel"),
+             (STEALTH_METHODS.socks     , "Socks"),
+             (STEALTH_METHODS.http      , "HTTP"),
+             (STEALTH_METHODS.obfs      , "OBFS"),
+        ]
+        if PLATFORM == PLATFORMS.windows:
+            options.append((STEALTH_METHODS.ssh, "SSH"))
+        self.stealth_method = SelectComponent(subject.settings.stealth.stealth_method, self, options=options)
         self.add_observable(self.subject.settings.stealth.stealth_method, self._on_stealth_method_changed)
 
         self.stealth_port = SelectComponent(subject.settings.stealth.stealth_port, self,
@@ -110,6 +113,7 @@ Stealth VPN is designed to obfuscate your VPN traffic, making it difficult to bl
         self.stealth_custom_node = CheckboxComponent(subject.settings.stealth.stealth_custom_node, self, label="")
         self.add_observable(self.subject.settings.stealth.stealth_custom_node, self._on_subject_updated)
         self.add_observable(subject.settings.vpn.vpn_protocol, self._on_subject_updated)
+        self.add_observable(subject.settings.vpn.openvpn.tls_method, self._on_stealth_method_changed)
 
         self.stealth_custom_hostname = TextinputComponent(subject.settings.stealth.stealth_custom_hostname, self,label="")
         self.stealth_custom_port = TextinputComponent(subject.settings.stealth.stealth_custom_port, self,label="")
@@ -125,17 +129,22 @@ Stealth VPN is designed to obfuscate your VPN traffic, making it difficult to bl
         self.set_stealth_port_options()
         self.update()
 
-
     def set_stealth_port_options(self):
         if self.subject.settings.stealth.stealth_method.get() == STEALTH_METHODS.ssh:
-            self.stealth_port.options = [ ( None, "auto") ] + [(x,x) for x in STEALTH_PORTS.ssh]
+            self.stealth_port.options = [( "auto", "auto") ] + [(x,x) for x in STEALTH_PORTS.ssh]
         if self.subject.settings.stealth.stealth_method.get() == STEALTH_METHODS.obfs:
-            self.stealth_port.options = [ ( None, "auto") ] + [(x,x) for x in STEALTH_PORTS.obfs]
+            if self.subject.settings.vpn.openvpn.tls_method.get() == OPENVPN_TLS_METHOD.tls_crypt:
+                self.stealth_port.options = [("auto", "auto")] + [(x, x) for x in STEALTH_PORTS.obfs_tlscrypt]
+            else:
+                self.stealth_port.options = [( "auto", "auto") ] + [(x,x) for x in STEALTH_PORTS.obfs]
         if self.subject.settings.stealth.stealth_method.get() == STEALTH_METHODS.stunnel:
-            self.stealth_port.options = [ ( None, "auto") ] + [(x,x) for x in STEALTH_PORTS.stunnel]
+            if self.subject.settings.vpn.openvpn.tls_method.get() == OPENVPN_TLS_METHOD.tls_crypt:
+                self.stealth_port.options = [( "auto", "auto") ] + [(x,x) for x in STEALTH_PORTS.stunnel_tlscrypt]
+            else:
+                self.stealth_port.options = [("auto", "auto")] + [(x, x) for x in STEALTH_PORTS.stunnel]
         if self.subject.settings.stealth.stealth_method.get() == STEALTH_METHODS.socks:
-            self.stealth_port.options = [ ( None, "auto") ] + [(x,x) for x in STEALTH_PORTS.socks]
+            self.stealth_port.options = [( "auto", "auto") ] + [(x,x) for x in STEALTH_PORTS.socks]
         if self.subject.settings.stealth.stealth_method.get() == STEALTH_METHODS.http:
-            self.stealth_port.options = [ ( None, "auto") ] + [(x,x) for x in STEALTH_PORTS.http]
+            self.stealth_port.options = [( "auto", "auto") ] + [(x,x) for x in STEALTH_PORTS.http]
         if self.subject.settings.stealth.stealth_method.get() == STEALTH_METHODS.no_stealth:
-            self.stealth_port.options = [ ( None, "auto") ]
+            self.stealth_port.options = [( "auto", "auto") ]

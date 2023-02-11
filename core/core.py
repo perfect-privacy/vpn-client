@@ -110,13 +110,18 @@ class Core(Observable):
         self.deviceManager = None
         if PLATFORM == PLATFORMS.windows:
             self.openVpnDriver = OpenVpnDriver(self)
-            self._start_timers.append(Timer(4, self.openVpnDriver.update_async))
+            self._start_timers.append(Timer(3, self.openVpnDriver.update_async))
 
             self.deviceManager = DeviceManager(self)
             self._start_timers.append(Timer(5, self.deviceManager.update_async))
 
+        if self.settings.is_first_startup.get() is True:
+            if PLATFORM == PLATFORMS.windows:
+                self.leakprotection.reset()
+            self.settings.is_first_startup.set(False)
+
         self.userapi = UserAPI(self)
-        self.userapi.request_update()
+        self._start_timers.append(Timer(5, self.userapi.request_update))
 
         self.session.start()
         for t in self._start_timers:
@@ -126,7 +131,7 @@ class Core(Observable):
         self.frontend_active = nr_of_active_frontends > 0
         self.trafficDownload.check_now()
         self.ipcheck.check_now()
-        self.leakprotection.update_async()
+        self.userapi.request_update()
 
     def on_frontend_exit(self, pyHtmlGuiInstance, nr_of_active_frontends):
         self.frontend_active = nr_of_active_frontends > 0
@@ -169,7 +174,6 @@ class Core(Observable):
 
     def _on_start_on_boot_updated(self, sender):
         if PLATFORM == PLATFORMS.windows:
-
             startup_path = "c:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp"
             shortcut_path = os.path.join(startup_path, "Perfect Privacy.lnk")
             if self.settings.startup.start_on_boot.get() == False:
@@ -185,9 +189,33 @@ class Core(Observable):
                 shortcut.Targetpath = os.path.join(APP_DIR, "perfect-privacy.exe")
                 shortcut.save()
 
+        elif PLATFORM == PLATFORMS.macos:
+            if self.settings.startup.start_on_boot.get() == False:
+                os.system('launchctl unload "/Library/LaunchAgents/perfect-privacy.plist"')
+                os.system('rm "/Library/LaunchAgents/perfect-privacy.plist"')
+            else:
+                s = '''
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+                    <plist version="1.0">
+                    <dict>
+                        <key>Label</key>
+                        <string>perfect-privacy</string>
+                        <key>RunAtLoad</key>
+                        <true/>
+                        <key>ProgramArguments</key>
+                        <array>
+                            <string>/Applications/Perfect\ Privacy.app/Contents/MacOS/perfect-privacy</string>
+                        </array>
+                    </dict>
+                    </plist>
+                '''
+                with open("/Library/LaunchAgents/perfect-privacy.plist", "w") as f:
+                    f.write(s.replace("\n                    ",""))
+                os.system('launchctl load "/Library/LaunchAgents/perfect-privacy.plist"')
+
     def _on_credentials_updated(self, sender):
         self.settings.account.account_expiry_date_utc = None
-        # self.general_preferences.modified()
         self.userapi.request_update()
 
     def quit(self):

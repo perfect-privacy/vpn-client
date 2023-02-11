@@ -20,12 +20,14 @@ class NetworkInterface():
             success, stdout, stderr = SubCommand().run("netsh", ["interface", "ipv6", "delete", "address", "%s" % self.index, "address=%s" % ipv6[0], "store=active"])
 
     def enableIpv6(self):
+        # enable does nothing, if a automatically assigned Ipv6 has been removed, it will come back automatically when announcements are no longer firewalled
         pass
 
     def enableDnsLeakProtection(self):
+        all_ipv4_dns_servers = [item.vpn_server_config.dns_ipv4 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv4 != "" and item.vpn_server_config.bandwidth_mbps > 500]
+        all_ipv6_dns_servers = [item.vpn_server_config.dns_ipv6 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv6 != "" and item.vpn_server_config.bandwidth_mbps > 500]
 
-        all_ipv4_dns_servers = [item.vpn_server_config.dns_ipv4 for _,item in self.core.vpnGroupPlanet.servers.items()]
-        all_ipv6_dns_servers = [item.vpn_server_config.dns_ipv6 for _,item in self.core.vpnGroupPlanet.servers.items()]
+
         changed = False
 
         if self.ipenabled is True:
@@ -100,7 +102,7 @@ class NetworkInterfaces():
 
         networkdatas = self.core.powershell.execute("Get-CimInstance -Class Win32_NetworkAdapterConfiguration | ConvertTo-Json", as_data = True )
         for networkdata in networkdatas:
-            if  networkdata["InterfaceIndex"] not in self.networkinterfaces:
+            if networkdata["InterfaceIndex"] not in self.networkinterfaces:
                 continue
             ni = self.networkinterfaces[ networkdata["InterfaceIndex"]]
             ni.dhcpenabled = networkdata["DHCPEnabled"]
@@ -135,7 +137,6 @@ class NetworkInterfaces():
         self._load()
         for key, interface in self.networkinterfaces.items():
             interface.enableDnsLeakProtection()
-
 
     def disableDnsLeakProtection(self):
         self._load()

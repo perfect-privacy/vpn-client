@@ -83,8 +83,6 @@ class TrafficDownload(Observable):
             self.last_successful_check.set( math.floor(now))
         except Exception as e:
             self.last_failed_check.set(math.floor(now))
-            #self._logger.debug(traceback.format_exc())
-            #self._logger.debug(   "error while checking for updates, retry in {} seconds".format(self._err_check_interval_seconds))
             self._timer.interval = self._err_check_interval_seconds
         self.next_check = math.floor(self._timer.last_call_timestamp + self._timer.interval)
         self.state = TrafficDownloadState.IDLE

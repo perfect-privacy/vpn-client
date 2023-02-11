@@ -1,18 +1,13 @@
 import os
 import shutil
-from gettext import gettext as _
 from zipfile import ZipFile, BadZipfile, LargeZipFile
-import logging
 from datetime import datetime
 import math
 import traceback
-
 from core.libs.web import reporter
 from core.libs.update.updater_state import UpdaterState
-
 from config.paths  import CONFIG_DIR, CONFIG_UPDATE_DIR
 from config.urls import CONFIG_UPDATE_URL
-
 from core.libs.web import WebRequest
 from core.libs.web import SecureDownload
 from core.libs.update import GenericUpdater
@@ -141,7 +136,7 @@ class ConfigUpdater(GenericUpdater):
                         os.chmod(flattened_path, 0o644)
                         f.write(z.open(filename).read())
         except (BadZipfile, LargeZipFile, Exception) as e:
-            raise Exception(_("Error extracting ZIP file: {}").format(str(e)))
+            raise Exception("Error extracting ZIP file: {}".format(str(e)))
         self._logger.debug("unzipping done")
 
 

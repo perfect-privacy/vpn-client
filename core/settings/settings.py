@@ -72,7 +72,7 @@ class Settings_Stealth(Observable):
         self.stealth_custom_node.attach_observer(self._on_subitem_updated)
         self.stealth_custom_node.attach_observer(self._set_defaults_stealth_custom_node)
 
-        self.stealth_custom_hostname = PermanentProperty(self.__class__.__name__ + ".stealth_custom_hostname", None)
+        self.stealth_custom_hostname = PermanentProperty(self.__class__.__name__ + ".stealth_custom_hostname", "")
         self.stealth_custom_hostname.attach_observer(self._on_subitem_updated)
 
         self.stealth_custom_port = PermanentProperty(self.__class__.__name__ + ".stealth_custom_port", None)
@@ -82,10 +82,10 @@ class Settings_Stealth(Observable):
         self.stealth_custom_require_auth.attach_observer(self._on_subitem_updated)
         self.stealth_custom_require_auth.attach_observer(self._set_defaults_stealth_custom_require_auth)
 
-        self.stealth_custom_auth_username = PermanentProperty(self.__class__.__name__ + ".stealth_custom_auth_username", None)
+        self.stealth_custom_auth_username = PermanentProperty(self.__class__.__name__ + ".stealth_custom_auth_username", "")
         self.stealth_custom_auth_username.attach_observer(self._on_subitem_updated)
 
-        self.stealth_custom_auth_password = PermanentProperty(self.__class__.__name__ + ".stealth_custom_auth_password", None)
+        self.stealth_custom_auth_password = PermanentProperty(self.__class__.__name__ + ".stealth_custom_auth_password", "")
         self.stealth_custom_auth_password.attach_observer(self._on_subitem_updated)
 
         self.stealth_custom_proxy_auth_use_ntlm = PermanentProperty(self.__class__.__name__ + ".stealth_custom_proxy_auth_use_ntlm", False)
@@ -107,12 +107,12 @@ class Settings_Stealth(Observable):
             self.stealth_custom_port.set("")
             self.stealth_custom_require_auth.set(False)
             self.stealth_custom_ssh_fingerprint.set("")
+
     def _set_defaults_stealth_custom_require_auth(self, event):
         if self.stealth_custom_require_auth.get() is False:
             self.stealth_custom_auth_username.set("")
             self.stealth_custom_auth_password.set("")
             self.stealth_custom_proxy_auth_use_ntlm.set(False)
-
 
     def _on_subitem_updated(self, sender):
         self.notify_observers()
@@ -127,7 +127,7 @@ class Settings_Vpn_OpenVPN(Observable):
         self.cipher = PermanentProperty(self.__class__.__name__ + ".cipher", OPENVPN_CIPHER.aes_256_gcm)
         self.cipher.attach_observer(self._on_subitem_updated)
 
-        self.driver = PermanentProperty(self.__class__.__name__ + ".driver", OPENVPN_DRIVER.tap_windows6_latest)
+        self.driver = PermanentProperty(self.__class__.__name__ + ".driver", OPENVPN_DRIVER.wintun)
         self.driver.attach_observer(self._on_subitem_updated)
 
         self.tls_method = PermanentProperty(self.__class__.__name__ + ".tls_method", OPENVPN_TLS_METHOD.tls_crypt)
@@ -136,7 +136,7 @@ class Settings_Vpn_OpenVPN(Observable):
         self.port = PermanentProperty(self.__class__.__name__ + ".port",None)
         self.port.attach_observer(self._on_subitem_updated)
 
-        self.cascading_max_hops = PermanentProperty(self.__class__.__name__ + ".cascading_max_hops", 1)
+        self.cascading_max_hops = PermanentProperty(self.__class__.__name__ + ".cascading_max_hops", 2)
         self.cascading_max_hops.attach_observer(self._on_subitem_updated)
 
     def _on_subitem_updated(self, sender):
@@ -190,32 +190,6 @@ class Settings_Account(Observable):
         self.password.set("")
 
 
-class Settings_Smartnet(Observable):
-    def __init__(self):
-        super().__init__()
-
-        self.enabled = PermanentProperty(self.__class__.__name__ + ".enabled", False)
-        self.enabled.attach_observer(self._on_subitem_updated)
-
-    def _on_subitem_updated(self, sender):
-        self.notify_observers()
-
-
-class Settings_WlanAccesspoint(Observable):
-    def __init__(self):
-        super().__init__()
-
-    def _on_subitem_updated(self, sender):
-        self.notify_observers()
-
-class Settings_WlanClient(Observable):
-    def __init__(self):
-        super().__init__()
-
-    def _on_subitem_updated(self, sender):
-        self.notify_observers()
-
-
 class Settings_Startup(Observable):
     def __init__(self):
         super().__init__()
@@ -237,18 +211,14 @@ class Settings(Observable):
         self.stealth = Settings_Stealth()
         self.vpn = Settings_Vpn()
         self.account = Settings_Account()
-        self.smartnet = Settings_Smartnet()
-        self.wlanclient = Settings_WlanClient()
-        self.wlanaccesspoint = Settings_WlanAccesspoint()
         self.startup = Settings_Startup()
-
+        self.is_first_startup =  PermanentProperty(self.__class__.__name__ + ".is_first_startup", True)
         self.first_start_wizard_was_run = PermanentProperty(self.__class__.__name__ + ".first_start_wizard_was_run", False)
         self.first_start_wizard_was_run.attach_observer(self._on_subitem_updated)
 
         self.interface_level         = PermanentProperty(self.__class__.__name__ + ".interface_level", "simple")
         self.interface_level.attach_observer(self._on_subitem_updated)
         self.interface_level.attach_observer(self._on_interfacelevel_updated)
-
 
     def _on_subitem_updated(self, sender ):
         self.notify_observers()

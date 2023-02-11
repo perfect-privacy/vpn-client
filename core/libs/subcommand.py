@@ -6,7 +6,7 @@ class SubCommand():
     def __init__(self):
         self._logger = logging.getLogger(self.__class__.__name__)
 
-    def run(self, cmd, args, timeout=10):
+    def run(self, cmd, args = [], timeout=10):
         args = [cmd] + args
         proc = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         try:

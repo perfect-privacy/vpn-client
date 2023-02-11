@@ -20,7 +20,7 @@ class StealthObfs(StealthCommon):
         self.openvpn_arguments = [   ]
         self.remote_host = self._servergroup.vpn_server_config.obfs3_ip  # the ip or host the openvpn process actually connects to
         self.remote_port = self._core.settings.stealth.stealth_port.get()
-        if core.settings.vpn.openvpn.tls_method == OPENVPN_TLS_METHOD.tls_crypt:
+        if core.settings.vpn.openvpn.tls_method.get() == OPENVPN_TLS_METHOD.tls_crypt:
             ports = STEALTH_PORTS.obfs_tlscrypt
         else:
             ports = STEALTH_PORTS.obfs
@@ -47,11 +47,11 @@ class StealthObfs(StealthCommon):
         self._stderr_read_tread = Thread(target=self._read_stderr_thread, daemon=True)
         self._stderr_read_tread.start()
 
-        for i in range(15):
+        for i in range(10):
             if self._obfs_local_port is not None or self._stdout_read_tread is None:
                 break
-            print("waiting for obfs to connect")
-            time.sleep(2)
+            self._logger.info("waiting for obfs to connect")
+            time.sleep(1.5)
         self.openvpn_arguments = [
             "--socks-proxy", "127.0.0.1", self._obfs_local_port
         ]

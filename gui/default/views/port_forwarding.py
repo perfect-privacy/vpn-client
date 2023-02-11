@@ -1,3 +1,5 @@
+import time
+
 from pyhtmlgui import PyHtmlView, ObservableListView
 from gui.common.components import CheckboxComponent
 
@@ -59,8 +61,10 @@ class PortForwardingView(PyHtmlView):
 
         <div class="inner">
             <h1>Port Forwarding</h1>
-            <p>Port forwardings are helpful to optimize the speed for certain games or Peer-to-peer software like torrent clients. You can designate up to five specific ports to forward to your computer.</p>
-            
+            <p>Port forwardings are helpful to optimize the speed for certain games or Peer-to-peer software like torrent clients. You can designate up to five specific ports to forward to your computer.
+            Note: It might take up to 3 minutes for any changes to apply on our Servers. 
+            If you update your port forwarding settings on our website, it might take some time for the settings below to refresh. <a onclick="pyview.refresh()">Refresh Now</a> 
+            </p>
             <div class="boxes">
                 <section>
                     <h3>
@@ -174,6 +178,7 @@ class PortForwardingView(PyHtmlView):
         self.serverGroupView = ServerGroupView(self.subject.userapi, self)
         self.add_observable(subject.userapi.customPortForwardings)
         self.add_observable(subject.userapi._server_groups)
+        self._last_update_requested = 0
 
     def custom_port_forwarding_enabled(self):
         if self._custom_port_forwarding_enabled is True:
@@ -185,6 +190,13 @@ class PortForwardingView(PyHtmlView):
             return
         self._custom_port_forwarding_enabled = value
         self.update()
+
+    def refresh(self):
+        if self._last_update_requested + 3 > time.time():
+            return
+        self._last_update_requested = time.time()
+        self.subject.userapi.request_update()
+
 
 class CustomPortForwardingRowItem(PyHtmlView):
     DOM_ELEMENT = "tr"
