@@ -29,7 +29,7 @@ class TrayView(PyHtmlView):
                     <br>          
                     <div style="position: absolute; bottom: 5px; width: calc(100% - 5px);">
                          <div style="width:50%;text-align:center;float:left">
-                            <button onclick="pyhtmlapp.exit_app()">Yes</button>
+                            <button onclick="pyview.exit_app()">Yes</button>
                          </div>     
                          <div style="width:50%;text-align:center;float:right">
                             <button onclick="pyview.hide_confirm_exit()">No</button>
@@ -133,8 +133,9 @@ class TrayView(PyHtmlView):
         if self.is_visible is True:
             self.update()
 
-    def exit_frontend_app(self):
-        self.eval_javascript("exit_app()", skip_results=True)
+    def exit_app(self):
+        self.subject.session.disconnect()
+        self.eval_javascript("pyhtmlapp.exit_app()", skip_results=True)
 
 
 class HopListView(PyHtmlView):
@@ -258,7 +259,6 @@ class SelectServerView(PyHtmlView):
         self.update()
 
     def open_subitem(self, identifier):
-        print(" SelectServerView open_subitem", identifier)
         try:
             index = self.slug.index(identifier)
             del self.slug[index:]

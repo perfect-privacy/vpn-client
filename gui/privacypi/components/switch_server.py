@@ -56,7 +56,7 @@ class ServerListsItem(PyHtmlView):
     def connect_or_add(self):
         self.parent.parent.subject.settings.enable_expert_mode.set(True)  # TODO test foo
         self.parent.parent.subject.session.connect_or_add(self.subject)
-        print("connect or add")
+
 
 
 class ServerList(PyHtmlView):

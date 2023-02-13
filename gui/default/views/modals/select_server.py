@@ -78,7 +78,6 @@ class SelectServerModalView(Modal):
         self.update()
 
     def open_subitem(self, identifier):
-        print(" SelectServerView open_subitem", identifier)
         try:
             index =self.slug.index(identifier)
             del self.slug[index:]
@@ -94,7 +93,6 @@ class SelectServerModalView(Modal):
         self.update()
 
     def set_filter(self, value):
-        print("set_filter", value)
         self.filter = value
         self.current_list.set_filter(value)
 

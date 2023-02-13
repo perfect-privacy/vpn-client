@@ -5,7 +5,7 @@ jinja2
 whichcraft
 pyinstaller
 psutil
-pyhtmlgui>=3.10
+pyhtmlgui>=3.14
 markupsafe==2.1.1
 werkzeug
 flask

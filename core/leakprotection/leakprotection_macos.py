@@ -91,4 +91,5 @@ class LeakProtection_macos(LeakProtection_Generic):
                 name = line.strip()
                 if name == "":
                     continue
-                _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setdnsservers', name, "Empty"])
+                _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setdnsservers'   , name, "Empty"])
+                _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setsearchdomains', name, "Empty"])

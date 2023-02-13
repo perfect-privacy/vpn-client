@@ -99,7 +99,6 @@ class StealthSSHMacos(StealthSSHCommon):
             try:
                 f, self._known_hosts_file = tempfile.mkstemp(prefix="ssh_known_hosts_", text=True)
                 self._files_to_delete.append(self._known_hosts_file)
-                print("fooooo", self._ssh_fingerprint)
                 with os.fdopen(f, "w") as f:
                     if self._ssh_port == 22:
                         # for default port 22 the square brackets and the port must be omitted

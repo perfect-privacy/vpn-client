@@ -59,5 +59,4 @@ class CustomPortForwarding(Observable):
         self.parent = parent
 
     def remove(self):
-        print("REMOVE CALLED")
         self.parent.remove(self)

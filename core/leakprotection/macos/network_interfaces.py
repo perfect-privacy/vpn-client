@@ -28,7 +28,8 @@ class NetworkInterface():
 
         if len(dnsservers) > 0:
             self.dnsleakprotection_enabled = True
-            _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setdnsservers', self.name] + dnsservers)
+            _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setdnsservers'   , self.name] + dnsservers)
+            _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setsearchdomains', self.name, "local"] )
 
     def disableDnsLeakProtection(self):
         all_current_dns = self.dns_servers_v4 + self.dns_servers_v6
@@ -39,7 +40,8 @@ class NetworkInterface():
                     has_pp_dns = True
         if has_pp_dns is True or self.dnsleakprotection_enabled is True:
             self.dnsleakprotection_enabled = False
-            _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setdnsservers', self.name, "Empty"])
+            _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setdnsservers'   , self.name, "Empty"])
+            _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setsearchdomains', self.name, "Empty"] )
 
     def __str__(self):
         data = []

@@ -37,15 +37,8 @@ class UserAPI(Observable):
         self.account_disabled = None
 
         self.base_url = "https://www.perfect-privacy.com/api/user"
-        #self.max_cache_time = timedelta(seconds=60)
         self.last_update = None
 
-        #self.on_update_started = Signal()
-        #self.operating = False
-        #self.on_update = Signal()
-        #self.updating_failed = False
-
-        #self._actual_values = {}
         self._server_groups = ObservableList()
         self._server_groups_last_checked = 0
 
@@ -93,7 +86,6 @@ class UserAPI(Observable):
             request = self.request_queue.get()
             if request is None:
                 break
-            print(request)
             for key,item in request.items():
                 if item is False: request[key] = 0
                 if item is True: request[key] = 1
@@ -234,13 +226,8 @@ class UserAPI(Observable):
         if "serverGroups" not in response_dict:
             if "getServerGroups" in payload:
                 self._logger.error("despite requested, API didn't return server groups")
-                #reporter.report_error(msg="despite requested, API didn't return server groups")
             return
         self._server_groups.clear()
         self._server_groups.extend( response_dict["serverGroups"])
         self._server_groups_last_checked = time.time()
-
-
-
-
 

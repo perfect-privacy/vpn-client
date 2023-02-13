@@ -143,7 +143,7 @@ class PortForwardingView(PyHtmlView):
                 </section>
             
                 {% if pyview.custom_port_forwarding_enabled() == True %}
-                    <section style="width:50%">
+                    <section>
                         <h3>
                             Auto Renew Port Forwarding
                             <div class="input">{{ pyview.auto_renew_port_forwarding.render() }} </div>
@@ -151,7 +151,7 @@ class PortForwardingView(PyHtmlView):
                         <div>Automatically renew port forwarding after expiration</div>
                     </section>
                     
-                    <section style="width:50%">
+                    <section>
                         <h3>
                             Email Notifications for Port Forwarding Renewal
                             <div class="input"> {{ pyview.email_port_forwarding_updates.render() }} </div>

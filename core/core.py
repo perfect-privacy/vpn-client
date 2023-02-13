@@ -233,6 +233,12 @@ class Core(Observable):
                     pass
 
             try:
+                self.configUpdater.disable()
+                self.softwareUpdater.disable()
+            except:
+                pass
+
+            try:
                 self._logger.debug("shutting down session")
                 self.session.quit()
                 self._logger.debug("session shut down")
@@ -240,6 +246,13 @@ class Core(Observable):
                 pass
             except Exception as e:
                 self._logger.error("unable to shut down session: {}".format(str(e)))
+
+            time.sleep(2)# give async leak protection and others some time
+
+            try:
+                self.leakprotection.shutdown()
+            except Exception as e:
+                self._logger.error("unable to shut down leak protection: {}".format(str(e)))
 
             try:
                 reporter.shutdown()

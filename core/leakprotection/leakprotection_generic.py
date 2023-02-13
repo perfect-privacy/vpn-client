@@ -46,6 +46,7 @@ class LeakProtection_Generic(Observable):
     def shutdown(self):
         self._is_running = False
         self._wakeup_event.set()
+        self.__worker_thread.join()
 
     def _worker_thread(self):
         while self._is_running is True:
