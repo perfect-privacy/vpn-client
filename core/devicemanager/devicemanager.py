@@ -152,7 +152,6 @@ class DeviceManager(Observable):
                 self._load_existing_devices()
                 changed = False
 
-
             hopnames_valid = []
             for hop_nr in range(1, cascading_max_hops+1):
                 hopname = "Perfect Privacy VPN %s" % (hop_nr)
@@ -196,24 +195,26 @@ class DeviceManager(Observable):
         networkdatas = self.core.powershell.execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
         name_to_index = {}
         for networkdata in networkdatas:
-            name_to_index[networkdata["InterfaceAlias"]] = networkdata["InterfaceIndex"]
+            try:
+                name_to_index[networkdata["InterfaceAlias"]] = networkdata["InterfaceIndex"]
+            except Exception as e:
+                self._logger.debug("Failed to load networkdata, %s" % e)
 
         success, stdout, stderr = SubCommand().run(OPENVPN, [ "--show-adapters"])
         for line in stdout.split(b"\n"):
-            if line.find(b"{") > -1 or line.find(b"}") > -1 or line.find(b"\\") > -1:
-                try:
-                    name = line.split(b"'")[1].strip().decode("UTF-8")
-                except:
-                    continue # no or foreign character name, aka not ours.
-                guid = line.split(b"{")[1].split(b"}")[0].strip()
-                type = line.split(b"}")[1].strip()
-                guid = guid.decode("UTF-8")
-                type = type.decode("UTF-8")
-                d = OpenVpnDevice()
-                d.index = name_to_index[name]
-                d.name = name
-                d.guid = guid
-                d.type = type
-                yield d
+            try:
+                if line.find(b"{") > -1 or line.find(b"}") > -1 or line.find(b"\\") > -1:
+                    try:
+                        name = line.split(b"'")[1].strip().decode("UTF-8")
+                    except:
+                        continue # no, or foreign character name, aka not ours.
+                    d = OpenVpnDevice()
+                    d.index = name_to_index[name]
+                    d.name = name
+                    d.guid = line.split(b"{")[1].split(b"}")[0].strip().decode("UTF-8")
+                    d.type = line.split(b"}")[1].strip().decode("UTF-8")
+                    yield d
+            except Exception as e:
+                self._logger.debug("Failed to parse device enumeration, %s" % e)
         return []
 

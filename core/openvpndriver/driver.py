@@ -14,6 +14,7 @@ class InstalledDriver():
         self.version_date = None
         self.version_number = None
 
+
 class OpenVpnDriver(Observable):
     def __init__(self, core):
         super().__init__()
@@ -73,7 +74,6 @@ class OpenVpnDriver(Observable):
                 time.sleep(1)
             self._update()
 
-
     def _update(self):
         try:
             self.lock.acquire()
@@ -89,9 +89,7 @@ class OpenVpnDriver(Observable):
             self.state.set(OpenVpnDriverState.IDLE)
         finally:
             self.lock.release()
-
         self.notify_observers()
-
 
     def _on_subdriver_changed(self, event):
         self.notify_observers()
@@ -144,29 +142,41 @@ class Driver_generic(Observable):
 
     def _enum_drivers(self):
         success, stdout, stderr = SubCommand().run(PNPUTIL, [ "/enum-drivers", "/class", "Net" ])
-        result = stdout.replace(b"\r", b"").replace(b"  ", b" ")
-        parts  = result.split(b"\n\n")
+        try:
+            parts  = stdout.replace(b"\r", b"").replace(b"  ", b" ").split(b"\n\n")
+        except Exception as e:
+            self._logger.debug("Failed to enumerate drivers, %s" % e)
+            parts = []
+
         for part in parts:
             if part.find(self.identifier.encode("UTF-8")) != -1:
-                lines = part.split(b"\n")
-                name = lines[0].split(b": ")[1].strip().decode("UTF-8").strip()
-                version_date   = lines[5].split(b": ")[1].strip().split(b" ")[0].strip().decode("UTF-8").strip()
-                version_number = lines[5].split(b": ")[1].strip().split(b" ")[1].strip().decode("UTF-8").strip()
-                i = InstalledDriver()
-                i.name = name
-                i.version_date = version_date
-                i.version_number = version_number
-                yield i
+                try:
+                    i = InstalledDriver()
+                    i.name = part.split(b"\n")[0].split(b": ")[1].strip().decode("UTF-8").strip()
+                    i.version_date = part.split(b"\n")[5].split(b": ")[1].strip().split(b" ")[0].strip().decode("UTF-8").strip()
+                    i.version_number = part.split(b"\n")[5].split(b": ")[1].strip().split(b" ")[1].strip().decode("UTF-8").strip()
+                    yield i
+                except Exception as e:
+                    self._logger.debug("Failed to parse driver enumeration, %s" % e)
+        return []
 
     def _enum_devices(self):
         success, stdout, stderr = SubCommand().run(PNPUTIL, [ "/enum-devices", "/class", "Net" ])
-        result = stdout.replace(b"\r", b"").replace(b"  ", b" ")
-        parts  = result.split(b"\n\n")
+        try:
+            parts  = stdout.replace(b"\r", b"").replace(b"  ", b" ").split(b"\n\n")
+        except Exception as e:
+            self._logger.debug("Failed to enumerate devices, %s" % e)
+            parts = []
+
         for part in parts:
-            if part.find(self.identifier.encode("UTF-8")) != -1:
-                lines = part.split(b"\n")
-                instance_id = lines[0].split(b": ")[1].strip().decode("UTF-8").strip()
-                yield instance_id
+            try:
+                if part.find(self.identifier.encode("UTF-8")) != -1:
+                    lines = part.split(b"\n")
+                    instance_id = lines[0].split(b": ")[1].strip().decode("UTF-8").strip()
+                    yield instance_id
+            except Exception as e:
+                self._logger.debug("Failed to parse device enumeration, %s" % e)
+        return []
 
     def _delete_driver(self, oemname):
         if oemname not in  [x.name for x in self.installed_drivers]:
@@ -198,18 +208,29 @@ class Driver_TapWindows(Driver_generic):
 
     def set_version_to_install(self, inf_file):
         self._inf_file = inf_file
-        v = open(self._inf_file,"r").read().split("DriverVer")[1].split("=")[1].split("\n")[0].strip()
-        self.available_version_date   = v.split(",")[0].strip()
-        self.available_version_number = v.split(",")[1].strip()
+        try:
+            parts = open(self._inf_file,"r").read().split("DriverVer")[1].split("=")[1].split("\n")[0].strip().split(",")
+            self.available_version_date   = parts[0].strip()
+            self.available_version_number = parts[1].strip()
+        except Exception as e:
+            self._logger.debug("Failed to get TapWindows version, %s" % e)
+            self.available_version_date   = 0
+            self.available_version_number = 0
+
 
 class Driver_WinTun(Driver_generic):
     def __init__(self, openVpnDriver):
         self.identifier = "WireGuard LLC"
         super().__init__(self.identifier, openVpnDriver)
         self._logger = logging.getLogger(self.__class__.__name__)
-        v = open(WINTUN_INF,"r").read().split("DriverVer")[1].split("=")[1].split("\n")[0].strip()
-        self.available_version_date   = v.split(",")[0].strip()
-        self.available_version_number = v.split(",")[1].strip()
+        try:
+            parts = open(WINTUN_INF,"r").read().split("DriverVer")[1].split("=")[1].split("\n")[0].strip().split(",")
+            self.available_version_date   = parts[0].strip()
+            self.available_version_number = parts[1].strip()
+        except Exception as e:
+            self._logger.debug("Failed to get WinTUN version, %s" % e)
+            self.available_version_date   = 0
+            self.available_version_number = 0
 
     def _add_driver(self):
         success, stdout, stderr = SubCommand().run(PNPUTIL, ["/add-driver", WINTUN_INF ])
