@@ -175,7 +175,6 @@ class DeviceManager(Observable):
             self.lock.release()
         self.notify_observers()
 
-
     def _on_settings_driver_changed(self, event):
         self._logger.debug("_on_settings_driver_changed")
         self.update_async()
@@ -215,6 +214,6 @@ class DeviceManager(Observable):
                 d.name = name
                 d.guid = guid
                 d.type = type
-                yield  d
-
+                yield d
+        return []
 

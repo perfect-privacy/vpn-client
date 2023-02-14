@@ -1,5 +1,4 @@
 import logging
-from core.libs.web import reporter
 from config.constants import PROTECTION_SCOPES
 import threading
 from pyhtmlgui import  Observable
@@ -75,7 +74,6 @@ class LeakProtection_Generic(Observable):
                 self.__enable()
             else:
                 self._logger.error("invalid traffic leak protection setting")
-                reporter.report_error(msg="invalid traffic leak protection setting")
         finally:
             self._lock.release()
         self.notify_observers()

@@ -320,11 +320,10 @@ class VpnGroupPlanet(VpnGroup):
         )
 
     def load_configs_json(self):
-        self._logger.debug("loading config file from {}".format(CONFIG_DIR))
         try:
             servers_data = json.loads(open(os.path.join(CONFIG_DIR, "servers.json"),"r").read())
         except:
-            self._logger.debug("Failed to load config file from {}".format(CONFIG_DIR))
+            self._logger.debug("Failed to load config file")
             servers_data = []
 
         for server_data in servers_data:

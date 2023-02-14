@@ -31,8 +31,8 @@ class PreferencesView(PyHtmlView):
                     <div class="input"> {{ pyview.neuro_routing.render() }} </div>
                 </h3> 
                 <div>
-                    Your traffic will brought as close as possible to the destination within 
-                    the encrypted VPN network. That way, your traffic is only exposed to the internet where it is unavoidable.
+                    Use our AI-driven routing technology to keep your internet traffic within our encrypted network wherever possible. This makes sure your traffic is only routed 
+                    though the open internet for as short as possible, making it way harder to do any kind of traffic analysis.  
                 </div>
             </section>
 
@@ -40,9 +40,9 @@ class PreferencesView(PyHtmlView):
                 <section>
                     <h3>
                         Enforce Primary Ip
-                        <div class="input"> {{ pyview.random_exit_ip.render() }} </div>
+                        <div class="input"> {{ pyview.enforce_primary_ip.render() }} </div>
                     </h3> 
-                    <div>There are services that require a primary IP address. Turn it on only when you need it.</div>
+                    <div>Make sure servers primary ip address is used as exit ip. Otherwise a random IP will be assigned.</div>
                 </section>
             {% endif %}
         </div> 
@@ -71,7 +71,9 @@ class PreferencesView(PyHtmlView):
                         OpenVPN Protocol
                         <div class="input">{{ pyview.openvpn_protocol.render() }}</div>
                     </h3> 
-                    <div>Phasellus convallis elit id ullam corper amet et pulvinar. Duis aliquam turpis mauris, sed ultricies erat dapibus.</div>
+                    <div>
+                        Select OpenVPN protocol, UDP is recommended in most cases, however in some networks TCP might work more reliable. TCP is automatically used if stealth is enabled.  
+                    </div>
                 </section>
 
                 <section>
@@ -80,7 +82,7 @@ class PreferencesView(PyHtmlView):
                         <div class="input" style="width:5em;"> {{ pyview.openvpn_cascading_max_hops.render() }}</div>
                     </h3> 
                     <div>
-                        Please note that increasing the number of hops may also increase the risk of connection failures and slower performance
+                        Select the maximum number of available hops for cascading connections. 
                     </div>
                 </section>                              
 
@@ -91,7 +93,7 @@ class PreferencesView(PyHtmlView):
                             <div class="input" style="width:8em;"> {{ pyview.openvpn_cipher.render() }} </div>    
                         </h3> 
                         <div>
-                            Select the desired encryption cipher for your OpenVPN connection. 
+                            Select the desired encryption cipher for your OpenVPN connection.
                             Different ciphers have different strengths and weaknesses, so choose the one that best meets your security needs.
                         </div>
                     </section>
@@ -102,7 +104,7 @@ class PreferencesView(PyHtmlView):
                             <div class="input" style="width:8em;"> {{ pyview.openvpn_tls_method.render() }} </div>
                         </h3> 
                         <div>
-                            Phasellus convallis elit id ullam corper amet et pulvinar. Duis aliquam turpis mauris, sed ultricies erat dapibus.
+                           Select prefered OpenVPN TLS Method. TLS-CRYPT is the newer, recommended way. 
                         </div>
                     </section>
 
@@ -113,7 +115,7 @@ class PreferencesView(PyHtmlView):
                                 <div class="input" style="width:8em;"> {{ pyview.openvpn_driver.render() }} </div>
                             </h3> 
                             <div>
-                                Phasellus convallis elit id ullam corper amet et pulvinar. Duis aliquam turpis mauris, sed ultricies erat dapibus.
+                                Select OpenVPN Driver. WinTUN is the newest, fastest OpenVPN driver, but some older Windows version might need some older driver. 
                             </div>
                         </section>
                     {% endif %}
@@ -130,7 +132,6 @@ class PreferencesView(PyHtmlView):
                 {{ pyview.deviceManager.render() }} 
             {% endif %}
         {% endif %}  
-
     </div>
     '''
 
@@ -184,7 +185,7 @@ class PreferencesView(PyHtmlView):
                                                   (OPENVPN_DRIVER.tap_windows6_9_00_00_9, "TAP 9.0.0.9"),
                                                   (OPENVPN_DRIVER.tap_windows6_9_00_00_21, "TAP 9.0.0.21"),
                                               ])
-        self.random_exit_ip = CheckboxComponent(subject.userapi.random_exit_ip, self, label="")
+        self.enforce_primary_ip = CheckboxComponent(subject.userapi.random_exit_ip, self, label="", inverted=True)
         self.neuro_routing = CheckboxComponent(subject.userapi.neuro_routing, self, label="")
         self.start_on_boot = CheckboxComponent(subject.settings.startup.start_on_boot, self)
         self.updater = UpdaterView(subject, self)
@@ -195,7 +196,7 @@ class PreferencesView(PyHtmlView):
             self.deviceManager = StatusNetworkDevicesView(subject.deviceManager, self)
             self.osname = "Windows"
         if PLATFORM == PLATFORMS.macos:
-            self.osname = "MacOS"
+            self.osname = "macOS"
         self._last_update_requested = 0
 
     def _on_object_updated(self, source, **kwargs):

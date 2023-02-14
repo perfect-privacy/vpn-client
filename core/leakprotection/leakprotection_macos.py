@@ -4,7 +4,6 @@ import os
 import subprocess
 import traceback
 from collections import namedtuple
-from core.libs.web import reporter
 from .leakprotection_generic import LeakProtection_Generic
 from .macos.network_interfaces import NetworkInterfaces
 from ..libs.subcommand import SubCommand
@@ -66,7 +65,6 @@ class LeakProtection_macos(LeakProtection_Generic):
             except Exception as e:
                 self._logger.error("unexpected exception: {}".format(e))
                 self._logger.debug(traceback.format_exc())
-                reporter.report_error(traceback=traceback.format_exc())
 
         if self.core.settings.leakprotection.enable_dnsleak_protection.get():
             self.networkInterfaces.enableDnsLeakProtection()

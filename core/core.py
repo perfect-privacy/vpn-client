@@ -33,11 +33,7 @@ from core.userapi.userapi import UserAPI
 from pyhtmlgui import Observable
 
 from .leakprotection.leakprotection_generic import LeakProtectionState
-from .libs.update.updater_state import UpdaterState
-from .libs.web import reporter
 from .libs.powershell import Powershell
-from config.constants import PLATFORMS
-from config.config import PLATFORM
 from .configupdater import ConfigUpdater
 from .leakprotection import LeakProtection
 from .ipcheck import IpCheck
@@ -72,7 +68,6 @@ class Core(Observable):
         self.frontend_active = False
 
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._logger.debug("loading core")
 
         self.settings = Settings()
         self.settings.account.attach_observer(self._on_credentials_updated)
@@ -221,10 +216,8 @@ class Core(Observable):
     def quit(self):
         try:
             if self._is_shutting_down:
-                self._logger.debug("shutdown already in progress")
                 return
             self._is_shutting_down = True
-            self._logger.info("shutting down")
 
             for t in self._start_timers:
                 try:
@@ -239,11 +232,8 @@ class Core(Observable):
                 pass
 
             try:
-                self._logger.debug("shutting down session")
                 self.session.quit()
                 self._logger.debug("session shut down")
-            except AttributeError:
-                pass
             except Exception as e:
                 self._logger.error("unable to shut down session: {}".format(str(e)))
 
@@ -254,10 +244,6 @@ class Core(Observable):
             except Exception as e:
                 self._logger.error("unable to shut down leak protection: {}".format(str(e)))
 
-            try:
-                reporter.shutdown()
-            except:
-                self._logger.debug("shutting down reporter failed")
         except Exception as e:
             self._logger.error("shutting down gracefully failed: {}".format(str(e)))
         finally:

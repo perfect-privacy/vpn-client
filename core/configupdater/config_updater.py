@@ -4,7 +4,6 @@ from zipfile import ZipFile, BadZipfile, LargeZipFile
 from datetime import datetime
 import math
 import traceback
-from core.libs.web import reporter
 from core.libs.update.updater_state import UpdaterState
 from config.paths  import CONFIG_DIR, CONFIG_UPDATE_DIR
 from config.urls import CONFIG_UPDATE_URL
@@ -80,7 +79,6 @@ class ConfigUpdater(GenericUpdater):
             old_version_number = int(old_version_number)
         except (ValueError, TypeError, Exception):
             self._logger.error("invalid config version number: '{}' or '{}'".format( old_version_number, new_version_number))
-            reporter.report_error(msg="invalid config version number: '{}' or '{}'".format(old_version_number, new_version_number))
             # force update if the version numbers are not comparable or one of them is invalid
             return 1
 

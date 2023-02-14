@@ -2,10 +2,6 @@ import logging
 from datetime import datetime
 from threading import Thread, Event
 import traceback
-
-from core.libs.web import reporter
-
-
 class PerpetualTimer(object):
     def __init__(self, callback, interval, last_call_timestamp=None):
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -56,7 +52,6 @@ class PerpetualTimer(object):
             except:
                 self._logger.error("error executing callback")
                 self._logger.debug(traceback.format_exc())
-                reporter.report_error(traceback=traceback.format_exc())
 
     def _calculate_delay(self):
         if self._call_now:
@@ -102,7 +97,6 @@ class PerpetualTimer(object):
         self._wakeup_event.set()
 
     def shutdown(self):
-        self._logger.debug("shutting down...")
         self._is_running = False
         self._cancel_pause_event.set()
         self._wakeup_event.set()
@@ -110,8 +104,3 @@ class PerpetualTimer(object):
             self._timer_thread.join(timeout=20)
         except RuntimeError:
             self._logger.debug("joining failed")
-        if self._timer_thread.is_alive():
-            self._logger.error("shutting down timer thread failed")
-            reporter.report_error(msg="shutting down timer thread failed")
-            raise RuntimeError()
-        self._logger.debug("shut down finished")

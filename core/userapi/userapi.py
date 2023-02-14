@@ -57,7 +57,6 @@ class UserAPI(Observable):
         self.gpg_mail_only = RemoteProperty("pgpOnly", self.request_queue)
 
         self._worker_thread_running = True
-        #self._worker_continue_event = Event()
         self._worker_thread = Thread(target=self._worker, daemon=True)
         self._worker_thread.start()
 
@@ -91,7 +90,6 @@ class UserAPI(Observable):
                 if item is True: request[key] = 1
             try:
                 payload, response = self._request_api(request)
-                print(payload, response)
                 self._handle_api_response(payload, response)
             except UserAPIError as e:
                 pass
@@ -99,7 +97,6 @@ class UserAPI(Observable):
                 self._logger.debug("Request failed: %s" % e )
 
     def _request_api(self, payload):
-        print("request", payload)
         username = self.unvalidated_username if self.unvalidated_username != "" else self.core.settings.account.username.get()
         password = self.unvalidated_password if self.unvalidated_password != "" else self.core.settings.account.password.get()
 
@@ -150,7 +147,7 @@ class UserAPI(Observable):
             response_dict = json.loads(response.content.decode())
         except:
             self._logger.error("invalid response: API didn't return valid JSON")
-            #reporter.report_error(msg="API returned invalid JSON")
+
             raise UserAPIError()
 
         self._logger.debug("response: {}".format(response_dict))

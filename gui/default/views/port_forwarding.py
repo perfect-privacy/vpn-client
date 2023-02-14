@@ -1,5 +1,4 @@
 import time
-
 from pyhtmlgui import PyHtmlView, ObservableListView
 from gui.common.components import CheckboxComponent
 
@@ -79,23 +78,19 @@ class PortForwardingView(PyHtmlView):
                         </div>
                     </div>
                 </section>
-                
                 <section>
                     <h3>
                         Enable Custom Port Forwarding
-                        
                         <div class="input">
-                        <div class="CheckboxComponent">
-                            <input onchange='pyview.set_custom_port_forwarding($("#checkbox_custom_port_forwarding").prop("checked") === true )'
-                                class="form-check-input" type="checkbox" value="" id="checkbox_custom_port_forwarding"
-                                {% if pyview.custom_port_forwarding_enabled() %} checked {% endif %}
-                                {% if pyview.subject.userapi.customPortForwardings.portforwardings | length > 0 %} disabled {% endif %}
-                            >
-                            <label class="form-check-label" for="checkbox_custom_port_forwarding"></label>
+                            <div class="CheckboxComponent">
+                                <input onchange='pyview.set_custom_port_forwarding($("#checkbox_custom_port_forwarding").prop("checked") === true )'
+                                    class="form-check-input" type="checkbox" value="" id="checkbox_custom_port_forwarding"
+                                    {% if pyview.custom_port_forwarding_enabled() %} checked {% endif %}
+                                    {% if pyview.subject.userapi.customPortForwardings.portforwardings | length > 0 %} disabled {% endif %}
+                                >
+                                <label class="form-check-label" for="checkbox_custom_port_forwarding"></label>
+                            </div>
                         </div>
-          
-                        </div>
-      
                     </h3>
                     <div>
                         Enable configurable port forwarding. 
@@ -104,12 +99,9 @@ class PortForwardingView(PyHtmlView):
                             If this option is enabled, you can configure up to five port forwardings from Perfect Privacy servers to your computer. The ports are set randomly on the server side.
                         </div>
                     </div>
-            
                     {% if pyview.custom_port_forwarding_enabled() == True %}
                         {{pyview.serverGroupView.render()}}
-                
                         <br>
-            
                         <table class="table">
                             <thead>
                                 <tr>
@@ -120,8 +112,7 @@ class PortForwardingView(PyHtmlView):
                                     <th scope="col"></th>
                                 </tr>
                             </thead>
-                            {{ pyview.custom_port_forwardings.render() }}
-                            
+                            {{ pyview.custom_port_forwardings.render() }}           
                         </table>
                         <div class="row">
                             <div class="col-6">Forward to local port</div>
@@ -141,7 +132,6 @@ class PortForwardingView(PyHtmlView):
                         </div>
                     {% endif %}
                 </section>
-            
                 {% if pyview.custom_port_forwarding_enabled() == True %}
                     <section>
                         <h3>
@@ -150,7 +140,6 @@ class PortForwardingView(PyHtmlView):
                         </h3>
                         <div>Automatically renew port forwarding after expiration</div>
                     </section>
-                    
                     <section>
                         <h3>
                             Email Notifications for Port Forwarding Renewal

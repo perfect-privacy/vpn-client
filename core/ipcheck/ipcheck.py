@@ -1,4 +1,5 @@
 import logging
+import time
 from datetime import datetime
 
 from .ipcheck_result import IPCheckerResult
@@ -65,16 +66,18 @@ class IpCheck(Observable):
                (self.result4.vpn_connected is True  and self.result6.vpn_connected is False)
 
     def _run_check(self):
+        for i in range(15):
+            if self.core.allow_webrequests() is True:
+                break
+            time.sleep(1)
         if self.core.allow_webrequests() is False:
             self.clear()
             return
-
 
         self.state = IPCheckerState.ACTIVE
         self.notify_observers()
         now = datetime.now().timestamp()
         try:
-
             self._ip_checker.check( expected_ipv4_addresses=self.core.vpnGroupPlanet.get_ipv4s(), expected_ipv6_addresses=self.core.vpnGroupPlanet.get_ipv6s(), result4=self.result4, result6=self.result6)
             self.last_successful_check.set(math.floor(now))
             self._check_timer.interval = int(self._check_timer.interval * 1.1)
@@ -82,11 +85,6 @@ class IpCheck(Observable):
                 self._check_timer.interval = self._max_check_interval_seconds
             return True
         except:
-            #import sys
-            #import traceback
-            #exc_type, exc_value, exc_traceback = sys.exc_info()
-            #tb = traceback.format_exception(exc_type, exc_value, exc_traceback, limit=2)
-            #self._logger.error("Stack trace: {stacktrace}".format(stacktrace=tb))
             self.last_failed_check.set(math.floor(now))
             self._check_timer.interval = self._err_check_interval_seconds
             return False

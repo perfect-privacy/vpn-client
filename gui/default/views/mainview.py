@@ -1,7 +1,4 @@
-from pyhtmlgui import PyHtmlView, ObservableListView
-
-#from .vpn_settings import VpnSettingsView
-from .public_ip import PublicIpView
+from pyhtmlgui import PyHtmlView
 from .stealth import StealthView
 from .port_forwarding import PortForwardingView
 from .preferences import PreferencesView
@@ -15,12 +12,13 @@ from ...common.components import SelectComponent
 
 class MainView(PyHtmlView):
     TEMPLATE_STR = '''
-        <script>
-            function confirm_exit(){
-                pyview.confirmExitModal.show()
-            }
+        <script> 
+            // is called by qt app, for example in reaction to osx menu exit button clicked.
+            function confirm_exit(){ 
+                pyview.confirmExitModal.show() 
+            } 
         </script>
-        {% set interface_level = pyview.subject.settings.interface_level.get() %}
+        
         <section id="sidebar">
             <div class="inner">
                 <div style="position:absolute;top:0px;width:100%">
@@ -31,12 +29,12 @@ class MainView(PyHtmlView):
                         <li><a href="#intro">Dashboard</a></li>
                         <li><a href="#trackstop">TrackStop</a></li>
                         <li><a href="#leakprotection">Leak Protection</a></li>
-                        {% if interface_level != "simple" %}
+                        {% if pyview.subject.settings.interface_level.get() != "simple" %}
                             <li><a href="#stealth">Stealth</a></li>
                             <li><a href="#portforwarding">Port Forwarding</a></li>
                         {% endif %}
                         <li><a href="#preferences">Preferences</a></li>
-                        {% if interface_level  == "expert" %}
+                        {% if pyview.subject.settings.interface_level.get()  == "expert" %}
                             <li><a href="#logs">Log</a></li>
                         {% endif %}
                     </ul>  
@@ -59,7 +57,7 @@ class MainView(PyHtmlView):
                 {{ pyview.leakprotection.render() }}
             </section>
 
-            {% if interface_level != "simple" %}
+            {% if pyview.subject.settings.interface_level.get() != "simple" %}
 
                 <section id="stealth" class="wrapper style1 fullheight fade-up">
                     {{ pyview.stealth.render() }}
@@ -75,18 +73,13 @@ class MainView(PyHtmlView):
                 {{ pyview.preferences.render() }}
             </section>
             
-            {% if interface_level == "expert" %}
+            {% if pyview.subject.settings.interface_level.get() == "expert" %}
                 <section id="logs" class="wrapper style2 fullheight fade-up">
                     {{ pyview.logs.render() }}
                 </section>
             {% endif %}
            
         </div>
-        <script>
-            function show_preferences(){
-                
-            }
-        </script>
         {{ pyview.confirmExitModal.render() }} 
     '''
 
@@ -97,8 +90,6 @@ class MainView(PyHtmlView):
         self.trackstop = TrackstopView(subject, self)
         self.leakprotection = LeakProtectionView(subject, self)
         self.portforwarding = PortForwardingView(subject, self)
-        self.publicIp = PublicIpView(subject, self)
-        #self.vpnsettings = VpnSettingsView(subject, self)
         self.stealth = StealthView(subject, self)
         self.preferences = PreferencesView(subject, self)
         self.logs = LogsView(subject, self)
@@ -106,7 +97,6 @@ class MainView(PyHtmlView):
         self.confirmExitModal = ConfirmExitModalView(subject, self)
         self.add_observable(self.subject.userapi.credentials_valid, self._on_subject_updated)
         self.add_observable(self.subject.settings.interface_level,  self._on_interface_level_updated)
-
         self.interface_level = SelectComponent(subject.settings.interface_level, self,
                                             options=[
                                                 ("simple"  , "Simple" ),
@@ -122,6 +112,3 @@ class MainView(PyHtmlView):
     def _on_interface_level_updated(self, source, **kwargs):
         self.update()
         self.eval_javascript("document.documentElement.scrollTop = 0;", skip_results=True)
-
-    def exit_frontend_app(self):
-        self.eval_javascript("exit_app()", skip_results=True)

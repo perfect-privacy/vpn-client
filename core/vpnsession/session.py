@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from pyhtmlgui import Observable, ObservableList
-from core.libs.web import reporter
 from threading import Thread, Event
 import traceback
 import random
@@ -172,7 +171,6 @@ class Session(Observable):
                                 except:
                                     self._logger.info("connecting failed, retrying in a few moments")
                                     self._logger.debug(traceback.format_exc())
-                                    reporter.report_error(traceback=traceback.format_exc())
                                     self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
                                     self._disconnect_all()
                                 else:
@@ -346,7 +344,6 @@ class Session(Observable):
         except:
             self._logger.critical("Unable to disconnect. This is a serious error! You may want to reboot your computer.")
             self._logger.debug(traceback.format_exc())
-            reporter.report_error(traceback=traceback.format_exc())
 
     def _connect_all(self):
         hop_number = 0

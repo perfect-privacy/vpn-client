@@ -22,7 +22,8 @@ class NetworkInterface():
                     return
 
         if len(dnsservers) == 0:
-            if set(sorted(self.dns_servers_v4 + self.dns_servers_v6)).issubset(self.all_ipv4_dns_servers + self.all_ipv6_dns_servers):
+            existing_servers = set(self.dns_servers_v4 + self.dns_servers_v6)
+            if len(existing_servers) > 0 and existing_servers.issubset(self.all_ipv4_dns_servers + self.all_ipv6_dns_servers):
                 return
             dnsservers = [random.choice(self.all_ipv4_dns_servers), random.choice(self.all_ipv4_dns_servers), random.choice(self.all_ipv6_dns_servers), random.choice(self.all_ipv6_dns_servers)]
 

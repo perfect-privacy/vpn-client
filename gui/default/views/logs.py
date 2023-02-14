@@ -6,14 +6,15 @@ import re
 class LogsView(PyHtmlView):
     TEMPLATE_STR = '''
         <div class="inner">
-            <h1>Internal Log</h1>
-            <p></p>
-            
+            <button style="float:right" onclick='pyview.copy_to_clipboard()'>To Clipboard</button>
+            <h1 style="float:left">
+                Internal Log
+            </h1>           
             <input id="filter_str" type="text" onkeyup="pyview.set_filter(document.getElementById('filter_str').value)" value="{{filter_str}}" placeholder="filter"> </input>
             <div  style="height:40em;overflow:auto;">
                 {{ pyview.log.render() }}
             </div>
-        </div> 
+        </div>  
     '''
 
     def __init__(self, subject, parent):
@@ -24,6 +25,12 @@ class LogsView(PyHtmlView):
         super(LogsView, self).__init__(subject, parent)
         self.log = ObservableListView(subject.global_logger.logs, self, filter_function=lambda x:self._filter(x), item_class=LogListItem)
         self.filter_str = ""
+
+    def copy_to_clipboard(self):
+        lines = []
+        for item in self.subject.global_logger.logs:
+            lines.append("%s | %s | %s" % (item.timestamp.split(" ")[1], item.name, item.message ))
+        self.eval_javascript("pyhtmlapp.copy_to_clipboard(args.lines)", skip_results=True, lines="\n".join(lines))
 
     def _filter(self, item): # element is removed by filter
         return (re.search(self.filter_str, item.subject.levelname, re.IGNORECASE) == None and
@@ -40,8 +47,11 @@ class LogsView(PyHtmlView):
 class LogListItem(PyHtmlView):
     DOM_ELEMENT = "div"
     TEMPLATE_STR = '''
-        {{pyview.subject.timestamp}}, {{pyview.subject.levelname}}, {{pyview.subject.name}}, {{pyview.subject.message}}
+        {{pyview.timestamp()}} | {{pyview.subject.name}} | {{pyview.subject.message}}
     '''
     def __init__(self, subject, parent):
         self._on_subject_updated = None  # logs don't change, so don't observe every entry
         super().__init__(subject, parent)
+
+    def timestamp(self):
+        return self.subject.timestamp.split(" ")[1]

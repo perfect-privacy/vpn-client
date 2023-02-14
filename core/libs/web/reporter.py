@@ -20,9 +20,7 @@ REPORT_TYPE_UPDATE = "update"
 
 
 class Reporter(object):
-    """
-    :type _system_information: daemon.os_specific.macos_system_information.MacOsSystemInformation
-    """
+
 
     REPORT_URL = "https://www.perfect-privacy.com/api/client.php"
 
@@ -33,7 +31,6 @@ class Reporter(object):
 
         self._reports = deque()
         # self._system_information = system_information
-        self._installation_id = installation_id
         self._client_version = client_version
         self._config_version = config_version
         self._report_file = report_file
@@ -165,65 +162,3 @@ class Reporter(object):
         self._report_thread.join()
         self._write_reports_to_disk()
 
-
-_reporter = None
-
-
-def init(installation_id, client_version, config_version, report_file):
-    global _reporter
-    _reporter = Reporter(
-        #system_information=system_information,
-        installation_id=installation_id,
-        client_version=client_version,
-        config_version=config_version,
-        report_file=report_file)
-
-
-def report_error(**kwargs):
-    _report(REPORT_TYPE_ERROR, kwargs)
-
-
-def report_crash(**kwargs):
-    _report(REPORT_TYPE_CRASH, kwargs)
-
-
-def report_install(**kwargs):
-    _report(REPORT_TYPE_INSTALL, kwargs)
-
-
-def report_uninstall(**kwargs):
-    _report(REPORT_TYPE_UNINSTALL, kwargs)
-
-
-def report_update(**kwargs):
-    _report(REPORT_TYPE_UPDATE, kwargs)
-
-
-def _report(report_type, meta_dict):
-    global _reporter
-    if _reporter:
-        _reporter.add_report(report_type, meta_dict)
-    else:
-        print("ERROR: ignored report (reporter not initialized)")
-
-
-def enable():
-    global _reporter
-    if _reporter:
-        _reporter.enable()
-    else:
-        print("ERROR: reporter not initialized")
-
-
-def disable():
-    global _reporter
-    if _reporter:
-        _reporter.disable()
-    else:
-        print("ERROR: reporter not initialized")
-
-
-def shutdown():
-    global _reporter
-    if _reporter:
-        _reporter.shutdown()

@@ -5,8 +5,6 @@ import logging
 from datetime import datetime
 import math
 import traceback
-
-from core.libs.web import reporter
 from core.libs.update.generic_updater import GenericUpdater
 from core.libs.update.updater_state   import UpdaterState
 from core.libs.web import SecureDownload, WebRequest
@@ -36,10 +34,9 @@ class SoftwareUpdater(GenericUpdater):
         if os.path.exists(os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME)):
             self.state.set(UpdaterState.UPDATER_STATE_READY_FOR_INSTALL)
             self.version_online = open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "r").read()
-    def _check_for_updates(self):
 
-        #if self.state.get()  == UpdaterState.UPDATER_STATE_READY_FOR_INSTALL:
-        #    self._logger.debug("No checking for software updates, update is available in disk")
+
+    def _check_for_updates(self):
         if self.state.get()  != UpdaterState.UPDATER_STATE_IDLE and self.state.get() != UpdaterState.UPDATER_STATE_READY_FOR_INSTALL:
             self._logger.debug("can not start a check for updates: not idle")
             return
@@ -89,7 +86,6 @@ class SoftwareUpdater(GenericUpdater):
         self.notify_observers()
 
 
-
     def _compare_version_numbers(self, new_version_number, old_version_number):
         new_split = new_version_number.split(".")
         old_split = old_version_number.split(".")
@@ -97,8 +93,6 @@ class SoftwareUpdater(GenericUpdater):
         if len(old_split) != len(new_split):
             # force update if the version numbers are not comparable or one of them is invalid
             self._logger.error("invalid version number: '{}' or '{}'".format(old_version_number, new_version_number))
-            reporter.report_error(
-                msg="invalid version number: '{}' or '{}'".format(old_version_number, new_version_number))
             return 1
 
         for i, new_part in enumerate(new_split):

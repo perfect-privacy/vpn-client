@@ -50,8 +50,6 @@ class IpsecConnection(VPNConnection):
                 '-Force' ,
         ]
         r = self.core.powershell.execute(" ".join(cmd))
-        print("foobar", r)
-
         cmd = ['Set-VpnConnectionIPsecConfiguration',
                '-ConnectionName'                  , '"%s"' % self.hop_name,
                 '-EncryptionMethod'                , 'AES256'   ,  # DES,DES3,AES128,AES192,AES256,GCMAES128, GCMAES256
@@ -78,8 +76,6 @@ class IpsecConnection(VPNConnection):
         self._logger.debug("Connecting Ipsec")
         output = self.core.powershell.execute('c:\\Windows\\system32\\rasdial.exe "%s" "%s" "%s"' % ( self.hop_name, self.core.settings.account.username.get(), self.core.settings.account.password.get())).strip()
         self._logger.debug("Ipsec connect output: %s" % output)
-
-        print(output)
 
     def _disconnect_device(self):
         self._logger.debug("Disconnecting Ipsec")

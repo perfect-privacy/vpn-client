@@ -58,17 +58,25 @@ class SelectComponentWithSelect(PyHtmlView):
 class CheckboxComponent(PyHtmlView):
     TEMPLATE_STR = '''
         <input 
-            onchange='pyview.subject.set($("#checkbox_{{ pyview.uid }}").prop("checked") === true)'  
+            onchange='pyview.set($("#checkbox_{{ pyview.uid }}").prop("checked") === true)'  
             class="form-check-input" type="checkbox" value="" id="checkbox_{{ pyview.uid }}" 
-            {% if pyview.subject.get() %} checked {% endif %}
+            {% if pyview.get() %} checked {% endif %}
         >
         <label class="form-check-label" for="checkbox_{{ pyview.uid }}">
            {{pyview.label}}
         </label>
     '''
-    def __init__(self, subject, parent, label = ""):
+    def __init__(self, subject, parent, label = "", inverted = False):
         super(CheckboxComponent, self).__init__(subject, parent)
+        self.inverted = inverted
         self.label = label
+
+    def get(self):
+        return not self.subject.get() if self.inverted is True else self.subject.get()
+
+    def set(self, value):
+        self.subject.set(not value) if self.inverted is True else self.subject.set(value)
+
 
 class TextinputComponent(PyHtmlView):
     TEMPLATE_STR = '''

@@ -35,7 +35,7 @@ class SelectServerModalView(Modal):
                 {% endfor %}
                 <input id="filter" type="text" value="{{pyview.filter}}" placeholder="Search" onkeyup='pyview.set_filter($("#filter").val())'></input>
 
-                <div style="overflow: auto;height: 85%;float:left; width:100%">        
+                <div style="overflow: auto;height: 90%;float:left; width:100%">        
                     {{pyview.current_list.render()}}
                 </div>
             </div>
@@ -160,15 +160,15 @@ class ServerListView(PyHtmlView):
 class ServerListsItemView(PyHtmlView):
     DOM_ELEMENT = None
     TEMPLATE_STR = '''
-        <tr id="{{pyview.uid}}" class="list_item {% if pyview.core.session.can_add_hop(pyview.subject) == false %}can_not_add{% endif %}{% if pyview.selected %}active{% endif %}"
+        <tr id="{{pyview.uid}}" style="line-height: 2em;" class="list_item {% if pyview.core.session.can_add_hop(pyview.subject) == false %}can_not_add{% endif %}{% if pyview.selected %}active{% endif %}"
             onclick   ='pyview.select()'
             ondblclick='pyview.add_hop()'
         >
-            <td>
-                <img src="/static/img/flags/flags-iso/flat/64/{{ pyview.subject.country_shortcodes.0 | upper}}.png" style="opacity:0.9">
+            <td style="line-height: 2em;" >
+                <img style="height:2.5em;margin-top:-4px;margin-bottom:-18px;" src="/static/img/flags/flags-iso/flat/64/{{ pyview.subject.country_shortcodes.0 | upper}}.png">
             </td>
             <td>
-                <h3>{{ pyview.subject.name|title }}</h3>
+                <b>{{ pyview.subject.name|title }}</b>
             </td>
             <td>
                 {{ pyview.subject.bandwidth_max }} Mbit
@@ -178,14 +178,14 @@ class ServerListsItemView(PyHtmlView):
             </td>
             <td>
                 {% if pyview.core.favourites.contains(pyview.subject.identifier) == false %}
-                    <i class="fa fa-star-o" style="font-size:1.5em;" onclick="event.stopPropagation();pyview.add_to_favourites();"></i>
+                    <i class="fa fa-star-o" style="font-size:1.5em;padding-top:0.25em" onclick="event.stopPropagation();pyview.add_to_favourites();"></i>
                 {% else %}
-                    <i class="fa fa-star" style="font-size:1.5em;color:#ffff1d" onclick="event.stopPropagation();pyview.remove_from_favourites();"></i>
+                    <i class="fa fa-star" style="font-size:1.5em;padding-top:0.25em;color:#ffff1d" onclick="event.stopPropagation();pyview.remove_from_favourites();"></i>
                 {% endif %}
             </td>
             {% if pyview.subject.subitems %}
                 <td>
-                    <i class="fa fa-arrow-right" style="font-size:1.5em;" onclick="event.stopPropagation();pyview.open_subitem();"></i>
+                    <i class="fa fa-arrow-right" style="font-size:1.5em;padding-top:0.25em" onclick="event.stopPropagation();pyview.open_subitem();"></i>
                 </td> 
             {% else %}
                 <td></td> 
