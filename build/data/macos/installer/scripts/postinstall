@@ -13,4 +13,7 @@ launchctl load /Library/LaunchDaemons/perfect-privacy-service.plist
 while [ "1$(launchctl list|grep com.perfect-privacy.service|cut -f1)" -eq 0 ]; do
   sleep 1  # wait for service to start
 done
+
+su "$USER" -c "open /Applications/Perfect\ Privacy.app"
+
 echo "Post installation process finished"
