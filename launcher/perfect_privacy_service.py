@@ -101,7 +101,7 @@ if __name__ == "__main__":
                 linuxDaemon  = LinuxDaemon()
                 linuxDaemon.from_commandline()
 
-            if PLATFORM == PLATFORMS.windows: # if we are launched on windows, without parameters and as admin we asume we are the windows service
+            if PLATFORM == PLATFORMS.windows: # if we are launched on windows, without parameters we asume we are the windows service
                 from launcher.services.windows_service import Windows_Service
                 import servicemanager
                 import win32serviceutil
@@ -115,6 +115,6 @@ if __name__ == "__main__":
         if getattr(sys, 'frozen', False) == True:  # check if we are bundled by pyinstaller
             exc_type, exc_value, exc_traceback = sys.exc_info()
             tb = traceback.format_exception(exc_type, exc_value, exc_traceback)
-            open("crash.log","w").write("%s" % tb)
+            open("crash.log","a").write("%s" % tb)
         else:
             raise e
