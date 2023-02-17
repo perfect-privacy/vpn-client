@@ -1,4 +1,5 @@
 import os, sys
+import subprocess
 
 import psutil
 from PyQt5.QtCore import Qt
@@ -7,23 +8,21 @@ from config.config import SHARED_SECRET, PLATFORM, SERVICE_PORT
 from config.constants import PLATFORMS
 from config.paths import APP_DIR
 
-PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))
+PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 CRASHLOG = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
-
 
 
 ERROR_PAGE = '''
     <div style="text-align:center;color:gray">
         <h3>
             <br><br>
-            failed to connect to vpn background service  <br><br>
+            Failed to connect to VPN background service  <br><br>
             :( <br><br>
-            retrying in a few seconds <br> <br>
-            %s  <br> <br>
+            %s<br><br>
             <button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" 
                 onclick="pyhtmlapp.__default_exit_qtapp()">EXIT NOW
-            </button>
-            
+            </button><br>
+            Retrying in a few seconds <br> <br>            
         </h3>
     </div>
 '''
@@ -73,7 +72,13 @@ class MainApp():
         self.app.stop()
 
     def open_crashlog(self, *args):
-        pass
+        crashlog = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
+        if PLATFORM == PLATFORMS.macos:  # macOS
+            subprocess.call(('open', crashlog))
+        elif PLATFORM == PLATFORMS.windows:  # Windows
+            os.startfile(crashlog)
+        else:  # linux variants
+            subprocess.call(('xdg-open', crashlog))
 
 class StartupCheckerWin():
 
@@ -84,6 +89,7 @@ class StartupCheckerWin():
         return False, msg
 
     def check_service_exe(self):
+        print(os.path.join(PROJECT_ROOT_DIRECTORY, "perfect-privacy-service.exe"))
         return os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, "perfect-privacy-service.exe"))
 
     def check_service_installed(self):
@@ -101,17 +107,19 @@ class StartupCheckerWin():
     def get_error_msg(self):
         errormsg = None
         if self.check_service_exe() == False:
-            errormsg = "Some installation files are missing, please make sure they have not been quarantined by your anti virus software."
+            errormsg = "Some installation files are missing, make sure they have not been quarantined by your anti virus software.<br> Please reinstall Perfect Privacy"
         elif self.check_service_installed() == False:
-            errormsg = "The VPN background service is not installed, make sure it has not been blocked by your anti virus software"
+            errormsg = "The VPN background service is not installed, make sure it has not been blocked by your anti virus software.<br> Please reinstall Perfect Privacy"
         elif self.check_service_running() == False:
             if os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")):
-                errormsg = 'The VPN background service apparently crashed, but left a crash log.' \
+                errormsg = 'The VPN background service apparently crashed, and left a crash log.<br>' \
                            '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" ' \
                            'onclick="pyhtmlapp.open_crashlog()">Open crash.log</button>'
 
             else:
-                errormsg = "The VPN background service is not running, but no reason is apparent. Please try restarting your computer, or reinstall Perfect Privacy. If all else fails, please contact Perfect Privacy support"
+                errormsg = "The VPN background service is not running, but no reason is apparent. <br>" \
+                           "Please try restarting your computer, or reinstall Perfect Privacy.<br>" \
+                           "If all else fails, please contact Perfect Privacy support"
         return errormsg
 
 

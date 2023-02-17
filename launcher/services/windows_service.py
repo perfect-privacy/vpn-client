@@ -16,7 +16,7 @@ service_name = "Perfect Privacy VPN"
 service_displayname = service_name + " core"
 service_description = service_name + " core service"
 
-PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))
+PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 CRASHLOG = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
 
 
