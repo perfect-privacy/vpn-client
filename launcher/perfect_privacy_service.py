@@ -1,13 +1,13 @@
 import os, sys
 import subprocess
 import traceback
-
-from config.config import APP_VERSION
-
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
+CRASHLOG = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
+
 try:
+    from config.config import APP_VERSION
     from config.files import PLATFORMS,PLATFORM, SOFTWARE_UPDATE_FILENAME
     from config.paths import SOFTWARE_UPDATE_DIR
     from gui import getPyHtmlGuiInstance
@@ -15,7 +15,8 @@ except:
     if getattr(sys, 'frozen', False) == True:  # check if we are bundled by pyinstaller
         exc_type, exc_value, exc_traceback = sys.exc_info()
         tb = traceback.format_exception(exc_type, exc_value, exc_traceback)
-        open("crash.log", "w").write("%s" % tb)
+        with open(CRASHLOG, "a") as f:
+            f.write("%s" % tb)
         os._exit(1)
 
 
@@ -72,8 +73,8 @@ def check_install_autoupdate():
 
 if __name__ == "__main__":
     try:
-        if os.path.exists("crash.log"):
-            os.remove("crash.log")
+        if os.path.exists(CRASHLOG):
+            os.remove(CRASHLOG)
 
         try:
             option = sys.argv[1]
@@ -115,6 +116,7 @@ if __name__ == "__main__":
         if getattr(sys, 'frozen', False) == True:  # check if we are bundled by pyinstaller
             exc_type, exc_value, exc_traceback = sys.exc_info()
             tb = traceback.format_exception(exc_type, exc_value, exc_traceback)
-            open("crash.log","a").write("%s" % tb)
+            with open(CRASHLOG, "a") as f:
+                f.write("%s" % tb)
         else:
             raise e

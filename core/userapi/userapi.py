@@ -149,8 +149,10 @@ class UserAPI(Observable):
             self._logger.error("invalid response: API didn't return valid JSON")
 
             raise UserAPIError()
-
-        self._logger.debug("response: {}".format(response_dict))
+        to_print = {}
+        to_print.update(response_dict)
+        response_dict["validUntil"] = "--replaced--"
+        self._logger.debug("response: {}".format(to_print))
 
         return payload, response_dict
 

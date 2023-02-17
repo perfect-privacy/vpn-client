@@ -21,9 +21,11 @@ if getattr( sys, 'frozen', False ) == True:  # check if we are bundled by pyinst
     if "REPLACE_TOKEN_ON_POST_INSTALL" in content:
         new_secret = "%s" % uuid.uuid4()
         content = content.replace("REPLACE_TOKEN_ON_POST_INSTALL", new_secret)
-        open(RUNTIME_CONF, "w").write(content)
-        SHARED_SECRET = new_secret
-
+        try:
+            open(RUNTIME_CONF, "w").write(content)
+            SHARED_SECRET = new_secret
+        except:
+            print("Failed to write config")
 
 RELEASE_CONF_DATA = {}
 for key, value in [line.split("=") for line in open(RELEASE_CONF, "r").read().strip().split("\n") if "=" in line ]:
