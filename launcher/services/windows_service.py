@@ -1,5 +1,6 @@
-import time
-import socket
+import time, os, sys
+import traceback
+
 from core.core import Core
 import win32serviceutil
 import servicemanager
@@ -14,6 +15,9 @@ from gui import getPyHtmlGuiInstance
 service_name = "Perfect Privacy VPN"
 service_displayname = service_name + " core"
 service_description = service_name + " core service"
+
+PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))
+CRASHLOG = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
 
 
 class Windows_Service(win32serviceutil.ServiceFramework):
@@ -42,22 +46,36 @@ class Windows_Service(win32serviceutil.ServiceFramework):
         self.main()
 
     def start(self):
-        self.logger = Logger(quiet=True)
-        self.core = Core(self.logger)
-        self.gui = getPyHtmlGuiInstance(
-            frontend = FRONTEND,
-            appInstance = self.core,
-            on_frontend_ready = self.core.on_frontend_ready,
-            on_frontend_exit  = self.core.on_frontend_exit,
-        )
-        self.gui.start(show_frontend=False, block=False)
-        self.isrunning = True
+        try:
+            self.logger = Logger(quiet=True)
+            self.core = Core(self.logger)
+            self.gui = getPyHtmlGuiInstance(
+                frontend = FRONTEND,
+                appInstance = self.core,
+                on_frontend_ready = self.core.on_frontend_ready,
+                on_frontend_exit  = self.core.on_frontend_exit,
+            )
+            self.gui.start(show_frontend=False, block=False)
+            self.isrunning = True
+        except Exception as e:
+            self.isrunning = False
+            self.gui.stop()
+            if getattr(sys, 'frozen', False) == True:  # check if we are bundled by pyinstaller
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                tb = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                with open(CRASHLOG, "a") as f:
+                    f.write("%s" % tb)
+            else:
+                raise e
 
     def stop(self):
-        self.core.quit()
-        for endpoint in self.gui._endpoints.values():
-            for instance in endpoint._gui_instances:
-                instance.call_javascript("exit_app()", args=[], skip_results=True)
+        try:
+            self.core.quit()
+            for endpoint in self.gui._endpoints.values():
+                for instance in endpoint._gui_instances:
+                    instance.call_javascript("exit_app()", args=[], skip_results=True)
+        except:
+            pass
         self.gui.stop()
         self.isrunning = False
 

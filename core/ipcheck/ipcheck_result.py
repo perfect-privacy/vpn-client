@@ -57,7 +57,4 @@ class IPCheckerResult(Observable):
         return not self.__eq__(other)
 
     def __repr__(self):
-        return "IPCheckerResult(vpn_connected={vpn_connected}, public_ip={public_ip}, public_rdns={public_rdns}, public_city={public_city}, public_country={public_country})".format(
-            vpn_connected=self.vpn_connected, public_ip=self.public_ip,
-            public_rdns=self.public_rdns, public_city=self.public_city,
-            public_country=self.public_country)
+        return "IPCheckerResult(connected={vpn_connected})".format(vpn_connected=self.vpn_connected,)

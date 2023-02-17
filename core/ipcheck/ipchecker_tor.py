@@ -17,5 +17,4 @@ class TorIPChecker(GenericIPChecker):
 
         except:
             self._logger.error("invalid response: malformed HTML")
-            self._logger.debug("response was: {}".format(response.content))
             raise ApiMalfunctionError("invalid response")
