@@ -3,6 +3,7 @@ import time
 
 from pyhtmlgui import PyHtmlView, ObservableListView
 
+from config.constants import VPN_PROTOCOLS
 from .modals.confirm_logout import ConfirmLogoutModalView
 from .modals.select_server import SelectServerModalView
 
@@ -168,7 +169,7 @@ class HopListView(PyHtmlView):
                 <button  onclick='pyview.core.session.connect()' style="background-color:#33c533a6">Connect</button>
             {% endif %}
         {% endif %}
-        {% if pyview.core.session.hops | length < pyview.core.settings.vpn.openvpn.cascading_max_hops.get()  %}
+        {% if pyview.can_add_server()  %}
             <button  onclick='pyview.parent.select_server_modal.show()'>Add Server</button>
         {% endif %}  <!---  if pyview.core.session._should_be_connected.get() == false and ---->
     '''
@@ -183,8 +184,17 @@ class HopListView(PyHtmlView):
 
         self.add_observable(self.core.session)
         self.add_observable(self.core.session.hops)
+        self.add_observable(self.core.settings.vpn.vpn_protocol)
         self.add_observable(self.core.settings.vpn.openvpn.cascading_max_hops)
         self.items = ObservableListView(subject, self, HopListItemView, dom_element="tbody")
+
+    def can_add_server(self):
+        if self.core.settings.vpn.vpn_protocol.get() == VPN_PROTOCOLS.openvpn:
+            max_hops = self.core.settings.vpn.openvpn.cascading_max_hops.get()
+        else:
+            max_hops = 1
+        return len(self.core.session.hops) < max_hops
+
 
 
 class HopListItemView(PyHtmlView):

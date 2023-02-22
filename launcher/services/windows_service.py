@@ -9,6 +9,7 @@ import win32service
 
 from config.config import FRONTEND
 from core.libs.logger import Logger
+from core.libs.web.reporter import ReporterInstance
 
 from gui import getPyHtmlGuiInstance
 
@@ -58,15 +59,8 @@ class Windows_Service(win32serviceutil.ServiceFramework):
             self.gui.start(show_frontend=False, block=False)
             self.isrunning = True
         except Exception as e:
-            self.isrunning = False
-            self.gui.stop()
-            if getattr(sys, 'frozen', False) == True:  # check if we are bundled by pyinstaller
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                tb = traceback.format_exception(exc_type, exc_value, exc_traceback)
-                with open(CRASHLOG, "a") as f:
-                    f.write("%s" % tb)
-            else:
-                raise e
+            ReporterInstance.report("service_start_crash", "%s" % traceback.format_exception(*sys.exc_info()))
+            self.stop()
 
     def stop(self):
         try:

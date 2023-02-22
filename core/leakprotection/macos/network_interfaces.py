@@ -80,7 +80,6 @@ class NetworkInterfaces():
                         elif "." in line:
                             ni.dns_servers_v4.append(line.strip())
 
-
     def enableDnsLeakProtection(self):
         self._load()
         for interface in self.networkinterfaces:

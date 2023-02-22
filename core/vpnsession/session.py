@@ -379,12 +379,7 @@ class Session(Observable):
             if hop.connection.state.get() != VpnConnectionState.CONNECTED:
                 self._logger.error("Couldn't connect within {} seconds".format(CONNECT_TIMEOUT))
                 raise VPNConnectionError()
-
-            highest_connected_hop = [hop for hop in self.hops if hop.connection is not None and hop.connection.state.get() == VpnConnectionState.CONNECTED][-1]
-            if highest_connected_hop.connection.ipv4_local_ip is not None:
-                highest_hop_ipv4 = highest_connected_hop.connection.ipv4_local_ip
-                highest_hop_ipv6 = highest_connected_hop.connection.ipv6_local_ip
-                self.core.leakprotection.set_highest_hop_local_ip(highest_hop_ipv4, highest_hop_ipv6)
+            self.core.leakprotection.update_async()
 
     def _wait_for_state_change(self, sender, new_state, **kwargs):
         self._connecting_state_changed_event.set()

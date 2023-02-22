@@ -2,6 +2,7 @@ import logging
 import os
 import ipaddress
 from core.libs.subcommand import SubCommand
+from config.files import NETSH, ROUTE
 
 class UpDown_Generic():
     def __init__(self, openvpnConnection):
@@ -24,33 +25,33 @@ class UpDown_Generic():
         gateway = self.find_gateway(gw_mask)
 
         if gateway is not None:
-            self.add_route_ipv4(source_ip=self.openvpnConnection.external_host_ip, source_mask="255.255.255.255", target=gateway)
+            self.add_route_ipv4(source_ip=self.openvpnConnection.external_host_ip, source_mask="255.255.255.255", target=gateway, device="")
         else:
             self._logger.error("No gateway found for hop %s" % self.openvpnConnection.hop_number)
 
         if self.openvpnConnection.ipv4_remote_gateway is not None:
             for i in range(0, 223, v4_mask):
-                self.add_route_ipv4(source_ip="%s.0.0.0" % i, source_mask="%s.0.0.0" % (256-v4_mask), target=self.openvpnConnection.ipv4_remote_gateway)
+                self.add_route_ipv4(source_ip="%s.0.0.0" % i, source_mask="%s.0.0.0" % (256-v4_mask), target=self.openvpnConnection.ipv4_remote_gateway, device=self.openvpnConnection.openvpn_device)
         else:
             self._logger.error("No ipv4_remote_gateway found for hop %s" % self.openvpnConnection.hop_number)
 
         for i in range(0x2000,0x3800,v6_mask):
-            self.add_route_ipv6(source_ip="%s::" % format(i,"x"), source_mask=3+self.openvpnConnection.hop_number, target="fe80::8", openvpn_device=self.openvpnConnection.openvpn_device)
+            self.add_route_ipv6(source_ip= "%s::" % format(i,"x"), source_mask=3+self.openvpnConnection.hop_number, target="fe80::8", device=self.openvpnConnection.openvpn_device)
 
     def down(self):
         self._logger.debug("Down")
 
         gw_mask, v4_mask, v6_mask = self.gateway_data[self.openvpnConnection.hop_number]
-        self.delete_route_ipv4(source_ip=self.openvpnConnection.external_host_ip, source_mask="255.255.255.255")
+        self.delete_route_ipv4(source_ip= self.openvpnConnection.external_host_ip, source_mask= "255.255.255.255")
 
         if self.openvpnConnection.ipv4_remote_gateway is not None:
             for i in range(0, 223, v4_mask):
-                self.delete_route_ipv4(source_ip="%s.0.0.0" % i, source_mask="%s.0.0.0" % (256-v4_mask), target=self.openvpnConnection.ipv4_remote_gateway)
+                self.delete_route_ipv4(source_ip="%s.0.0.0" % i, source_mask="%s.0.0.0" % (256-v4_mask), target=self.openvpnConnection.ipv4_remote_gateway, device=self.openvpnConnection.openvpn_device)
         else:
             self._logger.error("No ipv4_remote_gateway found for hop %s" % self.openvpnConnection.hop_number)
 
-        for i in range(0x2000,0x3800,v6_mask):
-            self.delete_route_ipv6(source_ip="%s::" % format(i,"x"), source_mask=3+self.openvpnConnection.hop_number, target="fe80::8", openvpn_device=self.openvpnConnection.openvpn_device)
+        for i in range(0x2000, 0x3800, v6_mask):
+            self.delete_route_ipv6(source_ip="%s::" % format(i,"x"), source_mask=3+self.openvpnConnection.hop_number, target="fe80::8", device=self.openvpnConnection.openvpn_device)
 
     def _is_ip(self, str):
         try:
@@ -63,16 +64,16 @@ class UpDown_Generic():
     def find_gateway(self, netmask_search):
         raise NotImplementedError()
 
-    def add_route_ipv4(self, source_ip, source_mask, target):
+    def add_route_ipv4(self, source_ip, source_mask, target, device = ""):
         raise NotImplementedError()
 
-    def add_route_ipv6(self, source_ip, source_mask, target, openvpn_device = ""):
+    def add_route_ipv6(self, source_ip, source_mask, target, device = ""):
         raise NotImplementedError()
 
-    def delete_route_ipv4(self, source_ip, source_mask, target = ""):
+    def delete_route_ipv4(self, source_ip, source_mask, target = "", device= ""):
         raise NotImplementedError()
 
-    def delete_route_ipv6(self, source_ip, source_mask, target = "", openvpn_device = ""):
+    def delete_route_ipv6(self, source_ip, source_mask, target = "", device = ""):
         raise NotImplementedError()
 
 
@@ -96,31 +97,35 @@ class UpDown_Windows(UpDown_Generic):
                 return gateway
         return None
 
-    def add_route_ipv4(self, source_ip, source_mask, target):
-        success, stdout, stderr = SubCommand().run("route", ["add", source_ip, "mask", source_mask, target ])
+    def add_route_ipv4(self, source_ip, source_mask, target, device = ""):
+        args = ["ADD", source_ip, "MASK", source_mask, target ]
+        if device != "" and device is not None:
+            args.extend(["IF", device])
+        success, stdout, stderr = SubCommand().run(ROUTE, args)
 
-    def add_route_ipv6(self, source_ip, source_mask, target, openvpn_device = ""):
-        args = [ "interface", "ipv6", "add", "route", "%s/%s" % (source_ip, source_mask)  ]
-        if openvpn_device != "" and openvpn_device is not None:
-            args.append("interface=%s" % openvpn_device)
-        args.append(target)
+    def add_route_ipv6(self, source_ip, source_mask, target, device = ""):
+        args = [ "interface", "ipv6", "add", "route", "%s/%s" % (source_ip, source_mask) , target ]
+        if device != "" and device is not None:
+            args.append("interface=%s" % device)
         args.append("store=active")
-        success, stdout, stderr = SubCommand().run("netsh.exe", args)
+        success, stdout, stderr = SubCommand().run(NETSH, args)
 
-    def delete_route_ipv4(self, source_ip, source_mask, target = ""):
-        args = [ "delete", source_ip, "mask", source_mask]
+    def delete_route_ipv4(self, source_ip, source_mask, target = "", device = ""):
+        args = [ "DELETE", source_ip, "MASK", source_mask]
         if target != "" and target is not None:
             args.append(target)
-        success, stdout, stderr = SubCommand().run("route", args)
+        if device != "" and device is not None:
+            args.extend(["IF", device])
+        success, stdout, stderr = SubCommand().run(ROUTE, args)
 
-    def delete_route_ipv6(self, source_ip, source_mask, target = "", openvpn_device = ""):
+    def delete_route_ipv6(self, source_ip, source_mask, target = "", device = ""):
         args = [ "interface", "ipv6", "delete", "route", "%s/%s" % (source_ip, source_mask)]
-        if openvpn_device != "" and openvpn_device is not None:
-            args.append("interface=%s" % openvpn_device)
         if target != "" and target is not None:
             args.append(target)
+        if device != "" and device is not None:
+            args.append("interface=%s" % device)
         args.append("store=active")
-        success, stdout, stderr = SubCommand().run("netsh.exe", args)
+        success, stdout, stderr = SubCommand().run(NETSH, args)
 
 
 class UpDown_Macos(UpDown_Generic):
@@ -151,31 +156,38 @@ class UpDown_Macos(UpDown_Generic):
                 return gateway
         return None
 
-    def add_route_ipv4(self, source_ip, source_mask, target):
+    def add_route_ipv4(self, source_ip, source_mask, target, device = ""):
         source_mask = ipaddress.IPv4Network('0.0.0.0/%s' % source_mask).prefixlen
-        success, stdout, stderr = SubCommand().run("route", ["-n", "add", "-net", "%s/%s" % (source_ip, source_mask), target])
+        args =  ["-n", "add", "-net", "%s/%s" % (source_ip, source_mask)]
+        if device != "" and device != None:
+            args.extend(["-iface", device])
+        args.append(target)
+        success, stdout, stderr = SubCommand().run("route", args)
 
-    def add_route_ipv6(self, source_ip, source_mask, target, openvpn_device = ""):
+    def add_route_ipv6(self, source_ip, source_mask, target, device = ""):
         #/sbin/route add -inet6 2000::/4 -iface utun2
-        if openvpn_device is None:
+        if device is None:
             self._logger.debug("No OpenVPN device, no adding ipv6 route")
             return
-        success, stdout, stderr = SubCommand().run("route", ["-n", "add", "-inet6", "%s/%s" % (source_ip, source_mask),"-iface" ,openvpn_device])
-        self._logger.debug("add_route_ipv6 %s %s %s %s" % ( source_ip, source_mask, target, openvpn_device))
+        success, stdout, stderr = SubCommand().run("route", ["-n", "add", "-inet6", "%s/%s" % (source_ip, source_mask),"-iface" ,device])
+        self._logger.debug("add_route_ipv6 %s %s %s %s" % ( source_ip, source_mask, target, device))
 
-    def delete_route_ipv4(self, source_ip, source_mask, target = ""):
+    def delete_route_ipv4(self, source_ip, source_mask, target = "", device = ""):
         source_mask = ipaddress.IPv4Network('0.0.0.0/%s' % source_mask).prefixlen
         args = ["-n", "delete", "-net", "%s/%s" % (source_ip, source_mask)]
+        if device != "" and device != None:
+            args.extend(["-iface" ,device])
         if target != "":
             args.append(target)
         success, stdout, stderr = SubCommand().run("route", args)
 
-    def delete_route_ipv6(self, source_ip, source_mask, target = "", openvpn_device = ""):
-        if openvpn_device is None:
+    def delete_route_ipv6(self, source_ip, source_mask, target = "", device = ""):
+        if device is None:
             self._logger.debug("No OpenVPN device, no deleting ipv6 route")
             return
-        success, stdout, stderr = SubCommand().run("route", ["-n", "delete", "-inet6", "%s/%s" % (source_ip, source_mask),"-iface" ,openvpn_device])
-        self._logger.debug("delete_route_ipv6 %s %s %s %s" % (source_ip, source_mask, target, openvpn_device))
+        args = ["-n", "delete", "-inet6", "%s/%s" % (source_ip, source_mask),"-iface" ,device]
+        success, stdout, stderr = SubCommand().run("route", args)
+        self._logger.debug("delete_route_ipv6 %s %s %s %s" % (source_ip, source_mask, target, device))
 
 
 class UpDown_Linux(UpDown_Generic):

@@ -33,7 +33,6 @@ class VPNServerConfig(object):
         self.block_p2p = False
 
 
-
     @property
     def all_ips(self):
         return [self.primary_ipv4] + self.alternative_ipv4
@@ -91,7 +90,6 @@ class VPNServerConfig(object):
         self.dns_ipv6          = server_data["dns_ipv6"]
         self.ssh_fingerprint   = server_data["ssh_fingerprint"]
         self.block_p2p         = server_data["block_p2p"]
-
 
 
     def __str__(self):

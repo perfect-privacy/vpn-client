@@ -1,164 +1,110 @@
 import logging
-import traceback
-from collections import deque
-from threading import Thread, Event, Timer
+import time
+from threading import Thread, Event
 import json
+import uuid
 import os
-from datetime import datetime
+from pathlib import Path
+import platform
+import requests
+try:
+    from config.config import BRANCH
+except:
+    BRANCH = "release"
+try:
+    from config.config import APP_VERSION, BRANCH, APP_BUILD
+except:
+    APP_VERSION, BRANCH, APP_BUILD = "unknown", "release", "0"
 
-import requests.exceptions as request_exceptions
-
-from config.config import BRANCH
-from config.constants import BRANCHES
-from .webrequest import WebRequest
-
-REPORT_TYPE_ERROR = "error"
-REPORT_TYPE_CRASH = "crash"
-REPORT_TYPE_INSTALL = "install"
-REPORT_TYPE_UNINSTALL = "uninstall"
-REPORT_TYPE_UPDATE = "update"
+REPORT_URL = "https://www.perfect-privacy.com/api/client.php"
+REPORT_FILE = os.path.join(Path.home(),".perfect_privacy.reports")
+INSTALL_ID  = os.path.join(Path.home(),".perfect_privacy.instid")
 
 
-class Reporter(object):
-
-
-    REPORT_URL = "https://www.perfect-privacy.com/api/client.php"
-
-    def __init__(self, installation_id, client_version, config_version, report_file):
+class Reporter():
+    def __init__(self):
+        self.reports = []
+        self.reports_send = 0
         self._logger = logging.getLogger(self.__class__.__name__)
-        if BRANCH != BRANCHES.dev:
-            self._logger.propagate = False
-
-        self._reports = deque()
-        # self._system_information = system_information
-        self._client_version = client_version
-        self._config_version = config_version
-        self._report_file = report_file
-        self._retry_timer = None
-
-        self._read_reports_from_disk()
-
-        self._is_running = True
-        self._cancel_pause_event = Event()
+        self.installation_id = "%s" % uuid.uuid4()
+        try:
+            with open(INSTALL_ID, "r") as f:
+                self.installation_id = f.read()
+        except:
+            try:
+                with open(INSTALL_ID, "w") as f:
+                    f.write(self.installation_id)
+            except:
+                pass
+        self.from_disk()
+        self._enabled = True
         self._wakeup_event = Event()
         self._report_thread = Thread(target=self._report_thread_run, daemon=True)
         self._report_thread.start()
+        if len(self.reports) > 0:
+            self._wakeup_event.set()
 
-    def enable(self):
-        self._logger.debug("enabling")
-        self._cancel_pause_event.set()
-        self._wakeup_event.set()
-
-    def disable(self):
-        self._logger.debug("disabling")
-        self._cancel_pause_event.clear()
-        self._wakeup_event.set()
-
-    def _report_thread_run(self):
-        while self._is_running:
-            self._logger.debug("waiting...")
-            self._cancel_pause_event.wait()
-            self._wakeup_event.wait()
-            self._wakeup_event.clear()
-
-            if not self._is_running or not self._cancel_pause_event.is_set():
-                continue
-
-            report_to_send = None
-            try:
-                report_to_send = self._reports.pop()
-                self._send_report(report_to_send)
-                if len(self._reports) > 0:
-                    self._wakeup_event.set()
-            except IndexError:  # no reports in list
-                continue
-            except request_exceptions.RequestException:
-                self._logger.debug("reporting failed, retry in 10 seconds")
-                if report_to_send:
-                    self._reports.append(report_to_send)
-                if self._retry_timer:
-                    self._retry_timer.cancel()
-                self._retry_timer = Timer(10, self._wakeup_event.set)
-                self._retry_timer.start()
-                continue
-            except:
-                self._logger.debug("reporting failed: unexpected exception")
-                self._logger.debug(traceback.format_exc())
-                if report_to_send:
-                    self._reports.append(report_to_send)
-                continue
-
-    def _send_report(self, report):
-        self._logger.debug("reporting: {}".format(report))
-        if BRANCH == BRANCHES.dev:
-            self._logger.info("report cancelled: DEV system")
-            return
-        r = WebRequest().post(url=self.REPORT_URL, data=report)
-        r.raise_for_status()
-        return r
-
-    def add_report(self, report_type, meta_dict=None):
-        if not meta_dict:
-            meta_dict = {}
-        meta_dict["timestamp"] = round(datetime.now().timestamp(), 3)
-        meta_dict["openvpn_version"] = 23 # TODO self._system_information.openvpn_version_number
-        meta_dict["openssh_version"] = 23 # TODO self._system_information.openssh_version_number
+    def report(self, name, data = '', noid = False):
         report = {
-            "id": self._installation_id,
-            "osversion": "macOS {}".format(23), # TODO self._system_information.system_version_number),
-            "clientversion": self._client_version,
-            "configversion": self._config_version,
-            "action": report_type,
-            "meta": json.dumps(meta_dict)
+            "id":  "" if noid is True else self.installation_id,
+            "osversion": " ; ".join(platform.system_alias(platform.system(), platform.release(), "" if noid is True else platform.version())),
+            "clientversion": " ; ".join([APP_VERSION, BRANCH, APP_BUILD]),
+            "configversion": "",
+            "action": name,
+            "meta": json.dumps(data)
         }
-        self._logger.debug("added report: {}".format(report))
-        self._reports.appendleft(report)
+        if BRANCH != "release":
+            self._logger.error(report)
+            return
+        self.reports.append(report)
+        self.to_disk()
         self._wakeup_event.set()
 
-    def _read_reports_from_disk(self):
-        return # FIXME
-        filed_reports = []
+    def to_disk(self):
         try:
-            if os.path.exists(self._report_file):
-                with open(self._report_file, "r") as f:
-                    filed_reports = json.load(f)
-                os.remove(self._report_file)
-        except:
-            self._logger.debug("an error occurred while reading the reports from disk")
-            self._logger.debug(traceback.format_exc())
-        for report in filed_reports:
-            try:
-                new_report = {
-                    "id": report["id"],
-                    "osversion": report["osversion"],
-                    "clientversion": report["clientversion"],
-                    "configversion": report["configversion"],
-                    "action": report["action"],
-                    "meta": report["meta"]
-                }
-                self._reports.append(new_report)
-            except:
-                self._logger.debug("can not restore invalid report")
-
-    def _write_reports_to_disk(self):
-        if len(self._reports) > 0:
-            try:
-                with open(self._report_file, "w") as f:
-                    json.dump(list(self._reports), f)
-            except:
-                self._logger.debug("an error occurred while writing the reports to disk")
-                self._logger.debug(traceback.format_exc())
-
-    def shutdown(self):
-        self._is_running = False
-        try:
-            if self._retry_timer:
-                self._retry_timer.cancel()
-                self._retry_timer.join()
+            d = json.dumps({
+                "reports" : self.reports,
+                "reports_send" : self.reports_send
+            })
+            with open(REPORT_FILE, "w") as f:
+                f.write(d)
         except:
             pass
-        self._cancel_pause_event.set()
+
+    def from_disk(self):
+        try:
+            with open(REPORT_FILE, "r") as f:
+                d = json.loads(f.read())
+                self.reports = d["reports"]
+                self.reports_send = d["reports_send"]
+        except:
+            pass
+
+    def shutdown(self):
+        if len(self.reports) > 0:
+            self._wakeup_event.set()
+            time.sleep(3)
+        self._enabled = False
         self._wakeup_event.set()
         self._report_thread.join()
-        self._write_reports_to_disk()
 
+    def _report_thread_run(self):
+        while self._enabled:
+            self._wakeup_event.wait()
+            self._wakeup_event.clear()
+            if not self._enabled:
+                break
+            while len(self.reports) > 0 and self._enabled is True:
+                try:
+                    requests.post(url=REPORT_URL, data=self.reports[0], timeout=5)
+                    self._logger.error("crashreport send: %s" % self.reports[0])
+                    self.reports_send += 1
+                    del self.reports[0]
+                    self.to_disk()
+                except Exception as e:
+                    print(e)
+                    if self._enabled is True:
+                        time.sleep(10)
+
+
+ReporterInstance = Reporter()

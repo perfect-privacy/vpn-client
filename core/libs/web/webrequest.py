@@ -9,7 +9,7 @@ enable_direct_access = True
 lock_until = 0
 
 
-# Central downloader, container dns workarround and blocks on windows if network state is changeing
+# Central downloader, contains dns workarround
 class WebRequest:
     @classmethod
     def lock(cls,timeout = 5):

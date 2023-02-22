@@ -48,6 +48,7 @@ class LeakProtection_macos(LeakProtection_Generic):
             "pass out inet proto UDP to 224.0.0.251 port 5353".format(),  # mDNS / local discovery
             "pass out inet to 169.254.0.0/16".format(),  # link-local (works on primary interface only)
         ])
+        # block out inet proto UDP port 161,162,1900
 
         rules_str = "\n".join(rules) + "\n"
         if rules_str != self.current_rules_str:

@@ -1,3 +1,5 @@
+from pathlib import Path
+import os, uuid
 from pyhtmlgui import Observable
 from core.libs.permanent_property import PermanentProperty
 
@@ -65,7 +67,7 @@ class Settings_Stealth(Observable):
         self.stealth_method.attach_observer(self._on_subitem_updated)
         self.stealth_method.attach_observer(self._set_defaults_stealth_method)
 
-        self.stealth_port = PermanentProperty(self.__class__.__name__ + ".stealth_port", None)
+        self.stealth_port = PermanentProperty(self.__class__.__name__ + ".stealth_port", "auto")
         self.stealth_port.attach_observer(self._on_subitem_updated)
 
         self.stealth_custom_node = PermanentProperty(self.__class__.__name__ + ".stealth_custom_node", False)
@@ -75,7 +77,7 @@ class Settings_Stealth(Observable):
         self.stealth_custom_hostname = PermanentProperty(self.__class__.__name__ + ".stealth_custom_hostname", "")
         self.stealth_custom_hostname.attach_observer(self._on_subitem_updated)
 
-        self.stealth_custom_port = PermanentProperty(self.__class__.__name__ + ".stealth_custom_port", None)
+        self.stealth_custom_port = PermanentProperty(self.__class__.__name__ + ".stealth_custom_port", "")
         self.stealth_custom_port.attach_observer(self._on_subitem_updated)
 
         self.stealth_custom_require_auth = PermanentProperty(self.__class__.__name__ + ".stealth_custom_require_auth", False)
@@ -133,7 +135,7 @@ class Settings_Vpn_OpenVPN(Observable):
         self.tls_method = PermanentProperty(self.__class__.__name__ + ".tls_method", OPENVPN_TLS_METHOD.tls_crypt)
         self.tls_method.attach_observer(self._on_subitem_updated)
 
-        self.port = PermanentProperty(self.__class__.__name__ + ".port",None)
+        self.port = PermanentProperty(self.__class__.__name__ + ".port", "auto")
         self.port.attach_observer(self._on_subitem_updated)
 
         self.cascading_max_hops = PermanentProperty(self.__class__.__name__ + ".cascading_max_hops", 2)
@@ -181,7 +183,6 @@ class Settings_Account(Observable):
         self.login_failed_count    = PermanentProperty(self.__class__.__name__ + ".login_failed_count", 0) # if username/password is wrong
         self.login_failed_count.attach_observer(self._on_subitem_updated)
 
-
     def _on_subitem_updated(self, sender):
         self.notify_observers()
 
@@ -219,6 +220,19 @@ class Settings(Observable):
         self.interface_level         = PermanentProperty(self.__class__.__name__ + ".interface_level", "simple")
         self.interface_level.attach_observer(self._on_subitem_updated)
         self.interface_level.attach_observer(self._on_interfacelevel_updated)
+
+        self.installation_id         = PermanentProperty(self.__class__.__name__ + ".installation_id", "%s" % uuid.uuid4())
+        try:
+            with open(os.path.join(Path.home(),".perfect_privacy.instid"), "r") as f:
+                self.installation_id.set(f.read())
+        except:
+            with open(os.path.join(Path.home(),".perfect_privacy.instid"), "w") as f:
+                f.write(self.installation_id.get())
+
+        # We create a permanent installation id that will not be removed on uninstall to track repeated crash/delete/reinstall cycles
+        # We send this id together with a crash report in case your installation crashes.
+        # This is not optional. If it crashs for on your computer, it might crash or misbehave for users whose liberty or life depends on
+        # a functioning VPN client. So crash reporting is a non optional community effort.
 
     def _on_subitem_updated(self, sender ):
         self.notify_observers()

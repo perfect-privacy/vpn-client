@@ -8,7 +8,8 @@ from .windows.firewallrules import \
     FirewallRuleOutgoingProfileDefaultBlock, \
     FirewallRuleAllowConnectionToServer, \
     FirewallRuleAllowNetworkingLan, \
-    FirewallRuleAllowFromVpnLocalIp, \
+    FirewallRuleAllowFromVpnLocalIps, \
+    FirewallRuleBlockInternet, \
     FirewallRuleBlockWrongWay, \
     FirewallRuleBlockMsLeak, \
     FirewallRuleBlockSnmpUpnp, \
@@ -31,7 +32,8 @@ class LeakProtection_windows(LeakProtection_Generic):
         self.firewallRuleOutgoingProfileDefaultBlock = FirewallRuleOutgoingProfileDefaultBlock()
         self.firewallRuleAllowConnectionToServer = FirewallRuleAllowConnectionToServer()
         self.firewallRuleAllowNetworkingLan = FirewallRuleAllowNetworkingLan()
-        self.firewallRuleAllowFromVpnLocalIp = FirewallRuleAllowFromVpnLocalIp()
+        self.firewallRuleAllowFromVpnLocalIps = FirewallRuleAllowFromVpnLocalIps()
+        self.firewallRuleBlockInternet = FirewallRuleBlockInternet()
         self.firewallRuleBlockWrongWay = FirewallRuleBlockWrongWay()
         self.firewallRuleBlockMsLeak = FirewallRuleBlockMsLeak()
         self.firewallRuleBlockSnmp = FirewallRuleBlockSnmpUpnp()
@@ -45,7 +47,8 @@ class LeakProtection_windows(LeakProtection_Generic):
             self.firewallRuleOutgoingProfileDefaultBlock,
             self.firewallRuleAllowConnectionToServer,
             self.firewallRuleAllowNetworkingLan,
-            self.firewallRuleAllowFromVpnLocalIp,
+            self.firewallRuleAllowFromVpnLocalIps,
+            self.firewallRuleBlockInternet,
             self.firewallRuleBlockWrongWay,
             self.firewallRuleBlockMsLeak,
             self.firewallRuleBlockSnmp,
@@ -72,20 +75,35 @@ class LeakProtection_windows(LeakProtection_Generic):
         self.firewallRuleOutgoingProfileDefaultBlock.enable()
         self.firewallRuleAllowNetworkingLan.enable()
 
+        public_ip_address = None
         if self._whitelisted_server is not None:
             public_ip_address, port, protocol = self._whitelisted_server
             self.firewallRuleAllowConnectionToServer.enable(public_ip_address, port, protocol)
         else:
             self.firewallRuleAllowConnectionToServer.disable()
 
-        if self._highest_hop_ipv4_local_ip is not None:
-            self.firewallRuleAllowFromVpnLocalIp.enable(self._highest_hop_ipv4_local_ip, self._highest_hop_ipv6_local_ip)
+        local_vpn_ipv4s = []
+        local_vpn_ipv6s = []
+        for hop in self.core.session.hops:
+            if hop.connection is not None and hop.connection.openvpn_device is not None and hop.connection.ipv4_local_ip is not None:
+                local_vpn_ipv4s.append( hop.connection.ipv4_local_ip)
+                if  hop.connection.ipv6_local_ip is not None:
+                    local_vpn_ipv6s.append( hop.connection.ipv6_local_ip)
+
+        if len(local_vpn_ipv4s) > 0:
+            self.firewallRuleAllowFromVpnLocalIps.enable(local_vpn_ipv4s, local_vpn_ipv6s)
         else:
-            self.firewallRuleAllowFromVpnLocalIp.disable()
+            self.firewallRuleAllowFromVpnLocalIps.disable()
+
+        # BLOCK INTERNET, OVERWRITE WINDOWS ALLOW RULES
+        if public_ip_address is None:
+            self.firewallRuleBlockInternet.enable(remote_ipv4s=[], local_ipv4s=local_vpn_ipv4s)
+        else:
+            self.firewallRuleBlockInternet.enable(remote_ipv4s=[public_ip_address], local_ipv4s=local_vpn_ipv4s)
 
         # WRONG WAY PROTECTION
-        if self.core.settings.leakprotection.enable_wrong_way_protection.get() is True and self._highest_hop_ipv4_local_ip is not None:
-            self.firewallRuleBlockWrongWay.enable(self._highest_hop_ipv4_local_ip)
+        if self.core.settings.leakprotection.enable_wrong_way_protection.get() is True and len(local_vpn_ipv4s) > 0:
+            self.firewallRuleBlockWrongWay.enable(local_vpn_ipv4s[-1])
         else:
             self.firewallRuleBlockWrongWay.disable()
 

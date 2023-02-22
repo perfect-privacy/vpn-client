@@ -1,4 +1,7 @@
 import logging
+import socket
+import struct
+
 from core.libs.powershell import Powershell
 from core.libs.permanent_property import PermanentProperty
 
@@ -42,6 +45,11 @@ class FirewallRule():
             powershell.execute(new_rule_cmd)
         self.is_enabled = True
 
+    def update(self):
+        self._logger.info("%s updating" % self.__class__.__name__)
+        new_rule_cmd = "Set-NetFirewallRule %s" % self._build(update=True)
+        powershell.execute(new_rule_cmd)
+
     def disable(self):
         if self.is_enabled is True:
             self._logger.info("%s disabling" % self.__class__.__name__)
@@ -52,11 +60,12 @@ class FirewallRule():
     def exists(self):
         return powershell.execute('Get-NetFirewallRule -Name "%s"  | ConvertTo-Json' % self.name, as_data = True) != None
 
-    def _build(self):
+    def _build(self, update = False):
         args = []
         args.append('-Name "%s"' % self.name)
-        args.append('-DisplayName  "%s"' % self.name)
-        args.append('-Description  "%s"' % self.description)
+        if update is False:
+            args.append('-DisplayName  "%s"' % self.name)
+            args.append('-Description  "%s"' % self.description)
         if self.action is not None:
             args.append('-Action  %s' % self.action)
         if self.direction is not None:
@@ -112,16 +121,13 @@ class FirewallRuleAllowConnectionToServer(FirewallRule):
         super().__init__()
 
     def enable(self, ip, port, protocol):
-        if self.remote_addresses is None or self.remote_ports is None:
-            changed = True
-        else:
-            changed = self.remote_addresses[0] != ip or self.remote_ports[0] != port or self.protocol != protocol.upper()
-        if changed:
-            self.disable()
+        changed =  self.remote_addresses is None or self.remote_ports is None or self.remote_addresses[0] != ip or self.remote_ports[0] != port or self.protocol != protocol.upper()
+        if changed is True or self.is_enabled is False:
             self.remote_addresses = [ip]
             self.remote_ports = [port]
             self.protocol = protocol.upper()
-        super().enable()
+            super().enable() if self.is_enabled is False else self.update()
+
 
 class FirewallRuleAllowNetworkingLan(FirewallRule):
     def __init__(self):
@@ -132,7 +138,7 @@ class FirewallRuleAllowNetworkingLan(FirewallRule):
         self.remote_addresses = ["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16"]
         super().__init__()
 
-class FirewallRuleAllowFromVpnLocalIp(FirewallRule):
+class FirewallRuleAllowFromVpnLocalIps(FirewallRule):
 
     def __init__(self):
         self.name = "Perfect Privacy - Allow traffic from local VPN IP"
@@ -141,24 +147,63 @@ class FirewallRuleAllowFromVpnLocalIp(FirewallRule):
         self.direction = NET_FW_RULE_DIR_OUT
         super().__init__()
 
-    def enable(self, local_ipv4, local_ipv6):
-        changed = False
-        if self.local_addresses is None or self.remote_ports is None:
-            changed = True
-        else:
-            if len(self.local_addresses) > 0:
-                changed = self.local_addresses[0] != local_ipv4
-            if len(self.local_addresses) > 1 and changed is False:
-                changed = changed or self.local_addresses[1] != local_ipv6
-            else:
-                if local_ipv6 is not None:
-                    changed = True
-        if changed:
-            self.disable()
-            self.local_addresses = [local_ipv4]
-            if local_ipv6 is not None:
-                self.local_addresses.append(local_ipv6)
-        super().enable()
+    def enable(self, local_ipv4s, local_ipv6s):
+        changed = self.local_addresses != local_ipv4s+local_ipv6s or self.local_addresses is None
+        if changed is True or self.is_enabled is False:
+            self.local_addresses = local_ipv4s+local_ipv6s
+            super().enable() if self.is_enabled is False else self.update()
+
+
+class FirewallRuleBlockInternet(FirewallRule):
+    def __init__(self):
+        self.name = "Perfect Privacy - Block Internet Access"
+        self.description = self.name
+        self.action = NET_FW_ACTION_BLOCK
+        self.direction = NET_FW_RULE_DIR_OUT
+        super().__init__()
+        '''
+        block sending packets from "all ips, except vpn hop local ips" to "public internet ips except hop server ips"  
+        '''
+
+    def enable(self, remote_ipv4s, local_ipv4s):
+        local_ipv4_boundarys = ["0.0.0.0", "223.255.255.255"]
+        for local_ipv4 in set(local_ipv4s):
+            local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) - 1))
+            local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) + 1))
+        local_ipv4_boundarys.sort(key=lambda x:self.ip2int(x))
+
+        localAddresses = []
+        for i in range(0, len(local_ipv4_boundarys),2):
+            localAddresses.append("%s-%s" % (local_ipv4_boundarys[i],local_ipv4_boundarys[i+1]))
+        localAddresses.append("::-fdbf:1d37:bbe0::")
+        localAddresses.append("fdbf:1d37:bbe1::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")
+
+        internet_ipv4_boundarys = [
+           "0.0.0.0","9.255.255.255","11.0.0.0","126.255.255.255","128.0.0.0","169.253.255.255","169.255.0.0","172.15.255.255",
+           "172.32.0.0","192.167.255.255","192.169.0.0","223.255.255.255"
+        ]
+        for remote_ipv4 in remote_ipv4s:
+            internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) - 1))
+            internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) + 1))
+        internet_ipv4_boundarys.sort(key=lambda x:self.ip2int(x))
+
+        remoteAddresses = []
+        for i in range(0, len(internet_ipv4_boundarys),2):
+            remoteAddresses.append("%s-%s" % (internet_ipv4_boundarys[i],internet_ipv4_boundarys[i+1]))
+        remoteAddresses.append("2000::/3")
+
+        changed = self.local_addresses != localAddresses or self.remote_addresses != remoteAddresses
+        if changed is True or self.is_enabled is False:
+            self.local_addresses = localAddresses
+            self.remote_addresses = remoteAddresses
+            super().enable() if self.is_enabled is False else self.update()
+
+    def ip2int(self,addr):
+        return struct.unpack("!I", socket.inet_aton(addr))[0]
+
+    def int2ip(self, addr):
+        return socket.inet_ntoa(struct.pack("!I", addr))
+
 
 class FirewallRuleBlockWrongWay(FirewallRule):
     def __init__(self):
@@ -169,7 +214,7 @@ class FirewallRuleBlockWrongWay(FirewallRule):
         super().__init__()
 
         '''
-        block packets that arrive from "public internet ips" to "all lan ips, except the highest connected vpn hop local ip"
+        block packets that arrive from "public internet ips" to "all ips, except the highest connected vpn hop local ip"
         This prevents packets that arrive from the internet on any non VPN ip to be returned over the VPN
         https://www.perfect-privacy.com/en/blog/wrong-way-security-problem-exposes-real-ip
         '''
@@ -194,11 +239,10 @@ class FirewallRuleBlockWrongWay(FirewallRule):
             "192.169.0.0-223.255.255.255"
         ]
         changed = self.local_addresses != localAddresses or self.remote_addresses != remoteAddresses
-        if changed:
-            self.disable()
+        if changed is True or self.is_enabled is False:
             self.local_addresses = localAddresses
             self.remote_addresses = remoteAddresses
-        super().enable()
+            super().enable() if self.is_enabled is False else self.update()
 
 class FirewallRuleBlockMsLeak(FirewallRule):
     def __init__(self):
@@ -264,7 +308,7 @@ class _FirewallRuleBlockSnmpUpnp_TCP(FirewallRule):
         self.protocol = NET_FW_IP_PROTOCOL_TCP
         super().__init__()
 
-class FirewallRuleBlockDNS():
+class FirewallRuleBlockDNS(): # currently not in use
     def __init__(self):
         self.tcp_rule = _FirewallRuleBlockDNS_TCP()
         self.udp_rule = _FirewallRuleBlockDNS_UDP()

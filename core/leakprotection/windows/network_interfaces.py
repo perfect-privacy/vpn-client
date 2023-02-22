@@ -1,66 +1,73 @@
 from core.libs.subcommand import SubCommand
 import random
+from config.files import NETSH
 
 class NetworkInterface():
-    def __init__(self, core):
+    def __init__(self, core, all_ipv4_dns_servers, all_ipv6_dns_servers):
         self.core = core
         self.index = 0
         self.dhcpenabled = False
         self.servicename = None
         self.interfacealias = None
         self.ipenabled = None
-        self.dns_servers_v4 = []
+        self.dns_servers_v4 = []  # currently set, read from system
         self.dns_servers_v6 = []
+        self.all_ipv4_dns_servers = all_ipv4_dns_servers
+        self.all_ipv6_dns_servers = all_ipv6_dns_servers
         self.ipv6 = []
         self.ipv4 = []
         self.dnsleakprotection_enabled = False
 
     def disableIpv6(self):
         for ipv6 in self.ipv6:
-            success, stdout, stderr = SubCommand().run("netsh", ["interface", "ipv6", "delete", "address", "%s" % self.index, "address=%s" % ipv6[0], "store=active"])
+            success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv6", "delete", "address", "%s" % self.index, "address=%s" % ipv6[0], "store=active"])
 
     def enableIpv6(self):
         # enable does nothing, if a automatically assigned Ipv6 has been removed, it will come back automatically when announcements are no longer firewalled
         pass
 
     def enableDnsLeakProtection(self):
-        all_ipv4_dns_servers = [item.vpn_server_config.dns_ipv4 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv4 != "" and item.vpn_server_config.bandwidth_mbps > 500]
-        all_ipv6_dns_servers = [item.vpn_server_config.dns_ipv6 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv6 != "" and item.vpn_server_config.bandwidth_mbps > 500]
-
-
-        changed = False
-
+        dnsservers = []
+        new_dnsservers_v4 = []
+        new_dnsservers_v6 = []
         if self.ipenabled is True:
             if self.interfacealias.startswith("Perfect Privacy") or self.interfacealias.startswith("PerfectPrivacy"):
                 if self.core.settings.leakprotection.use_custom_dns_servers.get() is True:
-                    new_dnsservers_v4 = [ip for ip in [self.core.settings.leakprotection.custom_dns_server_1.get(), self.core.settings.leakprotection.custom_dns_server_2.get()]]
-                    new_dnsservers_v6 = [ip for ip in [self.core.settings.leakprotection.custom_dns_server_1.get(), self.core.settings.leakprotection.custom_dns_server_2.get()]]
-                else:
-                    new_dnsservers_v4 = [random.choice(all_ipv4_dns_servers) , random.choice(all_ipv4_dns_servers)] # TODO better selection
-                    new_dnsservers_v6 = [random.choice(all_ipv6_dns_servers) , random.choice(all_ipv6_dns_servers)]
+                    dnsservers = [self.core.settings.leakprotection.custom_dns_server_1.get(), self.core.settings.leakprotection.custom_dns_server_2.get()]
+                    dnsservers = [x.strip() for x in dnsservers if x.strip() != ""]
+                    dnsservers.sort()
+                    if len(dnsservers) > 0:
+                        if dnsservers == sorted(self.dns_servers_v4 + self.dns_servers_v6):
+                            return
+                if len(dnsservers) == 0:
+                    existing_servers = set(self.dns_servers_v4 + self.dns_servers_v6)
+                    if len(existing_servers) > 0 and existing_servers.issubset(self.all_ipv4_dns_servers + self.all_ipv6_dns_servers):
+                        return
+                    dnsservers = [random.choice(self.all_ipv4_dns_servers), random.choice(self.all_ipv4_dns_servers), random.choice(self.all_ipv6_dns_servers), random.choice(self.all_ipv6_dns_servers)]
+                new_dnsservers_v4 = [ip for ip in dnsservers if "." in ip]
+                new_dnsservers_v6 = [ip for ip in dnsservers if ":" in ip]
             else: # not our interface
-                new_dnsservers_v4 = ["0.0.0.0"]
-                new_dnsservers_v6 = ["::"]
+                if self.dns_servers_v4 != ["0.0.0.0"]:
+                    new_dnsservers_v4 = ["0.0.0.0"]
+                if self.dns_servers_v6 != ["::"]:
+                    new_dnsservers_v6 = ["::"]
 
-            if new_dnsservers_v4 != self.dns_servers_v4:
-                changed = True
-                success, stdout, stderr = SubCommand().run("netsh", ["interface", "ipv4", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v4[0], "validate=no"])
-                if len(new_dnsservers_v4) > 1:
-                    success, stdout, stderr = SubCommand().run("netsh", ["interface", "ipv4", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v4[1], "index=1", "validate=no"])
-            if new_dnsservers_v6 != self.dns_servers_v6:
-                changed = True
-                success, stdout, stderr = SubCommand().run("netsh", ["interface", "ipv6", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v6[0] , "validate=no"])
-                if len(new_dnsservers_v6) > 1:
-                    success, stdout, stderr = SubCommand().run("netsh", ["interface", "ipv4", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v6[1], "index=1", "validate=no"])
+            if len(new_dnsservers_v4) > 0:
+                success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv4", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v4[0], "validate=no"])
+            if len(new_dnsservers_v4) > 1:
+                success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv4", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v4[1], "index=1", "validate=no"])
+            if len(new_dnsservers_v6) > 0:
+                success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv6", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v6[0] , "validate=no"])
+            if len(new_dnsservers_v6) > 1:
+                success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv4", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v6[1], "index=1", "validate=no"])
 
-        if self.dnsleakprotection_enabled is False: # so we can run multiple times
-            self.dnsleakprotection_enabled = changed
+            self.dnsleakprotection_enabled = True
 
     def disableDnsLeakProtection(self):
         if self.dnsleakprotection_enabled is True or "0.0.0.0" in self.dns_servers_v4 or "::" in self.dns_servers_v6:
             self.dnsleakprotection_enabled = False
-            success, stdout, stderr = SubCommand().run("netsh.exe", ["interface", "ipv4", "set", "dnsserver", "%s" % self.index, "dhcp", "validate=no"])
-            success, stdout, stderr = SubCommand().run("netsh.exe", ["interface", "ipv6", "set", "dnsserver", "%s" % self.index, "dhcp", "validate=no"])
+            success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv4", "set", "dnsserver", "%s" % self.index, "dhcp", "validate=no"])
+            success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv6", "set", "dnsserver", "%s" % self.index, "dhcp", "validate=no"])
 
 
     def __str__(self):
@@ -83,12 +90,15 @@ class NetworkInterfaces():
         self.networkinterfaces = None
 
     def _load(self):
+        all_ipv4_dns_servers = [item.vpn_server_config.dns_ipv4 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv4 != "" and item.vpn_server_config.bandwidth_mbps > 500]
+        all_ipv6_dns_servers = [item.vpn_server_config.dns_ipv6 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv6 != "" and item.vpn_server_config.bandwidth_mbps > 500]
+
         if self.networkinterfaces is None:
             self.networkinterfaces = {}
         networkdatas = self.core.powershell.execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
         for networkdata in networkdatas:
             if networkdata["InterfaceIndex"] not in self.networkinterfaces:
-                ni = NetworkInterface(self.core)
+                ni = NetworkInterface(self.core, all_ipv4_dns_servers, all_ipv6_dns_servers)
                 ni.index =  networkdata["InterfaceIndex"]
                 self.networkinterfaces[ni.index] = ni
             else:

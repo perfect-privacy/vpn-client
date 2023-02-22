@@ -3,6 +3,7 @@ import threading
 import time
 import os
 from core.libs.subcommand import SubCommand
+from config.files import NETSH
 
 class IpsecConnection(VPNConnection):
     """
@@ -108,10 +109,10 @@ class IpsecConnection(VPNConnection):
             self._add_route()
 
     def _add_route(self):
-        success, stdout, stderr = SubCommand().run("netsh", ["interface","ipv6", "add", "route",    "2000::/4", 'interface="%s"' % self.hop_name ])
-        success, stdout, stderr = SubCommand().run("netsh", ["interface","ipv6", "add", "route",    "3000::/4", 'interface="%s"' % self.hop_name ])
-        success, stdout, stderr = SubCommand().run("netsh", ["interface","ipv4", "add", "route",   "0.0.0.0/1", 'interface="%s"' % self.hop_name ])
-        success, stdout, stderr = SubCommand().run("netsh", ["interface","ipv4", "add", "route", "128.0.0.0/1", 'interface="%s"' % self.hop_name ])
+        success, stdout, stderr = SubCommand().run(NETSH, ["interface","ipv6", "add", "route",    "2000::/4", 'interface="%s"' % self.hop_name ])
+        success, stdout, stderr = SubCommand().run(NETSH, ["interface","ipv6", "add", "route",    "3000::/4", 'interface="%s"' % self.hop_name ])
+        success, stdout, stderr = SubCommand().run(NETSH, ["interface","ipv4", "add", "route",   "0.0.0.0/1", 'interface="%s"' % self.hop_name ])
+        success, stdout, stderr = SubCommand().run(NETSH, ["interface","ipv4", "add", "route", "128.0.0.0/1", 'interface="%s"' % self.hop_name ])
 
     def _delete_route(self):
         pass

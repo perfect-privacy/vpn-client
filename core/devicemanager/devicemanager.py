@@ -168,6 +168,14 @@ class DeviceManager(Observable):
 
             if changed:
                 self._load_existing_devices()
+
+            # if not all installed:
+            # data = {
+            #   "max_hops": 2
+            #   "installed hops"
+            #   "driver" : wintun
+            #   "logs" : last x log entry from this class
+            # }
             self.state.set(DeviceManagerState.IDLE)
 
         finally:

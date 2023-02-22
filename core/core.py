@@ -15,6 +15,7 @@
 ### END LICENSE
 import logging
 import os
+import random
 import subprocess
 import sys
 import threading
@@ -37,6 +38,7 @@ from .libs.powershell import Powershell
 from .configupdater import ConfigUpdater
 from .leakprotection import LeakProtection
 from .ipcheck import IpCheck
+from .libs.web.reporter import ReporterInstance
 from .settings import Settings
 from .softwareupdater import SoftwareUpdater
 from .trafficdownload import TrafficDownload
@@ -47,7 +49,7 @@ from .devicemanager import DeviceManager
 from .favourites import Favourites
 from .vpnsession.common import VpnConnectionState
 from config.config import PLATFORM
-from config.constants import PLATFORMS
+from config.constants import PLATFORMS, VPN_PROTOCOLS
 from config.paths import APP_DIR
 from .vpnsession.session import SessionState
 
@@ -84,6 +86,8 @@ class Core(Observable):
         self.session = Session(self)
 
         self.leakprotection = LeakProtection(core=self)
+        self._start_timers.append(Timer(2, self.leakprotection.update_async))
+
         self.settings.leakprotection.attach_observer(self._on_leakprotection_settings_changed)
 
         self.configUpdater = ConfigUpdater(self)
@@ -121,6 +125,19 @@ class Core(Observable):
         self.session.start()
         for t in self._start_timers:
             t.start()
+
+        self.settings.vpn.vpn_protocol.attach_observer(self.on_updated_vpnsettings)
+        self.settings.vpn.openvpn.cascading_max_hops.attach_observer(self.on_updated_vpnsettings)
+        self._send_usage_stats_thread = threading.Thread(target=self.check_send_usage_stats, daemon=True)
+        self._send_usage_stats_thread.start()
+
+    def on_updated_vpnsettings(self):
+        if self.settings.vpn.vpn_protocol.get() == VPN_PROTOCOLS.openvpn:
+            max_hops = self.settings.vpn.openvpn.cascading_max_hops.get()
+        else:
+            max_hops = 1
+        while len(self.session.hops) > max_hops:
+            self.session.remove_hop_by_index(len(self.session.hops) - 1)
 
     def on_frontend_ready(self, pyHtmlGuiInstance, nr_of_active_frontends):
         self.frontend_active = nr_of_active_frontends > 0
@@ -249,3 +266,43 @@ class Core(Observable):
         finally:
             self.on_exited.notify_observers()
         self._logger.info("shutdown finished")
+
+    def check_send_usage_stats(self):
+        while True:
+            time.sleep(1800) # roll dice every half hour for time to send report
+            if random.randint(0, 48) != 42: # randomly trigger only ~once a day
+                continue
+            if random.randint(0, 500) != 42: # ~once a day have 1:500 chance to actually send stats
+                continue
+            stats = {
+                "settings.interface_level": self.settings.interface_level.get(),
+                "settings.leakprotection.leakprotection_scope": self.settings.leakprotection.leakprotection_scope.get(),
+                "settings.leakprotection.enable_ms_leak_protection": self.settings.leakprotection.enable_ms_leak_protection.get(),
+                "settings.leakprotection.enable_wrong_way_protection": self.settings.leakprotection.enable_wrong_way_protection.get(),
+                "settings.leakprotection.enable_snmp_upnp_protection": self.settings.leakprotection.enable_snmp_upnp_protection.get(),
+                "settings.leakprotection.block_access_to_local_router": self.settings.leakprotection.block_access_to_local_router.get(),
+                "settings.leakprotection.enable_ipv6_leak_protection": self.settings.leakprotection.enable_ipv6_leak_protection.get(),
+                "settings.leakprotection.enable_deadrouting": self.settings.leakprotection.enable_deadrouting.get(),
+                "settings.leakprotection.enable_dnsleak_protection": self.settings.leakprotection.enable_dnsleak_protection.get(),
+                "settings.leakprotection.use_custom_dns_servers": self.settings.leakprotection.use_custom_dns_servers.get(),
+                "settings.stealth.stealth_method": self.settings.stealth.stealth_method.get(),
+                "settings.stealth.stealth_port": self.settings.stealth.stealth_port.get(),
+                "settings.stealth.stealth_custom_node": self.settings.stealth.stealth_custom_node.get(),
+                "settings.startup.start_on_boot": self.settings.startup.start_on_boot.get(),
+                "settings.startup.start_minimized": self.settings.startup.start_minimized.get(),
+                "settings.startup.connect_on_start": self.settings.startup.connect_on_start.get(),
+                "settings.vpn.vpn_protocol": self.settings.vpn.vpn_protocol.get(),
+                "settings.vpn.openvpn.protocol": self.settings.vpn.openvpn.protocol.get(),
+                "settings.vpn.openvpn.cipher": self.settings.vpn.openvpn.cipher.get(),
+                "settings.vpn.openvpn.driver": self.settings.vpn.openvpn.driver.get(),
+                "settings.vpn.openvpn.tls_method": self.settings.vpn.openvpn.tls_method.get(),
+                "settings.vpn.openvpn.port": self.settings.vpn.openvpn.port.get(),
+                "settings.vpn.openvpn.cascading_max_hops": self.settings.vpn.openvpn.cascading_max_hops.get(),
+                "usage.session.should_be_connected": self.session._should_be_connected.get(),
+                "usage.session.hops": len(self.session.hops),
+                "usage.has_ipv4": self.ipcheck.result4.public_ip != None,
+                "usage.has_ipv6": self.ipcheck.result6.public_ip != None,
+                "usage.ipv4_is_vpn": self.ipcheck.result4.vpn_connected == True,
+                "usage.ipv6_is_vpn": self.ipcheck.result6.vpn_connected == True,
+            }
+            ReporterInstance.report("usage_stats", data=stats, noid=True)

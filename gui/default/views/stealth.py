@@ -125,7 +125,7 @@ Stealth VPN is designed to obfuscate your VPN traffic, making it difficult to bl
         self.stealth_custom_proxy_auth_use_ntlm = CheckboxComponent(subject.settings.stealth.stealth_custom_proxy_auth_use_ntlm, self, label="")
 
     def _on_stealth_method_changed(self, sender):
-        self.subject.settings.stealth.stealth_port.set(None)
+        self.subject.settings.stealth.stealth_port.set("auto")
         self.set_stealth_port_options()
         self.update()
 

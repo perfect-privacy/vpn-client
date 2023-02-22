@@ -14,7 +14,7 @@
 - windows/stealth/pp.tstunnel.exe
     - https://www.stunnel.org/downloads.html    
     - download, install
-    - go to C:\Program Files (x86)\stunnel\bin, get tstunnel.exe and libssp-0.dll
+    - go to C:\Program Files (x86)\stunnel\bin, get tstunnel.exe and dll files
     - rename to pp.tstunnel.exe
     
 - macos/stealth/pp.tstunnel
@@ -30,20 +30,19 @@
     
 - windows/openvpn/
     - https://openvpn.net/community-downloads/
-    - download 32 and 64 bit version
+    - download 64 bit version
     - Open with 7zip explorer via -> "open internally *"
         - Open contained openvpn.cab via "open internally"
         - Files in archive have differnt names, extract and rename to
           -  tapctl.exe              -> pp.tapctl.exe
           -  bin.openvpn.exe         -> pp.openvpn.exe
-          -  libcrypto_1_1.dll       -> libcrypto-1_1.dll
-          -  liblzo2_2.dll           -> liblzo2-2.dll
+          -  libcrypto_3_x64.dll   -> libcrypto-3-x64.dll
           -  libpkcs11_helper_1.dll  -> libpkcs11-helper-1.dll
-          -  libssl-1_1.dll          -> libssl-1_1.dll
+          -  libssl_3_x64.dll      -> libssl-3-x64.dll
             
 - windows/wintun/latest
     - https://openvpn.net/community-downloads/
-    - download 32 and 64 bit version
+    - download 64 bit version
     - Open with 7zip explorer via -> "open internally *"
     - Open Binary.installer.dll.* via "open internally *",  there should be 2 such files, on is wintun, the other tap-windows6
     - go to .rsrc/RCDATA
@@ -54,7 +53,7 @@
          
 - windows/tapwindows/latest
     - https://openvpn.net/community-downloads/
-    - download 32 and 64 bit version
+    - download 64 bit version
     - Open with 7zip explorer via -> "open internally *"
     - Open Binary.installer.dll.* via "open internally *",  there should be 2 such files, on is wintun, the other tap-windows6
     - go to .rsrc/RCDATA

@@ -1,5 +1,4 @@
-import os, sys
-import subprocess
+import os, sys, threading
 import traceback
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
@@ -7,68 +6,33 @@ sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
 CRASHLOG = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
 
 try:
+    from core.libs.web.reporter import ReporterInstance
+except:
+    ReporterInstance = None
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    if ReporterInstance is not None:
+        ReporterInstance.report("unhandled_exception", "%s" % traceback.format_exception(exc_type, exc_value, exc_traceback))
+
+def handle_thread_exception(args):
+    handle_exception(args.exc_type, args.exc_value, args.exc_traceback)
+
+sys.excepthook = handle_exception
+threading.excepthook = handle_thread_exception
+
+
+try:
     from config.config import APP_VERSION
     from config.files import PLATFORMS,PLATFORM, SOFTWARE_UPDATE_FILENAME
     from config.paths import SOFTWARE_UPDATE_DIR
     from gui import getPyHtmlGuiInstance
 except:
-    if getattr(sys, 'frozen', False) == True:  # check if we are bundled by pyinstaller
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        tb = traceback.format_exception(exc_type, exc_value, exc_traceback)
-        with open(CRASHLOG, "a") as f:
-            f.write("%s" % tb)
-        os._exit(1)
-
-
-def _compare_version_numbers(new_version_number, old_version_number):
-    new_split = new_version_number.split(".")
-    old_split = old_version_number.split(".")
-    if len(old_split) != len(new_split):
-        return 1
-    for i, new_part in enumerate(new_split):
-        if new_part == old_split[i]:
-            continue
-        elif new_part > old_split[i]:
-            return 1
-        elif new_part < old_split[i]:
-            return -1
-        else:
-            raise Exception()
-    return 0
-
-def check_install_autoupdate():
-    update_executable = os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME)
-    update_executable_version = os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME)
-
-    if os.path.exists(update_executable) != os.path.exists(update_executable_version):
-        if os.path.exists(update_executable):
-            os.remove(update_executable)
-        if os.path.exists(update_executable_version):
-            os.remove(update_executable_version)
-
-    if not os.path.exists(update_executable):
-        return
-
-    VERSION = open(update_executable_version, "r").read().strip()
-
-    if _compare_version_numbers(VERSION, APP_VERSION) <= 0: # update already installed
-        if os.path.exists(update_executable):
-            os.remove(update_executable)
-        if os.path.exists(update_executable_version):
-            os.remove(update_executable_version)
-
-    if os.path.exists(update_executable):
-        kwargs = {}
-        if PLATFORM == PLATFORMS.windows:
-            CREATE_NEW_PROCESS_GROUP = 0x00000200  # note: could get it from subprocess
-            DETACHED_PROCESS = 0x00000008  # 0x8 | 0x200 == 0x208
-            kwargs.update(creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
-            p = subprocess.Popen([update_executable, "/S"], start_new_session=True,  close_fds=True)
-        elif sys.version_info < (3, 2):  # assume posix
-            kwargs.update(preexec_fn=os.setsid)
-        else:  # Python 3.2+ and Unix
-            kwargs.update(start_new_session=True)
-        os._exit(0)
+    ReporterInstance.report("service_import_crash", "%s" % traceback.format_exception(*sys.exc_info()))
+    ReporterInstance.shutdown()
+    os._exit(1)
 
 
 if __name__ == "__main__":
@@ -113,10 +77,6 @@ if __name__ == "__main__":
                 else:
                     win32serviceutil.HandleCommandLine(Windows_Service)
     except Exception as e:
-        if getattr(sys, 'frozen', False) == True:  # check if we are bundled by pyinstaller
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            tb = traceback.format_exception(exc_type, exc_value, exc_traceback)
-            with open(CRASHLOG, "a") as f:
-                f.write("%s" % tb)
-        else:
-            raise e
+        if ReporterInstance is not None:
+            ReporterInstance.report("service_crash", "%s" % traceback.format_exception(*sys.exc_info()))
+            ReporterInstance.shutdown()

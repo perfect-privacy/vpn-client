@@ -1,7 +1,7 @@
-import os, sys, json, uuid
+import os, sys, uuid
 from .constants import PLATFORMS, BRANCHES
 
-APP_NAME         = "Perfect Privacy"
+APP_NAME = "Perfect Privacy"
 
 if getattr( sys, 'frozen', False ) == True:  # check if we are bundled by pyinstaller
     RUNTIME_CONF = os.path.join(sys._MEIPASS, "runtime.conf")
@@ -22,7 +22,8 @@ if getattr( sys, 'frozen', False ) == True:  # check if we are bundled by pyinst
         new_secret = "%s" % uuid.uuid4()
         content = content.replace("REPLACE_TOKEN_ON_POST_INSTALL", new_secret)
         try:
-            open(RUNTIME_CONF, "w").write(content)
+            with open(RUNTIME_CONF, "w") as f:
+                f.write(content)
             SHARED_SECRET = new_secret
         except:
             print("Failed to write config")
@@ -46,7 +47,6 @@ elif sys.platform.startswith("darwin"):
     PLATFORM = PLATFORMS.macos
 
 
-
 SIG_PUBKEY = """-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw89YGj7ROj7T/zH/eDmU
 Do2tuzdMva3KYDS0PpRaaAgRnvnr6g42Dufl4Ht2wANM1MaishFZ7CZjdMqolPU2
@@ -58,5 +58,5 @@ eFD5xq/5mxAuxeKyrOK+ZOY1glXC9WOWqWCj7VYIEitXAYHuMBJygLlZrC1iok5i
 -----END PUBLIC KEY-----"""
 
 
-FRONTEND_AUTORELOAD = BRANCH == BRANCHES.dev   # to we dont have to restart the app during frontend design so often
+FRONTEND_AUTORELOAD = BRANCH == BRANCHES.dev   # so we dont have to restart the app during frontend design so often
 

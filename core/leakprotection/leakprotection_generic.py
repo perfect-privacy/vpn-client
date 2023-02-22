@@ -18,8 +18,6 @@ class LeakProtection_Generic(Observable):
         self.core = core
         self._logger = logging.getLogger(self.__class__.__name__)
         self._whitelisted_server = None
-        self._highest_hop_ipv4_local_ip = None
-        self._highest_hop_ipv6_local_ip = None
         self._is_running = True
         self.state = LeakProtectionState()
         self._lock = threading.Lock()
@@ -29,11 +27,6 @@ class LeakProtection_Generic(Observable):
 
     def whitelist_server(self, public_ip_address, port, protocol):
         self._whitelisted_server = [public_ip_address, port, protocol]
-        self.update_async()
-
-    def set_highest_hop_local_ip(self, ipv4, ipv6):
-        self._highest_hop_ipv4_local_ip = ipv4
-        self._highest_hop_ipv6_local_ip = ipv6
         self.update_async()
 
     def update(self):
