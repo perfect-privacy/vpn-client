@@ -89,11 +89,15 @@ class OpenVPNConnection(VPNConnection):
         if self.core.settings.stealth.stealth_method.get() != STEALTH_METHODS.no_stealth:
             self.openvpn_protocol = OPENVPN_PROTOCOLS.tcp
 
-        openvpn_port = None
-        if self.openvpn_protocol == OPENVPN_PROTOCOLS.tcp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt: openvpn_port = random.choice(OPENVPN_PORTS.TLSCRYPT.tcp)
-        if self.openvpn_protocol == OPENVPN_PROTOCOLS.tcp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:  openvpn_port = random.choice(OPENVPN_PORTS.TLSAUTH.tcp)
-        if self.openvpn_protocol == OPENVPN_PROTOCOLS.udp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt: openvpn_port = random.choice(OPENVPN_PORTS.TLSCRYPT.udp)
-        if self.openvpn_protocol == OPENVPN_PROTOCOLS.udp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:  openvpn_port = random.choice(OPENVPN_PORTS.TLSAUTH.udp)
+        openvpn_ports = []
+        if self.openvpn_protocol == OPENVPN_PROTOCOLS.tcp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt: openvpn_ports = OPENVPN_PORTS.TLSCRYPT.tcp
+        if self.openvpn_protocol == OPENVPN_PROTOCOLS.tcp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:  openvpn_ports = OPENVPN_PORTS.TLSAUTH.tcp
+        if self.openvpn_protocol == OPENVPN_PROTOCOLS.udp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt: openvpn_ports = OPENVPN_PORTS.TLSCRYPT.udp
+        if self.openvpn_protocol == OPENVPN_PROTOCOLS.udp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:  openvpn_ports = OPENVPN_PORTS.TLSAUTH.udp
+        if self.core.settings.vpn.openvpn.port.get() not in openvpn_ports:
+            openvpn_port = random.choice(openvpn_ports)
+        else:
+            openvpn_port = self.core.settings.vpn.openvpn.port.get()
 
         if self.hop_number == 1:
             if self.core.settings.stealth.stealth_method.get() == STEALTH_METHODS.ssh:

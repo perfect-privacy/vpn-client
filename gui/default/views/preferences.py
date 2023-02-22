@@ -3,7 +3,7 @@ import time
 from pyhtmlgui import PyHtmlView
 from gui.common.components import CheckboxComponent, SelectComponent
 from config.constants import VPN_PROTOCOLS, OPENVPN_CIPHER, OPENVPN_PROTOCOLS, OPENVPN_TLS_METHOD, OPENVPN_DRIVER, \
-    PLATFORMS
+    PLATFORMS, OPENVPN_PORTS
 from config.config import PLATFORM
 
 
@@ -100,6 +100,16 @@ class PreferencesView(PyHtmlView):
 
                     <section>
                         <h3>
+                            OpenVPN Port
+                            <div class="input" style="width:8em;"> {{ pyview.openvpn_port.render() }} </div>    
+                        </h3> 
+                        <div>
+                            Select the desired port for your OpenVPN connection.
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3>
                             TLS Method
                             <div class="input" style="width:8em;"> {{ pyview.openvpn_tls_method.render() }} </div>
                         </h3> 
@@ -152,6 +162,8 @@ class PreferencesView(PyHtmlView):
                                             ])
 
         self.add_observable(subject.settings.vpn.vpn_protocol, self._on_object_updated)
+        self.add_observable(subject.settings.vpn.openvpn.protocol, self._on_object_updated)
+        self.add_observable(subject.settings.vpn.openvpn.tls_method, self._on_object_updated)
         self.openvpn_cipher = SelectComponent(subject.settings.vpn.openvpn.cipher, self,
                                               options=[
                                                   (OPENVPN_CIPHER.aes_128_gcm, OPENVPN_CIPHER.aes_128_gcm),
@@ -185,6 +197,10 @@ class PreferencesView(PyHtmlView):
                                                   (OPENVPN_DRIVER.tap_windows6_9_00_00_9, "TAP 9.0.0.9"),
                                                   (OPENVPN_DRIVER.tap_windows6_9_00_00_21, "TAP 9.0.0.21"),
                                               ])
+
+        self.openvpn_port = SelectComponent(subject.settings.vpn.openvpn.port, self,
+                                            options=[],
+                                            label="")
         self.enforce_primary_ip = CheckboxComponent(subject.userapi.random_exit_ip, self, label="", inverted=True)
         self.neuro_routing = CheckboxComponent(subject.userapi.neuro_routing, self, label="")
         self.start_on_boot = CheckboxComponent(subject.settings.startup.start_on_boot, self)
@@ -198,8 +214,10 @@ class PreferencesView(PyHtmlView):
         if PLATFORM == PLATFORMS.macos:
             self.osname = "macOS"
         self._last_update_requested = 0
+        self.set_openvpn_port_options()
 
     def _on_object_updated(self, source, **kwargs):
+        self.set_openvpn_port_options()
         self.update()
 
     def refresh(self):
@@ -208,6 +226,20 @@ class PreferencesView(PyHtmlView):
         self._last_update_requested = time.time()
         self.subject.userapi.request_update()
 
+    def set_openvpn_port_options(self):
+        if self.subject.settings.vpn.openvpn.tls_method.get() == OPENVPN_TLS_METHOD.tls_crypt:
+            if self.subject.settings.vpn.openvpn.protocol.get() == OPENVPN_PROTOCOLS.udp:
+                ports = OPENVPN_PORTS.TLSCRYPT.udp
+            else:
+                ports = OPENVPN_PORTS.TLSCRYPT.tcp
+        else:
+            if self.subject.settings.vpn.openvpn.protocol.get() == OPENVPN_PROTOCOLS.udp:
+                ports = OPENVPN_PORTS.TLSAUTH.udp
+            else:
+                ports = OPENVPN_PORTS.TLSAUTH.tcp
+        self.openvpn_port.options = [("auto", "auto")] + [(x, x) for x in ports]
+        if self.subject.settings.vpn.openvpn.port.get() not in ports:
+            self.subject.settings.vpn.openvpn.port.set("auto")
 
 class UpdaterView(PyHtmlView):
     TEMPLATE_STR = '''
