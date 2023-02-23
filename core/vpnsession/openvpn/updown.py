@@ -2,7 +2,10 @@ import logging
 import os
 import ipaddress
 from core.libs.subcommand import SubCommand
-from config.files import NETSH, ROUTE
+from config.config import PLATFORM
+from config.constants import PLATFORMS
+if PLATFORM == PLATFORMS.windows:
+    from config.files import NETSH, ROUTE
 
 class UpDown_Generic():
     def __init__(self, openvpnConnection):
