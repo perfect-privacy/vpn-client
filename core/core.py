@@ -308,4 +308,4 @@ class Core(Observable):
                 "usage.ipv4_is_vpn": self.ipcheck.result4.vpn_connected == True,
                 "usage.ipv6_is_vpn": self.ipcheck.result6.vpn_connected == True,
             }
-            ReporterInstance.report("usage_stats", data=stats, noid=True)
+            ReporterInstance.report_stats(data=stats)

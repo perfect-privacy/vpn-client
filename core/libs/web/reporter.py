@@ -64,6 +64,22 @@ class Reporter():
         self.to_disk()
         self._wakeup_event.set()
 
+    def report_stats(self, data):
+        report = {
+            "id":  "",
+            "osversion": " ; ".join(platform.system_alias(platform.system(), platform.release(), "")),
+            "clientversion": " ; ".join([APP_VERSION, BRANCH, APP_BUILD]),
+            "configversion": "",
+            "action": "usage_stats",
+            "meta": json.dumps(data)
+        }
+        if BRANCH != "release":
+            self._logger.error(report)
+            return
+        self.reports.append(report)
+        self.to_disk()
+        self._wakeup_event.set()
+
     def to_disk(self):
         try:
             d = json.dumps({
