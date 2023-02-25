@@ -231,11 +231,6 @@ class Settings(Observable):
             with open(os.path.join(Path.home(),".perfect_privacy.instid"), "w") as f:
                 f.write(self.installation_id.get())
 
-        # We create a permanent installation id that will not be removed on uninstall to track repeated crash/delete/reinstall cycles
-        # We send this id together with a crash report in case your installation crashes.
-        # This is not optional. If it crashs for on your computer, it might crash or misbehave for users whose liberty or life depends on
-        # a functioning VPN client. So crash reporting is a non optional community effort.
-
     def _on_subitem_updated(self, sender ):
         self.notify_observers()
 
