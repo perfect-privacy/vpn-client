@@ -74,6 +74,7 @@ class Core(Observable):
         self.settings = Settings()
         self.settings.account.attach_observer(self._on_credentials_updated)
         self.settings.startup.start_on_boot.attach_observer(self._on_start_on_boot_updated)
+        ReporterInstance.send_crashreports = self.settings.send_crashreports
 
         self.vpnGroupPlanet = VpnGroupPlanet()
         self.vpnGroupPlanet.load_configs_json()
@@ -273,6 +274,8 @@ class Core(Observable):
             if random.randint(0, 48) != 42: # randomly trigger only ~once a day
                 continue
             if random.randint(0, 500) != 42: # ~once a day have 1:500 chance to actually send stats
+                continue
+            if self.settings.send_statistics.get() == False:
                 continue
             stats = {
                 "settings.interface_level": self.settings.interface_level.get(),

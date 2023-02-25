@@ -27,6 +27,8 @@ class Reporter():
         self.reports_send = 0
         self._logger = logging.getLogger(self.__class__.__name__)
         self.installation_id = "%s" % uuid.uuid4()
+        self.send_crashreports = None
+
         try:
             with open(INSTALL_ID, "r") as f:
                 self.installation_id = f.read()
@@ -45,6 +47,8 @@ class Reporter():
             self._wakeup_event.set()
 
     def report(self, name, data = '', noid = False):
+        if self.send_crashreports is not None and self.send_crashreports.get() == False:
+            return
         report = {
             "id":  "" if noid is True else self.installation_id,
             "osversion": " ; ".join(platform.system_alias(platform.system(), platform.release(), "" if noid is True else platform.version())),
@@ -92,6 +96,8 @@ class Reporter():
         while self._enabled:
             self._wakeup_event.wait()
             self._wakeup_event.clear()
+            if self.send_crashreports is not None and self.send_crashreports.get() == False:
+                return
             if not self._enabled:
                 break
             while len(self.reports) > 0 and self._enabled is True:

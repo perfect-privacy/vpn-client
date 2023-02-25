@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, platform
 from .config import BRANCH
 from .config import PLATFORM
 from .constants import PLATFORMS
@@ -9,7 +9,10 @@ if branch == "_RELEASE": branch = ""
 if PLATFORM == PLATFORMS.windows:
     SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.exe" % branch
 if PLATFORM == PLATFORMS.macos:
-    SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.dmg" % branch
+    if platform.processor() == "arm":
+        SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.pkg" % branch
+    else:
+        SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup_intel.pkg" % branch
 if PLATFORM == PLATFORMS.linux:
     SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.run" % branch
 
@@ -39,7 +42,7 @@ if PLATFORM == PLATFORMS.windows:
         NETSH   = os.path.join(os.environ["WINDIR"], "Sysnative", "netsh.exe")
 
 if PLATFORM == PLATFORMS.macos:
-    OPENVPN       = os.path.join(APP_THIRDPARTY_DIR, "openvpn", "2.5.0", "pp.openvpn")
+    OPENVPN       = os.path.join(APP_THIRDPARTY_DIR, "openvpn", "2.6.0", "pp.openvpn")
     SSH       = os.path.join("/usr","bin", "ssh")
     OBFS          = os.path.join(APP_THIRDPARTY_DIR, "stealth", "pp.obfs4proxy")
     STUNNEL       = os.path.join(APP_THIRDPARTY_DIR, "stealth", "pp.stunnel")

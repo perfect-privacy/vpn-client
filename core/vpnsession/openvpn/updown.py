@@ -162,8 +162,6 @@ class UpDown_Macos(UpDown_Generic):
     def add_route_ipv4(self, source_ip, source_mask, target, device = ""):
         source_mask = ipaddress.IPv4Network('0.0.0.0/%s' % source_mask).prefixlen
         args =  ["-n", "add", "-net", "%s/%s" % (source_ip, source_mask)]
-        if device != "" and device != None:
-            args.extend(["-iface", device])
         args.append(target)
         success, stdout, stderr = SubCommand().run("route", args)
 
@@ -178,8 +176,6 @@ class UpDown_Macos(UpDown_Generic):
     def delete_route_ipv4(self, source_ip, source_mask, target = "", device = ""):
         source_mask = ipaddress.IPv4Network('0.0.0.0/%s' % source_mask).prefixlen
         args = ["-n", "delete", "-net", "%s/%s" % (source_ip, source_mask)]
-        if device != "" and device != None:
-            args.extend(["-iface" ,device])
         if target != "":
             args.append(target)
         success, stdout, stderr = SubCommand().run("route", args)

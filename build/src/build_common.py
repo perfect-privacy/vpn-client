@@ -69,9 +69,7 @@ class BuildCommon():
     def _copy_files(self):
         # create var dirs
         os.mkdir(os.path.join(self.BUILD_DIR_TARGET, "var"))
-        shutil.copytree(
-            os.path.join(self.SOURCE_DIR, "var", "configs"),
-            os.path.join(self.BUILD_DIR_TARGET, "var", "configs"))
+        shutil.copytree(os.path.join(self.SOURCE_DIR, "var", "configs"), os.path.join(self.BUILD_DIR_TARGET, "var", "configs"))
 
         for f in glob.glob(os.path.join(self.BUILD_DIR_TMP, "dist", "perfect-privacy-service", "*")):
             try:
@@ -97,7 +95,6 @@ class BuildCommon():
                 pass
 
         shutil.rmtree(os.path.join(self.SOURCE_DIR, "build_tmp", "build"))
-        #shutil.rmtree(os.path.join(self.SOURCE_DIR, "build_tmp", "dist"))
 
 
     def _create_installer(self):

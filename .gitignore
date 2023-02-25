@@ -29,3 +29,5 @@ thirdparty/thirdparty.zip
 thirdparty/macos
 thirdparty/macos-arm
 thirdparty/windows
+foo.py
+foo.spec

@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, platform
 from config.config import PLATFORM
 
 if getattr( sys, 'frozen', False ) == True:  # check if we are bundled by pyinstaller
@@ -6,7 +6,10 @@ if getattr( sys, 'frozen', False ) == True:  # check if we are bundled by pyinst
     APP_THIRDPARTY_DIR = os.path.join(APP_DIR, "thirdparty")
 else:
     APP_DIR            = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-    APP_THIRDPARTY_DIR = os.path.join(APP_DIR, "thirdparty", PLATFORM)
+    if platform.processor() == "arm":
+        APP_THIRDPARTY_DIR = os.path.join(APP_DIR, "thirdparty", "%s-arm" % PLATFORM)
+    else:
+        APP_THIRDPARTY_DIR = os.path.join(APP_DIR, "thirdparty", PLATFORM)
 
 APP_VAR_DIR         = os.path.join(APP_DIR, "var")
 CONFIG_DIR          = os.path.join(APP_VAR_DIR, "configs")

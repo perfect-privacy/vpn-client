@@ -214,6 +214,8 @@ class Settings(Observable):
         self.account = Settings_Account()
         self.startup = Settings_Startup()
         self.is_first_startup =  PermanentProperty(self.__class__.__name__ + ".is_first_startup", True)
+        self.send_crashreports =  PermanentProperty(self.__class__.__name__ + ".send_crashreports", True)
+        self.send_statistics =  PermanentProperty(self.__class__.__name__ + ".send_statistics", True)
         self.first_start_wizard_was_run = PermanentProperty(self.__class__.__name__ + ".first_start_wizard_was_run", False)
         self.first_start_wizard_was_run.attach_observer(self._on_subitem_updated)
 

@@ -46,7 +46,9 @@ class PreferencesView(PyHtmlView):
                 </section>
             {% endif %}
         </div> 
-        <h2>Connection</h2>
+        {% if (pyview.subject.settings.vpn.vpn_protocol.get() == pyview.VPN_PROTOCOLS.openvpn and  pyview.subject.settings.interface_level.get() != "simple" ) or pyview.PLATFORM == pyview.PLATFORMS.windows %}
+            <h2>Connection</h2>
+        {% endif %}
         {% if pyview.PLATFORM == pyview.PLATFORMS.windows %}
             <div class="boxes">
                 <section>
@@ -132,9 +134,11 @@ class PreferencesView(PyHtmlView):
 
                 {% endif %}            
             </div>
-        {% endif %}            
+        {% endif %}
+        <h2>Updates</h2>
         {{ pyview.updater.render() }}
         {% if pyview.subject.settings.interface_level.get() == "expert" %}
+            <h2>OpenVPN Driver</h2>
             {% if pyview.openvpndriver %}
                 {{ pyview.openvpndriver.render() }}
             {% endif %}       
@@ -142,6 +146,47 @@ class PreferencesView(PyHtmlView):
                 {{ pyview.deviceManager.render() }} 
             {% endif %}
         {% endif %}  
+        
+        
+        <h2>Help our community</h2>
+        <div class="boxes">
+            <section> 
+                <h3>
+                    Automatically send crash reports
+                    <div class="input" style="width:8em;"> {{ pyview.send_crashreports.render() }} </div>
+                </h3> 
+                <div>
+                    We, and all other users, would greatly appreciate if you keep this option active. If our VPN client, 
+                    or some background component like leak protection crashes on your system, 
+                    it might behave incorrectly for users whose life and liberty depends on a functioning VPN.
+                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                    <div class="tooltip" style="display:none">
+                        Crash reports include the client version, installation ID, the OS, and the actual internal python stack trace of the crash.
+                        They do not contain any of the bullshit information that causes us all to hate and block telemetry and is not assigned to a IP/User/Account or anything else. 
+                    </div>
+                </div>
+            </section>
+            <section> 
+                <h3>
+                    Automatically report local settings
+                    <div class="input" style="width:8em;"> {{ pyview.send_statistics.render() }} </div>
+                </h3> 
+                <div>
+                    This option helps us collect statistics about the actually used VPN settings, stealth options and openvpn drivers.
+                    It does not collect any system information except your operating system (Windows, Mac, Linux).
+                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                    <div class="tooltip" style="display:none">
+                        Statistics include the following information and nothing else:<br> 
+                        Client version, OS (without exact version), interface level (simple,advanced, expert), leak protection settings, 
+                        stealth settings (without private nodes), vpn protocol, openvpn driver, tls method, port, max cascading hops, 
+                        the actual number of hops used, if you have an Ipv4, if you have an Ipv6 and if you are connected to the VPN.<br>
+                        Reports are not assigned to a IP/User/Account/Installation or anything else (As you might expect from our service).
+                        Statistics are only collected once approximatly every 500 days. 
+                    </div>
+                </div>
+            </section>      
+        </div>
+        
     </div>
     '''
 
@@ -204,6 +249,8 @@ class PreferencesView(PyHtmlView):
         self.enforce_primary_ip = CheckboxComponent(subject.userapi.random_exit_ip, self, label="", inverted=True)
         self.neuro_routing = CheckboxComponent(subject.userapi.neuro_routing, self, label="")
         self.start_on_boot = CheckboxComponent(subject.settings.startup.start_on_boot, self)
+        self.send_crashreports = CheckboxComponent(subject.settings.send_crashreports, self)
+        self.send_statistics = CheckboxComponent(subject.settings.send_statistics, self)
         self.updater = UpdaterView(subject, self)
 
         self.osname = ""

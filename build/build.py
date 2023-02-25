@@ -8,9 +8,6 @@ from build.src import BuildWindows, BuildMacos, BuildLinux
 def print_help():
     print ('''
     build.py <platform> <frontend> <branch> <buildnumber>
-    
-    platform : windows | linux | macos | raspberry | privacypi
-    frontend : default | privacypi
     branch   : release | dev
     buildnumber: set by jenkins or 0 on tests
 ''')
@@ -25,10 +22,9 @@ if __name__ == "__main__":
     elif PLATFORM == "linux":
         build = BuildLinux()
 
-    elif PLATFORM == "macos":
+    elif PLATFORM == "macos" or PLATFORM == "macos-arm":
         build = BuildMacos()
-    elif PLATFORM == "macos-arm":
-        build = BuildMacos()
+
     #elif PLATFORM == "raspberry":
     #    build = BuildRaspberry()
 
