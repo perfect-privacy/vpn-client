@@ -180,8 +180,9 @@ class Core(Observable):
 
         elif PLATFORM == PLATFORMS.macos:
             if self.settings.startup.start_on_boot.get() == False:
-                os.system('launchctl unload "/Library/LaunchAgents/perfect-privacy.plist"')
-                os.system('rm "/Library/LaunchAgents/perfect-privacy.plist"')
+                if os.path.exists("/Library/LaunchAgents/perfect-privacy.plist"):
+                    os.system('launchctl bootout system "/Library/LaunchAgents/perfect-privacy.plist"')
+                    os.system('rm "/Library/LaunchAgents/perfect-privacy.plist"')
             else:
                 s = '''
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -201,7 +202,7 @@ class Core(Observable):
                 '''
                 with open("/Library/LaunchAgents/perfect-privacy.plist", "w") as f:
                     f.write(s.replace("\n                    ",""))
-                os.system('launchctl load "/Library/LaunchAgents/perfect-privacy.plist"')
+                os.system('launchctl bootstrap system "/Library/LaunchAgents/perfect-privacy.plist"')
 
     def _on_credentials_updated(self, sender):
         self.settings.account.account_expiry_date_utc = None

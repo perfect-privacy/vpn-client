@@ -2,7 +2,11 @@ import os, sys
 import subprocess
 
 import psutil
-from PyQt6.QtCore import Qt
+try:
+    from PyQt6.QtCore import Qt
+except:
+    from PyQt5.QtCore import Qt
+
 from pyhtmlgui.apps.qt import PyHtmlQtApp, PyHtmlQtTray, PyHtmlQtWindow
 from config.config import SHARED_SECRET, PLATFORM, SERVICE_PORT
 from config.constants import PLATFORMS
@@ -59,7 +63,7 @@ class MainApp():
             self.window.on_show_event.attach_observer(self.app.show_osx_dock)
             self.app.on_activated_event.attach_observer(self.window.show)
         else:
-            self.window.on_minimized_event.attach_observer(self.window.hide)
+            #self.window.on_minimized_event.attach_observer(self.window.hide)
             self.tray.on_left_clicked.attach_observer(self.window.show)
         self.window._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self.tray._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)

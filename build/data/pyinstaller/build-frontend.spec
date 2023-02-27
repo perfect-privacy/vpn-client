@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-import sys
+import sys, platform
 
 try:
     name        = sys.argv[-3]
@@ -9,6 +9,7 @@ except:
     print("args: name, root_folder, script")
     exit(1)
 
+
 a = Analysis(
     [script],
     pathex          = [root_folder],
@@ -17,7 +18,7 @@ a = Analysis(
     hiddenimports   = ["sqlite3"],
     hookspath       = [os.path.join(root_folder, "build", "data", "pyinstaller")],
     runtime_hooks   = [],
-    excludes        = ["PyQt5"],
+    excludes        = ["PyQt5" if platform.processor() == "arm" else "PyQt6"],
     win_no_prefer_redirects = False,
     win_private_assemblies  = False,
     cipher          = None,

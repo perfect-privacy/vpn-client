@@ -1,1 +1,3 @@
 pyobjc
+PyQt5
+pyqtwebengine

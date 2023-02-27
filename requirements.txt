@@ -10,5 +10,3 @@ markupsafe
 werkzeug
 flask
 flask-sock
-PyQt6
-pyqt6-webengine
