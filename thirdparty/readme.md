@@ -18,8 +18,8 @@
     - rename to pp.tstunnel.exe
     
 - macos/stealth/pp.tstunnel
-    - brew install stunnel   
-    - get /usr/local/bin/stunnel
+    - download stunnel src https://www.stunnel.org/downloads.html
+    - ./configure ; make ; get src/stunnel
     - rename to pp.tstunnel
         
 - windows/stealth/plink.exe

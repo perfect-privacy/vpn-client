@@ -33,7 +33,6 @@ pyz = PYZ(
 exe = EXE(pyz,
     a.scripts,
     [],
-    target_arch= "arm64",
     exclude_binaries = True,
     name        = name,
     debug       = True,

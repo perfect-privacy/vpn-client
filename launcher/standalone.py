@@ -6,7 +6,8 @@ sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
 try:
     from core.libs.web.reporter import ReporterInstance
-except:
+except Exception as e:
+    print(e)
     ReporterInstance = None
 try:
     from gui import getPyHtmlGuiInstance
