@@ -1,3 +1,4 @@
+import logging
 import subprocess
 from subprocess import PIPE
 from threading import Thread, Lock
@@ -10,6 +11,7 @@ class Powershell():
         self._stdout_read_tread = None
         self._process = None
         self.lock = Lock()
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def execute(self, command, as_data = False):
         self.lock.acquire()
@@ -24,6 +26,8 @@ class Powershell():
                 except:
                     result = None
             return result
+        except Exception as e:
+            self._logger.debug("Failed to run powershell '%s' Exception: %s" % (command, e) )
         finally:
             self.lock.release()
 
@@ -41,6 +45,7 @@ class Powershell():
         self._process.stdin.write(b'' + command + b" ; ")
         self._process.stdin.write(b'Write-Host __ENDMARKER__ \n')
         self._process.stdin.flush()
+
         # FIXME : Sometimes causes an error if powershell decides to not respond?
         # FIXME2: Really?
 
@@ -48,7 +53,7 @@ class Powershell():
         startfound = False
         while True:
             try:
-                line = self._stdout_queue.get(timeout=15)
+                line = self._stdout_queue.get(timeout=12)
             except Empty:
                 break
             if line == b"__ENDMARKER__\n":

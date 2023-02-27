@@ -8,15 +8,21 @@ class SubCommand():
 
     def run(self, cmd, args = [], timeout=10):
         args = [cmd] + args
-        proc = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        success = False
+        stdout = b""
+        stderr = b""
         try:
-            stdout, stderr = proc.communicate(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            stdout, stderr = proc.communicate()
-        success = proc.returncode == 0
+            proc = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            try:
+                stdout, stderr = proc.communicate(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                stdout, stderr = proc.communicate()
+            success = proc.returncode == 0
+            msg = "Command: %s , Success: %s" % ( args, success)
+        except Exception as e:
+            msg = "Command: %s , Failed: %s" % ( args, e)
 
-        msg = "Command: %s , Success: %s" % ( args, success)
         if success is False or stderr != b"":
             if stdout != b"":
                 msg += ", Stdout: %s " % ( stdout[:1000].strip())

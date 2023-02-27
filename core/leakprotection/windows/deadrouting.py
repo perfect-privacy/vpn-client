@@ -13,7 +13,8 @@ class DeadRouting():
         self.whitelisted_server_ip = server
         if self.is_enabled is True:
             default_gw = self._find_default_gateway()
-            SubCommand().run(ROUTE, ["add", self.whitelisted_server_ip, "mask", "255.255.255.255", default_gw])
+            if default_gw is not None:
+                SubCommand().run(ROUTE, ["add", self.whitelisted_server_ip, "mask", "255.255.255.255", default_gw])
 
     def clear_whitelist(self):
         if self.whitelisted_server_ip is not None and self.is_enabled is True:
@@ -25,7 +26,8 @@ class DeadRouting():
             self.is_enabled = True
             if self.whitelisted_server_ip is not None:
                 default_gw = self._find_default_gateway()
-                SubCommand().run(ROUTE, ["add", self.whitelisted_server_ip, "mask", "255.255.255.255", default_gw])
+                if default_gw is not None:
+                    SubCommand().run(ROUTE, ["add", self.whitelisted_server_ip, "mask", "255.255.255.255", default_gw])
             SubCommand().run(ROUTE, ["add", "-p",   "0.0.0.0", "mask", "128.0.0.0", "10.255.255.255", "metric", "9999"]) # bugus unreachable ip, 127.0.0.1 does not work
             SubCommand().run(ROUTE, ["add", "-p", "128.0.0.0", "mask", "128.0.0.0", "10.255.255.255", "metric", "9999"])
             SubCommand().run(NETSH, ["interface", "ipv6", "add", "route", "2000::/4", "interface=1", "store=persistent"])
