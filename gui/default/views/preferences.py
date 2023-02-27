@@ -19,6 +19,15 @@ class PreferencesView(PyHtmlView):
                 </h3>
                 <div>If checked, the application will automatically start when you log into your computer.</div>
             </section>
+            <section>
+                <h3>
+                    Connect on startup
+                    <div class="input"> {{ pyview.connect_on_start.render() }} </div>
+                </h3>
+                <div>If checked, the application will automatically connect to the VPN on startup. </div>
+            </section>            
+            
+            
         </div>   
         <h2>External IP</h2>
         Note: It might take up to 3 minutes for any changes to apply on our Servers. 
@@ -249,6 +258,7 @@ class PreferencesView(PyHtmlView):
         self.enforce_primary_ip = CheckboxComponent(subject.userapi.random_exit_ip, self, label="", inverted=True)
         self.neuro_routing = CheckboxComponent(subject.userapi.neuro_routing, self, label="")
         self.start_on_boot = CheckboxComponent(subject.settings.startup.start_on_boot, self)
+        self.connect_on_start = CheckboxComponent(subject.settings.startup.connect_on_start, self)
         self.send_crashreports = CheckboxComponent(subject.settings.send_crashreports, self)
         self.send_statistics = CheckboxComponent(subject.settings.send_statistics, self)
         self.updater = UpdaterView(subject, self)

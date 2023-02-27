@@ -171,12 +171,17 @@ Section "Perfect Privacy" SEC_MAIN
     nsExec::ExecToStack  "TaskKill /IM pp.plink.exe /F"       # kill if needed
     nsExec::ExecToStack  "TaskKill /IM pp.tstunnel.exe /F"    # kill if needed
 
+    CopyFiles /SILENT /FILESONLY $INSTDIR\var\storage.db $TEMP
+    RMDir /r /REBOOTOK $INSTDIR
+
     File /r ..\..\..\build_tmp\perfect-privacy\*
 
     CreateDirectory "$SMPROGRAMS\Perfect Privacy"
     CreateShortCut  "$SMPROGRAMS\Perfect Privacy\Perfect Privacy.lnk" "$INSTDIR\perfect-privacy.exe"
     CreateShortCut  "$SMPROGRAMS\Perfect Privacy\Uninstall.lnk"       "$INSTDIR\uninstall.exe"
     CreateShortCut  "$DESKTOP\Perfect Privacy.lnk"                    "$INSTDIR\perfect-privacy.exe"
+
+    CopyFiles /SILENT /FILESONLY $TEMP\storage.db $INSTDIR\var
 
     nsExec::ExecToStack '"$INSTDIR\perfect-privacy-service.exe" --startup auto install' # install windows service
     nsExec::ExecToStack '"$INSTDIR\perfect-privacy-service.exe" start'                  # start windows service

@@ -1,38 +1,11 @@
-# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
-### BEGIN LICENSE
-# Copyright (C) 2014-2015 Perfect Privacy <support@perfect-privacy.com>
-# This program is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License version 3, as published
-# by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranties of
-# MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
-# PURPOSE.  See the GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program.  If not, see <http://www.gnu.org/licenses/>.
-### END LICENSE
 import logging
 import os
 import random
-import subprocess
-import sys
 import threading
 import time
 from threading import Timer
-
-#from config.paths import APP_UPDATE_DIR, SOFTWARE_UPDATE_IN_PROGRESS_PATH
-#from core.libs.smartnet import SmartNet
-from config.files import SOFTWARE_UPDATE_FILENAME
-from config.paths import SOFTWARE_UPDATE_DIR
-from core.userapi.userapi import UserAPI
-#from core.libs.wlanaccesspoint import WlanAccesspoint
-#from core.libs.wlanclient.wlanClient import WlanClient
-#from core.vpn.configs import VpnServerPlanet
-# from .vpn.vpn_config_loader import ConfigLoader #, get_group_by_identifier
 from pyhtmlgui import Observable
-
+from core.userapi.userapi import UserAPI
 from .leakprotection.leakprotection_generic import LeakProtectionState
 from .libs.powershell import Powershell
 from .configupdater import ConfigUpdater
@@ -52,7 +25,9 @@ from config.config import PLATFORM
 from config.constants import PLATFORMS, VPN_PROTOCOLS
 from config.paths import APP_DIR
 from .vpnsession.session import SessionState
-
+if PLATFORM == PLATFORMS.windows:
+    import win32com.client
+    import pythoncom
 
 class Core(Observable):
 
@@ -131,6 +106,7 @@ class Core(Observable):
         self.settings.vpn.openvpn.cascading_max_hops.attach_observer(self.on_updated_vpnsettings)
         self._send_usage_stats_thread = threading.Thread(target=self.check_send_usage_stats, daemon=True)
         self._send_usage_stats_thread.start()
+        self._on_start_on_boot_updated() # after first install set autostart true
 
     def on_updated_vpnsettings(self):
         if self.settings.vpn.vpn_protocol.get() == VPN_PROTOCOLS.openvpn:
@@ -185,7 +161,7 @@ class Core(Observable):
             return False
         return True
 
-    def _on_start_on_boot_updated(self, sender):
+    def _on_start_on_boot_updated(self, sender=None):
         if PLATFORM == PLATFORMS.windows:
             startup_path = "c:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp"
             shortcut_path = os.path.join(startup_path, "Perfect Privacy.lnk")
@@ -195,7 +171,7 @@ class Core(Observable):
             else:
                 if not os.path.exists(startup_path):
                     os.makedirs(startup_path)
-                import win32com.client
+                pythoncom.CoInitialize()
                 shell = win32com.client.Dispatch("WScript.Shell")
                 shortcut = shell.CreateShortCut(shortcut_path)
                 shortcut.IconLocation = str(os.path.join(APP_DIR, "gui", "default", "static", "img", "pp_icon.ico"))

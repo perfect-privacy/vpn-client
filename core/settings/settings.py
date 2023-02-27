@@ -194,10 +194,10 @@ class Settings_Account(Observable):
 class Settings_Startup(Observable):
     def __init__(self):
         super().__init__()
-        self.start_on_boot         = PermanentProperty(self.__class__.__name__ + ".start_on_boot", False)
+        self.start_on_boot         = PermanentProperty(self.__class__.__name__ + ".start_on_boot", True)
         self.start_on_boot.attach_observer(self._on_subitem_updated)
-        self.start_minimized       = PermanentProperty(self.__class__.__name__ + ".start_minimized", False)
-        self.start_minimized.attach_observer(self._on_subitem_updated)
+        #self.start_minimized       = PermanentProperty(self.__class__.__name__ + ".start_minimized", False)
+        #self.start_minimized.attach_observer(self._on_subitem_updated)
         self.connect_on_start      = PermanentProperty(self.__class__.__name__ + ".connect_on_start", False)
         self.connect_on_start.attach_observer(self._on_subitem_updated)
 
