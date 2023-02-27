@@ -45,7 +45,10 @@ if PLATFORM == PLATFORMS.macos:
     OPENVPN       = os.path.join(APP_THIRDPARTY_DIR, "openvpn", "2.6.0", "pp.openvpn")
     SSH       = os.path.join("/usr","bin", "ssh")
     OBFS          = os.path.join(APP_THIRDPARTY_DIR, "stealth", "pp.obfs4proxy")
-    STUNNEL       = os.path.join(APP_THIRDPARTY_DIR, "stealth", "pp.stunnel")
+    if platform.processor() == "arm":
+        STUNNEL       = os.path.join(APP_THIRDPARTY_DIR, "stealth", "pp.stunnel")
+    else:
+        STUNNEL = os.path.join(APP_THIRDPARTY_DIR, "stealth-arm", "pp.stunnel")
 
 if PLATFORM == PLATFORMS.linux:
     OPENVPN    = "/usr/sbin/openvpn"
