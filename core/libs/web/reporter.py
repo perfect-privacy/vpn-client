@@ -28,6 +28,7 @@ class Reporter():
         self._logger = logging.getLogger(self.__class__.__name__)
         self.installation_id = "%s" % uuid.uuid4()
         self.send_crashreports = None
+        self.last_report_send = 0
 
         try:
             with open(INSTALL_ID, "r") as f:
@@ -47,8 +48,6 @@ class Reporter():
             self._wakeup_event.set()
 
     def report(self, name, data = '', noid = False):
-        if self.send_crashreports is not None and self.send_crashreports.get() == False:
-            return
         report = {
             "id":  "" if noid is True else self.installation_id,
             "osversion": " ; ".join(platform.system_alias(platform.system(), platform.release(), "" if noid is True else platform.version())),
@@ -57,9 +56,17 @@ class Reporter():
             "action": name,
             "meta": json.dumps(data)
         }
+        self._logger.error(report)
+
         if BRANCH != "release":
-            self._logger.error(report)
             return
+        if self.send_crashreports is not None and self.send_crashreports.get() == False:
+            return
+        if (self.reports_send > 5 or len(self.reports) > 5) and self.last_report_send + 3600 < time.time()  and self.last_report_send < time.time() - 20:
+            # always send first 5 reports, send max 1 report per hour, burst reports within 20 seconds
+            return
+
+        self.last_report_send = time.time()
         self.reports.append(report)
         self.to_disk()
         self._wakeup_event.set()
@@ -84,7 +91,8 @@ class Reporter():
         try:
             d = json.dumps({
                 "reports" : self.reports,
-                "reports_send" : self.reports_send
+                "reports_send" : self.reports_send,
+                "last_report_send" : self.last_report_send
             })
             with open(REPORT_FILE, "w") as f:
                 f.write(d)
@@ -97,6 +105,7 @@ class Reporter():
                 d = json.loads(f.read())
                 self.reports = d["reports"]
                 self.reports_send = d["reports_send"]
+                self.last_report_send = d["last_report_send"]
         except:
             pass
 

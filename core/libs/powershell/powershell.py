@@ -1,9 +1,13 @@
 import logging
 import subprocess
+import traceback
 from subprocess import PIPE
 from threading import Thread, Lock
 from queue import Queue, Empty
 import json
+
+from core.libs.web.reporter import ReporterInstance
+
 
 class Powershell():
     def __init__(self):
@@ -15,19 +19,23 @@ class Powershell():
 
     def execute(self, command, as_data = False):
         self.lock.acquire()
+        result = ""
         try:
             if as_data is True:
                 if not command.endswith("ConvertTo-Json"):
                     command += " | ConvertTo-Json"
             result = self._execute_locked(command)
             if as_data is True:
-                try:
-                    result = json.loads(result)
-                except:
-                    result = None
+                result = json.loads(result)
             return result
         except Exception as e:
+            ReporterInstance.report("powershell_failed", {
+                "command" : command,
+                "exception": traceback.format_exc(),
+                "result": result
+            })
             self._logger.debug("Failed to run powershell '%s' Exception: %s" % (command, e) )
+            return None
         finally:
             self.lock.release()
 

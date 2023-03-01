@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from .leakprotection_generic import LeakProtection_Generic
 from .windows.network_interfaces import NetworkInterfaces
@@ -18,6 +19,8 @@ from .windows.firewallrules import \
     FirewallRuleBlockIpv6RouteAnnouncements,\
     FirewallRuleBlockIpv6Dhcp, \
     FirewallReset
+from ..libs.web.reporter import ReporterInstance
+
 
 class LeakProtection_windows(LeakProtection_Generic):
     def __init__(self, core=None):
@@ -150,6 +153,15 @@ class LeakProtection_windows(LeakProtection_Generic):
         self.networkInterfaces.disableDnsLeakProtection()
 
     def reset(self):
-        self.deadrouting.disable(force=True)
-        self.networkInterfaces.disableDnsLeakProtection()
-        self.firewallReset.run()
+        try:
+            self.deadrouting.disable(force=True)
+        except Exception as e:
+            ReporterInstance.report("firewall_reset_deadrouting_failed", traceback.format_exc())
+        try:
+            self.networkInterfaces.disableDnsLeakProtection()
+        except Exception as e:
+            ReporterInstance.report("firewall_reset_dns_failed", traceback.format_exc())
+        try:
+            self.firewallReset.run()
+        except Exception as e:
+            ReporterInstance.report("firewall_reset_firewall_failed", traceback.format_exc())

@@ -1,8 +1,11 @@
 import logging
+import traceback
+
 from config.constants import PROTECTION_SCOPES
 import threading
 from pyhtmlgui import  Observable
 from core.libs.generic_state import GenericState
+from core.libs.web.reporter import ReporterInstance
 
 
 class LeakProtectionState(GenericState):
@@ -74,14 +77,20 @@ class LeakProtection_Generic(Observable):
     def __disable(self):
         self.state.set(LeakProtectionState.DISABLING)
         self.notify_observers()
-        self._disable()
+        try:
+            self._disable()
+        except Exception as e:
+            ReporterInstance.report("leakprotection_disabled_failed", traceback.format_exc())
         self.state.set(LeakProtectionState.DISABLED)
         self.notify_observers()
 
     def __enable(self):
         self.state.set(LeakProtectionState.ENABLEING)
         self.notify_observers()
-        self._enable()
+        try:
+            self._enable()
+        except Exception as e:
+            ReporterInstance.report("leakprotection_enable_failed", traceback.format_exc())
         self.state.set(LeakProtectionState.ENABLED)
         self.notify_observers()
 

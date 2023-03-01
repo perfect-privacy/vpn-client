@@ -1,7 +1,9 @@
 import threading
 import logging
 import time
+import traceback
 
+from core.libs.web.reporter import ReporterInstance
 from core.openvpndriver.driver_state import OpenVpnDriverState
 from pyhtmlgui import  Observable
 from config.constants import OPENVPN_DRIVER
@@ -202,11 +204,16 @@ class DeviceManager(Observable):
     def _enum_devices(self):
         networkdatas = self.core.powershell.execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
         name_to_index = {}
+        if networkdatas is None:
+            self._logger.debug("Failed to load device enumeration")
+            return []
+
         for networkdata in networkdatas:
             try:
                 name_to_index[networkdata["InterfaceAlias"]] = networkdata["InterfaceIndex"]
             except Exception as e:
                 self._logger.debug("Failed to load networkdata, %s" % e)
+                ReporterInstance.report("devicemanager_get_interfaces_failed", traceback.format_exc())
 
         success, stdout, stderr = SubCommand().run(OPENVPN, [ "--show-adapters"])
         for line in stdout.split(b"\n"):
@@ -223,6 +230,7 @@ class DeviceManager(Observable):
                     d.type = line.split(b"}")[1].strip().decode("UTF-8")
                     yield d
             except Exception as e:
+                ReporterInstance.report("devicemanager_show_adapters_failed", traceback.format_exc())
                 self._logger.debug("Failed to parse device enumeration, %s" % e)
         return []
 

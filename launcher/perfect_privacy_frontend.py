@@ -1,5 +1,7 @@
 import os, sys
 import subprocess
+PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
+CRASHLOG = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
 
 import psutil
 try:
@@ -11,10 +13,8 @@ from pyhtmlgui.apps.qt import PyHtmlQtApp, PyHtmlQtTray, PyHtmlQtWindow
 from config.config import SHARED_SECRET, PLATFORM, SERVICE_PORT
 from config.constants import PLATFORMS
 from config.paths import APP_DIR
-
-PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
-CRASHLOG = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
-
+if PLATFORM == PLATFORMS.windows:
+    import win32com.shell.shell as shell
 
 ERROR_PAGE = '''
     <div style="text-align:center;color:gray">
@@ -48,6 +48,7 @@ class MainApp():
         self.window.addJavascriptFunction("exit_app", self.stop)
         self.window.addJavascriptFunction("copy_to_clipboard", PyHtmlQtApp.clipboard().setText)
         self.window.addJavascriptFunction("open_crashlog", self.open_crashlog)
+        self.window.addJavascriptFunction("fix_service_as_admin", self.fix_service_as_admin)
 
         self.tray = PyHtmlQtTray(self.app, url="http://127.0.0.1:%s/tray?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[300,400], icon_path = self.icon_path)
         self.tray.addJavascriptFunction("exit_app", self.stop)
@@ -84,6 +85,14 @@ class MainApp():
         else:  # linux variants
             subprocess.call(('xdg-open', crashlog))
 
+    def fix_service_as_admin(self, *args):
+        if PLATFORM == PLATFORMS.windows:
+            try:
+                return "status" in psutil.win_service_get("Perfect Privacy VPN").as_dict()
+            except: # install if needed
+                shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect_privacy_service.exe"), lpParameters='--startup auto install')
+            shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect_privacy_service.exe"), lpParameters='start')
+
 class StartupCheckerWin():
 
     def check(self):
@@ -113,7 +122,10 @@ class StartupCheckerWin():
         if self.check_service_exe() == False:
             errormsg = "Some installation files are missing, make sure they have not been quarantined by your anti virus software.<br> Please reinstall Perfect Privacy"
         elif self.check_service_installed() == False:
-            errormsg = "The VPN background service is not installed, make sure it has not been blocked by your anti virus software.<br> Please reinstall Perfect Privacy"
+            errormsg = "The VPN background service is not installed<br> "\
+                        "If this happens repeatedly, make sure no other security  or anti virus software is blocking our service.<br>" \
+                       '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" ' \
+                       'onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button>'
         elif self.check_service_running() == False:
             if os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")):
                 errormsg = 'The VPN background service apparently crashed, and left a crash log.<br>' \
@@ -122,7 +134,9 @@ class StartupCheckerWin():
 
             else:
                 errormsg = "The VPN background service is not running, but no reason is apparent. <br>" \
-                           "Please try restarting your computer, or reinstall Perfect Privacy.<br>" \
+                           "If this happens repeatedly, make sure no other security software is blocking our service.<br>" \
+                            '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" ' \
+                           'onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button>'\
                            "If all else fails, please contact Perfect Privacy support"
         return errormsg
 

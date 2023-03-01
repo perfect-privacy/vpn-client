@@ -1,6 +1,10 @@
+import traceback
+
 from core.libs.subcommand import SubCommand
 import random
 from config.files import NETSH
+from core.libs.web.reporter import ReporterInstance
+
 
 class NetworkInterface():
     def __init__(self, core, all_ipv4_dns_servers, all_ipv6_dns_servers):
@@ -96,42 +100,55 @@ class NetworkInterfaces():
         if self.networkinterfaces is None:
             self.networkinterfaces = {}
         networkdatas = self.core.powershell.execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
-        for networkdata in networkdatas:
-            if networkdata["InterfaceIndex"] not in self.networkinterfaces:
-                ni = NetworkInterface(self.core, all_ipv4_dns_servers, all_ipv6_dns_servers)
-                ni.index =  networkdata["InterfaceIndex"]
-                self.networkinterfaces[ni.index] = ni
-            else:
-                ni = self.networkinterfaces[ networkdata["InterfaceIndex"]]
+        if networkdatas is None:
+            ReporterInstance.report("failed_to_load_network_devices","")
+            return
 
-            ni.interfacealias = networkdata["InterfaceAlias"]
-            if networkdata["AddressFamily"] == 2:
-                ni.dns_servers_v4 = networkdata["ServerAddresses"]
-            if networkdata["AddressFamily"] == 23:
-                ni.dns_servers_v6 = networkdata["ServerAddresses"]
+        for networkdata in networkdatas:
+            try:
+                if networkdata["InterfaceIndex"] not in self.networkinterfaces:
+                    ni = NetworkInterface(self.core, all_ipv4_dns_servers, all_ipv6_dns_servers)
+                    ni.index =  networkdata["InterfaceIndex"]
+                    self.networkinterfaces[ni.index] = ni
+                else:
+                    ni = self.networkinterfaces[ networkdata["InterfaceIndex"]]
+
+                ni.interfacealias = networkdata["InterfaceAlias"]
+                if networkdata["AddressFamily"] == 2:
+                    ni.dns_servers_v4 = networkdata["ServerAddresses"]
+                if networkdata["AddressFamily"] == 23:
+                    ni.dns_servers_v6 = networkdata["ServerAddresses"]
+            except Exception as e:
+                ReporterInstance.report("get_dns_failed", traceback.format_exc())
 
         networkdatas = self.core.powershell.execute("Get-CimInstance -Class Win32_NetworkAdapterConfiguration | ConvertTo-Json", as_data = True )
+        if networkdatas is None:
+            ReporterInstance.report("failed_to_load_network_devices_part2", "")
+            return
         for networkdata in networkdatas:
-            if networkdata["InterfaceIndex"] not in self.networkinterfaces:
-                continue
-            ni = self.networkinterfaces[ networkdata["InterfaceIndex"]]
-            ni.dhcpenabled = networkdata["DHCPEnabled"]
-            ni.servicename = networkdata["ServiceName"]
-            ni.ipenabled   = networkdata["IPEnabled"]
-            ni.ipv4 = []
-            ni.ipv6 = []
-            if networkdata["IPAddress"] is not None:
-                for i in range(0,len(networkdata["IPAddress"])):
-                    ip = networkdata["IPAddress"][i]
-                    netmask = networkdata["IPSubnet"][i]
-                    if ip.find(":") != -1:
-                        ipn = (ip, netmask)
-                        if ipn not in ni.ipv6:
-                            ni.ipv6.append(ipn)
-                    else:
-                        ipn = (ip, netmask)
-                        if ipn not in ni.ipv4:
-                            ni.ipv4.append(ipn)
+            try:
+                if networkdata["InterfaceIndex"] not in self.networkinterfaces:
+                    continue
+                ni = self.networkinterfaces[ networkdata["InterfaceIndex"]]
+                ni.dhcpenabled = networkdata["DHCPEnabled"]
+                ni.servicename = networkdata["ServiceName"]
+                ni.ipenabled   = networkdata["IPEnabled"]
+                ni.ipv4 = []
+                ni.ipv6 = []
+                if networkdata["IPAddress"] is not None:
+                    for i in range(0,len(networkdata["IPAddress"])):
+                        ip = networkdata["IPAddress"][i]
+                        netmask = networkdata["IPSubnet"][i]
+                        if ip.find(":") != -1:
+                            ipn = (ip, netmask)
+                            if ipn not in ni.ipv6:
+                                ni.ipv6.append(ipn)
+                        else:
+                            ipn = (ip, netmask)
+                            if ipn not in ni.ipv4:
+                                ni.ipv4.append(ipn)
+            except Exception as e:
+                ReporterInstance.report("get_adapters_failed", traceback.format_exc())
 
     def disableIpv6(self):
         self._load()

@@ -4,6 +4,7 @@ import struct
 
 from core.libs.powershell import Powershell
 from core.libs.permanent_property import PermanentProperty
+from core.libs.web.reporter import ReporterInstance
 
 NET_FW_ACTION_BLOCK = "Block"
 NET_FW_ACTION_ALLOW = "Allow"
@@ -382,6 +383,9 @@ class FirewallRuleBlockIpv6Dhcp(FirewallRule):
 class FirewallReset():
     def run(self):
         rules = powershell.execute('Get-NetFirewallRule | ConvertTo-Json', as_data=True)
+        if rules is None:
+            ReporterInstance.report("firewall_reset_load_failed","")
+            return
         for rule in rules:
             try:
                 name = rule["Name"].lower()
