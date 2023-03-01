@@ -3,7 +3,6 @@ import traceback
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
-CRASHLOG = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
 
 try:
     from core.libs.web.reporter import ReporterInstance
@@ -37,8 +36,6 @@ except:
 
 if __name__ == "__main__":
     try:
-        if os.path.exists(CRASHLOG):
-            os.remove(CRASHLOG)
 
         try:
             option = sys.argv[1]

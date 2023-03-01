@@ -1,7 +1,6 @@
 import os, sys
 import subprocess
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
-CRASHLOG = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
 
 import psutil
 try:
@@ -47,7 +46,6 @@ class MainApp():
         self.window = PyHtmlQtWindow(self.app, url="http://127.0.0.1:%s/?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[1200, 800], title="Perfect Privacy", icon_path = self.icon_path, error_page=error_page)
         self.window.addJavascriptFunction("exit_app", self.stop)
         self.window.addJavascriptFunction("copy_to_clipboard", PyHtmlQtApp.clipboard().setText)
-        self.window.addJavascriptFunction("open_crashlog", self.open_crashlog)
         self.window.addJavascriptFunction("fix_service_as_admin", self.fix_service_as_admin)
 
         self.tray = PyHtmlQtTray(self.app, url="http://127.0.0.1:%s/tray?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[300,400], icon_path = self.icon_path)
@@ -76,18 +74,8 @@ class MainApp():
     def stop(self, *args):
         self.app.stop()
 
-    def open_crashlog(self, *args):
-        crashlog = os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")
-        if PLATFORM == PLATFORMS.macos:  # macOS
-            subprocess.call(('open', crashlog))
-        elif PLATFORM == PLATFORMS.windows:  # Windows
-            os.startfile(crashlog)
-        else:  # linux variants
-            subprocess.call(('xdg-open', crashlog))
-
     def fix_service_as_admin(self, *args):
         if PLATFORM == PLATFORMS.windows:
-            is_installed = False
             try:
                 is_installed = "status" in psutil.win_service_get("Perfect Privacy VPN").as_dict()
             except: # install if needed
@@ -130,17 +118,11 @@ class StartupCheckerWin():
                        '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" ' \
                        'onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button>'
         elif self.check_service_running() == False:
-            if os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, "crash.log")):
-                errormsg = 'The VPN background service apparently crashed, and left a crash log.<br>' \
-                           '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" ' \
-                           'onclick="pyhtmlapp.open_crashlog()">Open crash.log</button>'
-
-            else:
-                errormsg = "The VPN background service is not running, but no reason is apparent. <br>" \
-                           "If this happens repeatedly, make sure no other security software is blocking our service.<br>" \
-                            '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" ' \
-                           'onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button>'\
-                           "If all else fails, please contact Perfect Privacy support"
+            errormsg = "The VPN background service is not running, but no reason is apparent. <br>" \
+                       "If this happens repeatedly, make sure no other security software is blocking our service.<br>" \
+                        '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" ' \
+                       'onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button>'\
+                       "If all else fails, please contact Perfect Privacy support"
         return errormsg
 
 
