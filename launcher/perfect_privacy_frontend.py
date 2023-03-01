@@ -81,8 +81,8 @@ class MainApp():
             except: # install if needed
                 is_installed = False
             if is_installed is False:
-                shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect_privacy_service.exe"), lpParameters='--startup auto install')
-            shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect_privacy_service.exe"), lpParameters='start')
+                shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect-privacy-service.exe"), lpParameters='--startup auto install')
+            shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect-privacy-service.exe"), lpParameters='start')
 
 class StartupCheckerWin():
 
