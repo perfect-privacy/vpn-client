@@ -1,5 +1,9 @@
 import os, sys
 import subprocess
+import time
+
+from core.libs.web.reporter import ReporterInstance
+
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 import psutil
@@ -34,6 +38,12 @@ class MainApp():
     def __init__(self):
         errormsg = ""
         if PLATFORM == PLATFORMS.windows:
+            if StartupCheckerWin().check_service_exe() == False:
+                ReporterInstance.report("service_exe_missing", "")
+            elif StartupCheckerWin().check_service_installed() == False:
+                ReporterInstance.report("service_not_installed","")
+            elif StartupCheckerWin().check_service_running() == False:
+                ReporterInstance.report("service_not_running", "")
             success, msg = StartupCheckerWin().check()
             if success is False:
                 errormsg = msg
@@ -76,14 +86,18 @@ class MainApp():
 
     def fix_service_as_admin(self, *args):
         if PLATFORM == PLATFORMS.windows:
-            try:
-                is_installed = "status" in psutil.win_service_get("Perfect Privacy VPN").as_dict()
-            except: # install if needed
-                is_installed = False
-            if is_installed is False:
+            if StartupCheckerWin().check_service_installed() == False:
                 shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect-privacy-service.exe"), lpParameters='--startup auto install')
             shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect-privacy-service.exe"), lpParameters='start')
-
+            for _ in range(5):
+                if StartupCheckerWin().check_service_running() is True:
+                    break
+                time.sleep(1)
+            if StartupCheckerWin().check_service_installed() == False:
+                ReporterInstance.report("service_fix_not_installed","")
+            elif StartupCheckerWin().check_service_running() == False:
+                ReporterInstance.report("service_fix_not_running", "")
+            
 class StartupCheckerWin():
 
     def check(self):
@@ -93,8 +107,7 @@ class StartupCheckerWin():
         return False, msg
 
     def check_service_exe(self):
-        print(os.path.join(PROJECT_ROOT_DIRECTORY, "perfect-privacy-service.exe"))
-        return os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, "perfect-privacy-service.exe"))
+        return os.path.exists(os.path.join(APP_DIR, "perfect-privacy-service.exe"))
 
     def check_service_installed(self):
         try:
@@ -110,21 +123,17 @@ class StartupCheckerWin():
 
     def get_error_msg(self):
         errormsg = None
+        msg = "If this happens repeatedly, make sure no other security software is blocking our service.<br>" \
+            '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button><br>' \
+            'If you repair the service, it might take up to 30 seconds to load.<br>'\
+            "If all else fails, please contact Perfect Privacy support<br>"
         if self.check_service_exe() == False:
             errormsg = "Some installation files are missing, make sure they have not been quarantined by your anti virus software.<br> Please reinstall Perfect Privacy"
         elif self.check_service_installed() == False:
-            errormsg = "The VPN background service is not installed<br> "\
-                        "If this happens repeatedly, make sure no other security  or anti virus software is blocking our service.<br>" \
-                       '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" ' \
-                       'onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button>'
+            errormsg = "The VPN background service is not installed<br>" + msg
         elif self.check_service_running() == False:
-            errormsg = "The VPN background service is not running, but no reason is apparent. <br>" \
-                       "If this happens repeatedly, make sure no other security software is blocking our service.<br>" \
-                        '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" ' \
-                       'onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button>'\
-                       "If all else fails, please contact Perfect Privacy support"
+            errormsg = "The VPN background service is not running, but no reason is apparent. <br>" + msg
         return errormsg
-
 
 if __name__ == '__main__':
     MainApp().run()
