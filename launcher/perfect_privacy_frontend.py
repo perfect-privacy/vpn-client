@@ -87,9 +87,12 @@ class MainApp():
 
     def fix_service_as_admin(self, *args):
         if PLATFORM == PLATFORMS.windows:
+            is_installed = False
             try:
-                return "status" in psutil.win_service_get("Perfect Privacy VPN").as_dict()
+                is_installed = "status" in psutil.win_service_get("Perfect Privacy VPN").as_dict()
             except: # install if needed
+                is_installed = False
+            if is_installed is False:
                 shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect_privacy_service.exe"), lpParameters='--startup auto install')
             shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect_privacy_service.exe"), lpParameters='start')
 
