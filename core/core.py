@@ -116,14 +116,22 @@ class Core(Observable):
         while len(self.session.hops) > max_hops:
             self.session.remove_hop_by_index(len(self.session.hops) - 1)
 
-    def on_frontend_ready(self, pyHtmlGuiInstance, nr_of_active_frontends):
+    def on_frontend_exit_by_user(self):
+        self.frontend_active = False
+        if self.settings.startup.enable_background_mode.get() == False:
+            self.session.disconnect()
+        self.leakprotection.update_async()
+
+    def on_frontend_connected(self, pyHtmlGuiInstance, nr_of_active_frontends):
+        if self.frontend_active is False and nr_of_active_frontends > 0 and self.settings.startup.connect_on_start.get() == True:
+            self.session.connect()
         self.frontend_active = nr_of_active_frontends > 0
         self.trafficDownload.check_now()
         self.ipcheck.check_now()
         self.userapi.request_update()
 
-    def on_frontend_exit(self, pyHtmlGuiInstance, nr_of_active_frontends):
-        self.frontend_active = nr_of_active_frontends > 0
+    def on_frontend_disconnected(self, pyHtmlGuiInstance, nr_of_active_frontends):
+        pass
 
     def _on_session_state_changed(self, *args, **kwargs):
         if self.session.state.get() in [SessionState.DISCONNECTING, SessionState.CONNECTING]:
@@ -269,8 +277,8 @@ class Core(Observable):
                 "settings.stealth.stealth_port": self.settings.stealth.stealth_port.get(),
                 "settings.stealth.stealth_custom_node": self.settings.stealth.stealth_custom_node.get(),
                 "settings.startup.start_on_boot": self.settings.startup.start_on_boot.get(),
-                "settings.startup.start_minimized": self.settings.startup.start_minimized.get(),
-                "settings.startup.connect_on_start": self.settings.startup.connect_on_start.get(),
+                #"settings.startup.start_minimized": self.settings.startup.start_minimized.get(),
+                #"settings.startup.connect_on_start": self.settings.startup.connect_on_start.get(),
                 "settings.vpn.vpn_protocol": self.settings.vpn.vpn_protocol.get(),
                 "settings.vpn.openvpn.protocol": self.settings.vpn.openvpn.protocol.get(),
                 "settings.vpn.openvpn.cipher": self.settings.vpn.openvpn.cipher.get(),

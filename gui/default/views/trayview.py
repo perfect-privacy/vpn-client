@@ -23,7 +23,7 @@ class TrayView(PyHtmlView):
 
                 {% if pyview.confirm_exit == True %}
                     <h2 style="padding: 2em;"> Are you sure you want to Exit?</h2>
-                    {% if pyview.subject.session._get_number_of_non_idle_connections() != 0 %}
+                    {% if pyview.subject.session._get_number_of_non_idle_connections() != 0 and pyview.subject.settings.startup.enable_background_mode.get() == False %}
                         <h3> This will <b>disconnect</b> all existing VPN Tunnels! </h3>
                     {% endif %}
                     <br>          
@@ -134,7 +134,7 @@ class TrayView(PyHtmlView):
             self.update()
 
     def exit_app(self):
-        self.subject.session.disconnect()
+        self.subject.on_frontend_exit_by_user()
         self.eval_javascript("pyhtmlapp.exit_app()", skip_results=True)
 
 
@@ -145,7 +145,6 @@ class HopListView(PyHtmlView):
             {{pyview.items.render()}}
         </table>
         <div style="text-align:center">
-
             {% if pyview.core.session._should_be_connected.get()  %}
                 <button style="width:49%"  onclick='pyview.core.session.disconnect()'>Disconnect</button>            
             {% else %}

@@ -33,13 +33,12 @@ class PermanentProperty(Observable):
     permanentStorage = None
 
     def __init__(self, name, default_value):
+        self.name = name
         self._permanentStorage.set("%s_default_value" % name, default_value)
         try:
-            self.value = self._permanentStorage.get(name)
+            self._permanentStorage.get(name)
         except Exception as e:
-            self.value = default_value
             self._permanentStorage.set(name, default_value)
-        self.name = name
         super().__init__()
 
     @property
@@ -50,16 +49,15 @@ class PermanentProperty(Observable):
 
     def set(self, new_value, force_notify=False):
         changed = False
-        if self.value != new_value:
+        if self.get() != new_value:
             changed = True
-            self.value = new_value
             self._permanentStorage.set(self.name, new_value)
         if changed is True or force_notify is True:
             self.notify_observers()
 
     def get(self):
-        return self.value
+        return self._permanentStorage.get(self.name)
 
-    def default(self):
+    def default(self): # reset to default
         self.set(self._permanentStorage.get("%s_default_value" % self.name))
 

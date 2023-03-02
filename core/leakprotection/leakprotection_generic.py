@@ -57,7 +57,7 @@ class LeakProtection_Generic(Observable):
             if scope == PROTECTION_SCOPES.disabled:
                 self.__disable()
             elif scope == PROTECTION_SCOPES.program:
-                if self.core.session._should_be_connected.get() is True or self.core.frontend_active is True:
+                if self.core.session._should_be_connected.get() is True or self.core.frontend_active is True or self.core.settings.startup.enable_background_mode.get() is True:
                     self.__enable()
                 else:
                     self.__disable()

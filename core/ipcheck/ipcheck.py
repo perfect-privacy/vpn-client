@@ -17,7 +17,7 @@ class IPCheckerState():
 
 class IpCheck(Observable):
 
-    def __init__(self, core, min_check_interval_seconds=5 * 60, max_check_interval_seconds=7 * 24 * 60 * 60,   err_check_interval_seconds=10 * 60):
+    def __init__(self, core, min_check_interval_seconds=10 * 60, max_check_interval_seconds=60 * 60,   err_check_interval_seconds=10 * 60):
         self.core = core
         super(IpCheck, self).__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -28,7 +28,7 @@ class IpCheck(Observable):
         self._max_check_interval_seconds = max_check_interval_seconds
         self._err_check_interval_seconds = err_check_interval_seconds
         self.next_check = None
-        self._check_timer = PerpetualTimer(self._run_check, self._max_check_interval_seconds if self.last_successful_check.get() else self._err_check_interval_seconds, self.last_successful_check.get())
+        self._check_timer = PerpetualTimer(self._run_check, self._min_check_interval_seconds if self.last_successful_check.get() else self._err_check_interval_seconds, self.last_successful_check.get())
         self.state = IPCheckerState.IDLE
 
         self._ip_checker = PerfectPrivacyIPChecker(fallback_checker=TorIPChecker())
@@ -108,6 +108,7 @@ class IpCheck(Observable):
 
     def check_now(self):
         self.enable()
+        self._check_timer.interval = self._min_check_interval_seconds
         self._check_timer.call_now()
 
     def clear(self):

@@ -21,12 +21,34 @@ class PreferencesView(PyHtmlView):
             </section>
             <section>
                 <h3>
-                    Connect on startup
+                    Connect on start
                     <div class="input"> {{ pyview.connect_on_start.render() }} </div>
                 </h3>
-                <div>If checked, the application will automatically connect to the VPN on startup. </div>
-            </section>            
-            
+                <div>
+                    Automatically connect to VPN if Perfect Privacy App is started{% if pyview.subject.settings.interface_level.get() == "expert" %} or directly after boot if background mode is active{% endif %}.
+                </div>
+            </section>
+            {% if pyview.subject.settings.interface_level.get() == "expert" %}
+                <section>
+                    <h3>
+                        Background Mode
+                        <div class="input"> {{ pyview.enable_background_mode.render() }} </div>
+                    </h3>
+                    <div>
+                        If background mode is enabled, 
+                        all your VPN connections can be active even if the Perfect Privacy App is not running.
+                        <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                        <div class="tooltip" style="display:none">
+                           Use this to hide your VPN App usage from screen, 
+                           or to automatically connect all users to the vpn after boot, 
+                           without them even seeing the App. "Start with OS" is not needed for background mode, 
+                           as this will only start the frontend App. 
+                           The background service will always start after boot.
+                        </div>
+                    </div>
+                </section>
+
+            {% endif %}
             
         </div>   
         <h2>External IP</h2>
@@ -218,6 +240,7 @@ class PreferencesView(PyHtmlView):
         self.add_observable(subject.settings.vpn.vpn_protocol, self._on_object_updated)
         self.add_observable(subject.settings.vpn.openvpn.protocol, self._on_object_updated)
         self.add_observable(subject.settings.vpn.openvpn.tls_method, self._on_object_updated)
+        self.add_observable(subject.settings.startup.enable_background_mode, self._on_object_updated)
         self.openvpn_cipher = SelectComponent(subject.settings.vpn.openvpn.cipher, self,
                                               options=[
                                                   (OPENVPN_CIPHER.aes_128_gcm, OPENVPN_CIPHER.aes_128_gcm),
@@ -258,7 +281,11 @@ class PreferencesView(PyHtmlView):
         self.enforce_primary_ip = CheckboxComponent(subject.userapi.random_exit_ip, self, label="", inverted=True)
         self.neuro_routing = CheckboxComponent(subject.userapi.neuro_routing, self, label="")
         self.start_on_boot = CheckboxComponent(subject.settings.startup.start_on_boot, self)
+        #self.connect_on_start = CheckboxComponent(subject.settings.startup.connect_on_start, self)
+        self.enable_background_mode = CheckboxComponent(subject.settings.startup.enable_background_mode, self)
         self.connect_on_start = CheckboxComponent(subject.settings.startup.connect_on_start, self)
+
+
         self.send_crashreports = CheckboxComponent(subject.settings.send_crashreports, self)
         self.send_statistics = CheckboxComponent(subject.settings.send_statistics, self)
         self.updater = UpdaterView(subject, self)

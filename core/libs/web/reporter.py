@@ -15,10 +15,14 @@ try:
     from config.config import APP_VERSION, BRANCH, APP_BUILD
 except:
     APP_VERSION, BRANCH, APP_BUILD = "unknown", "release", "0"
+try:
+    from config.files import APP_DIR
+except:
+    APP_DIR = None
+
 
 REPORT_URL = "https://www.perfect-privacy.com/api/client.php"
 REPORT_FILE = os.path.join(Path.home(),".perfect_privacy.reports")
-INSTALL_ID  = os.path.join(Path.home(),".perfect_privacy.instid")
 
 
 class Reporter():
@@ -29,16 +33,27 @@ class Reporter():
         self.installation_id = "%s" % uuid.uuid4()
         self.send_crashreports = None
         self.last_report_send = 0
+        tmp_dir = "/tmp" if platform.system() != "windows" else "C:\\Users\\Public"
+        if APP_DIR is not None and os.path.exists(os.path.join(APP_DIR, "var", ".perfect_privacy.instid")):
+            self.installation_id = open(os.path.join(APP_DIR, "var", ".perfect_privacy.instid"), "r").read()
+            if os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
+                os.remove(os.path.join(tmp_dir, ".perfect_privacy.instid"))
+        elif os.path.exists(os.path.join(Path.home(), ".perfect_privacy.instid")):
+            self.installation_id = open(os.path.join(Path.home(), ".perfect_privacy.instid"), "r").read()
+        elif os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
+            self.installation_id = open(os.path.join(tmp_dir, ".perfect_privacy.instid"), "r").read()
+        else:
+            self.installation_id = uuid.uuid4()
 
-        try:
-            with open(INSTALL_ID, "r") as f:
-                self.installation_id = f.read()
-        except:
+        if not os.path.exists(os.path.join(Path.home(), ".perfect_privacy.instid")):
+            open(os.path.join(Path.home(), ".perfect_privacy.instid"), "w").write(self.installation_id)
+        if APP_DIR is not None and not os.path.exists(os.path.join(APP_DIR, "var", ".perfect_privacy.instid")):
             try:
-                with open(INSTALL_ID, "w") as f:
-                    f.write(self.installation_id)
+                open(os.path.join(APP_DIR, "var", ".perfect_privacy.instid"), "w").write(self.installation_id)
             except:
-                pass
+                if not os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
+                    open(os.path.join(tmp_dir, ".perfect_privacy.instid"), "w").write(self.installation_id)
+
         self.from_disk()
         self._enabled = True
         self._wakeup_event = Event()

@@ -45,8 +45,8 @@ class Daemon(object):
         self.gui = getPyHtmlGuiInstance(
             frontend=FRONTEND,
             appInstance=self.core,
-            on_frontend_ready=self.core.on_frontend_ready,
-            on_frontend_exit=self.core.on_frontend_exit,
+            on_frontend_ready=self.core.on_frontend_connected,
+            on_frontend_exit=self.core.on_frontend_disconnected,
         )
         self.gui.start(show_frontend=False, block=False)
 

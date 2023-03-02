@@ -80,8 +80,9 @@ class Session(Observable):
         self._should_be_connected = PermanentProperty(self.__class__.__name__ + "._should_be_connected", False)
         self._hops_stored = PermanentProperty(self.__class__.__name__ + "._hops_stored", None)
         self._running = True
-        if self.core.settings.startup.connect_on_start.get() == True:
+        if self.core.settings.startup.enable_background_mode.get() == True and self.core.settings.startup.connect_on_start.get() == True:
             self._should_be_connected.set(True)
+
         self.state = SessionState()
         self.state.attach_observer(self._on_state_changed)
 

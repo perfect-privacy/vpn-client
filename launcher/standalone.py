@@ -39,8 +39,8 @@ class Standalone():
         self.core = Core(self.logger)
         self.guiservice = getPyHtmlGuiInstance(
             appInstance       = self.core,
-            on_frontend_ready = self.core.on_frontend_ready,
-            on_frontend_exit  = self.core.on_frontend_exit,
+            on_frontend_ready = self.core.on_frontend_connected,
+            on_frontend_exit  = self.core.on_frontend_disconnected,
         )
         self.core.on_exited.attach_observer(self._on_core_exited)
 

@@ -38,5 +38,6 @@ def getPyHtmlGuiInstance( appInstance, frontend = "default", on_frontend_exit = 
         name            = "tray",
         base_template   = "tray.html",
         single_instance = True,
+        on_view_connected=on_frontend_ready,
     )
     return gui

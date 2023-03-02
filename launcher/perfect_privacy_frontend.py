@@ -1,14 +1,12 @@
 import os, sys
-import subprocess
 import time
-
 from core.libs.web.reporter import ReporterInstance
 
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 import psutil
 try:
-    from PyQt6.QtCore import Qt
+    from PyQt6.QtCore import Qt, QTimer
 except:
     from PyQt5.QtCore import Qt
 
@@ -16,8 +14,10 @@ from pyhtmlgui.apps.qt import PyHtmlQtApp, PyHtmlQtTray, PyHtmlQtWindow
 from config.config import SHARED_SECRET, PLATFORM, SERVICE_PORT
 from config.constants import PLATFORMS
 from config.paths import APP_DIR
+
 if PLATFORM == PLATFORMS.windows:
     import win32com.shell.shell as shell
+
 
 ERROR_PAGE = '''
     <div style="text-align:center;color:gray">
@@ -36,14 +36,19 @@ ERROR_PAGE = '''
 
 class MainApp():
     def __init__(self):
+        try:
+            self.minimized = sys.argv[1] == "minimized"
+        except:
+            self.minimized = False
+
         errormsg = ""
         if PLATFORM == PLATFORMS.windows:
             if StartupCheckerWin().check_service_exe() == False:
-                ReporterInstance.report("service_exe_missing", "")
+                ReporterInstance.report("service_exe_missing", {"was_run_once": SHARED_SECRET != "REPLACE_TOKEN_ON_POST_INSTALL"})
             elif StartupCheckerWin().check_service_installed() == False:
-                ReporterInstance.report("service_not_installed","")
+                ReporterInstance.report("service_not_installed", {"was_run_once": SHARED_SECRET != "REPLACE_TOKEN_ON_POST_INSTALL"})
             elif StartupCheckerWin().check_service_running() == False:
-                ReporterInstance.report("service_not_running", "")
+                ReporterInstance.report("service_not_running", {"was_run_once": SHARED_SECRET != "REPLACE_TOKEN_ON_POST_INSTALL"})
             success, msg = StartupCheckerWin().check()
             if success is False:
                 errormsg = msg
@@ -61,6 +66,7 @@ class MainApp():
         self.tray = PyHtmlQtTray(self.app, url="http://127.0.0.1:%s/tray?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[300,400], icon_path = self.icon_path)
         self.tray.addJavascriptFunction("exit_app", self.stop)
         self.tray.addJavascriptFunction("show_app", self.window.show)
+        self.tray.addJavascriptFunction("hide_app", self.window.hide)
 
         if PLATFORM == PLATFORMS.macos:
             def confirm_exit():
@@ -78,7 +84,10 @@ class MainApp():
         self.tray._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
 
     def run(self):
-        self.window.show()
+        if self.minimized is True:
+            self.window.hide()
+        else:
+            self.window.show()
         self.app.run()
 
     def stop(self, *args):
@@ -89,7 +98,7 @@ class MainApp():
             if StartupCheckerWin().check_service_installed() == False:
                 shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect-privacy-service.exe"), lpParameters='--startup auto install')
             shell.ShellExecuteEx(lpVerb='runas', lpFile=os.path.join(APP_DIR, "perfect-privacy-service.exe"), lpParameters='start')
-            for _ in range(5):
+            for _ in range(10):
                 if StartupCheckerWin().check_service_running() is True:
                     break
                 time.sleep(1)
@@ -97,7 +106,10 @@ class MainApp():
                 ReporterInstance.report("service_fix_not_installed","")
             elif StartupCheckerWin().check_service_running() == False:
                 ReporterInstance.report("service_fix_not_running", "")
-            
+            if SHARED_SECRET == "REPLACE_TOKEN_ON_POST_INSTALL":
+                os.execv(__file__, sys.argv)
+                self.stop()
+
 class StartupCheckerWin():
 
     def check(self):
