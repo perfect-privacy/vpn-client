@@ -1,5 +1,9 @@
 import os, sys, threading
 import traceback
+
+from win32api import GetCurrentProcess
+from win32security import *
+
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
@@ -30,12 +34,16 @@ except:
 try:
     open(os.path.join(APP_DIR, "var", ".test"), "w").write("success")
 except:
+    print("Perfect Privacy Service requires higher privileges (root/admin or system)")
+    if PLATFORM == PLATFORMS.windows:
+        is_admin = (GetTokenInformation(OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY), TokenUser)[0] == CreateWellKnownSid(WinLocalSystemSid))
+    else:
+        is_admin = os.getuid() == 0
     ReporterInstance.report("failed_appdir_write", {
         "path_exists": os.path.exists(os.path.join(APP_DIR, "var")),
-        ""
+        "is_admin" : is_admin
     })
     ReporterInstance.shutdown()
-    print("Perfect Privacy Service requires higher privileges (root/admin or system)")
     os._exit(1)
 
 
