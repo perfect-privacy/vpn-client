@@ -105,7 +105,7 @@ class GenericIPChecker(object):
         try:
             response = WebRequest().get(url=url, timeout=3)
         except request_exceptions.ConnectionError:
-            self._logger.error("network problem " + url)
+            #self._logger.error("network problem " + url)
             raise ApiNetworkError(_("network problem"))
         except request_exceptions.HTTPError:
             self._logger.error("invalid HTTP response "  + url)

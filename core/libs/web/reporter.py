@@ -33,7 +33,7 @@ class Reporter():
         self.installation_id = "%s" % uuid.uuid4()
         self.send_crashreports = None
         self.last_report_send = 0
-        tmp_dir = "/tmp" if platform.system() != "windows" else "C:\\Users\\Public"
+        tmp_dir = "/tmp" if platform.system() != "Windows" else "C:\\Users\\Public"
         if APP_DIR is not None and os.path.exists(os.path.join(APP_DIR, "var", ".perfect_privacy.instid")):
             self.installation_id = open(os.path.join(APP_DIR, "var", ".perfect_privacy.instid"), "r").read()
             if os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
@@ -63,13 +63,17 @@ class Reporter():
             self._wakeup_event.set()
 
     def report(self, name, data = '', noid = False):
+        try:
+            data = json.dumps(data)
+        except Exception as e:
+            data = "failed to encode report data: %s" % e
         report = {
             "id":  "" if noid is True else self.installation_id,
             "osversion": " ; ".join(platform.system_alias(platform.system(), platform.release(), "" if noid is True else platform.version())),
             "clientversion": " ; ".join([APP_VERSION, BRANCH, APP_BUILD]),
             "configversion": "",
             "action": name,
-            "meta": json.dumps(data)
+            "meta": data
         }
         self._logger.error(report)
 

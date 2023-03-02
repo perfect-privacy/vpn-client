@@ -55,11 +55,11 @@ class FirewallRule():
         if self.is_enabled is True:
             self._logger.info("%s disabling" % self.__class__.__name__)
             delete_rule_cmd = 'Remove-NetFirewallRule -Name "%s"' % self.name
-            powershell.execute(delete_rule_cmd)
+            powershell.execute(delete_rule_cmd, may_fail=True)
         self.is_enabled = False
 
     def exists(self):
-        return powershell.execute('Get-NetFirewallRule -Name "%s"  | ConvertTo-Json' % self.name, as_data = True) != None
+        return powershell.execute('Get-NetFirewallRule -Name "%s"  | ConvertTo-Json' % self.name, as_data = True, may_fail=True) != None
 
     def _build(self, update = False):
         args = []
@@ -390,7 +390,7 @@ class FirewallReset():
             try:
                 name = rule["Name"].lower()
                 if "perfect" in name and "privacy" in name:
-                    powershell.execute('Remove-NetFirewallRule -Name "%s"' % rule["name"])
+                    powershell.execute('Remove-NetFirewallRule -Name "%s"' % rule["name"], may_fail=True)
             except:
                 pass
         powershell.execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")

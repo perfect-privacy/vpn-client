@@ -29,5 +29,6 @@ thirdparty/thirdparty.zip
 thirdparty/macos
 thirdparty/macos-arm
 thirdparty/windows
+var/.perfect_privacy.instid
 foo.py
 foo.spec

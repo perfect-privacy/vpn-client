@@ -32,8 +32,8 @@ class IpCheck(Observable):
         self.state = IPCheckerState.IDLE
 
         self._ip_checker = PerfectPrivacyIPChecker(fallback_checker=TorIPChecker())
-        self.result4 = IPCheckerResult()
-        self.result6 = IPCheckerResult()
+        self.result4 = IPCheckerResult("Ipv4")
+        self.result6 = IPCheckerResult("Ipv6")
 
     @property
     def vpn_connected(self):
@@ -95,7 +95,6 @@ class IpCheck(Observable):
 
     def enable(self):
         if self.state != IPCheckerState.IDLE:
-            self._logger.debug("not enabling, state is not idle")
             return
         self._check_timer.enable()
         self.next_check = math.floor(self._check_timer.last_call_timestamp + self._check_timer.interval)

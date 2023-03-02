@@ -3,7 +3,6 @@ import traceback
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
-
 try:
     from core.libs.web.reporter import ReporterInstance
 except:
@@ -36,7 +35,6 @@ except:
 
 if __name__ == "__main__":
     try:
-
         try:
             option = sys.argv[1]
         except:

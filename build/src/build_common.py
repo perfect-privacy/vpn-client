@@ -69,6 +69,8 @@ class BuildCommon():
     def _copy_files(self):
         # create var dirs
         os.mkdir(os.path.join(self.BUILD_DIR_TARGET, "var"))
+        os.mkdir(os.path.join(self.BUILD_DIR_TARGET, "var", "software_update"))
+        os.mkdir(os.path.join(self.BUILD_DIR_TARGET, "var", "config_update"))
         shutil.copytree(os.path.join(self.SOURCE_DIR, "var", "configs"), os.path.join(self.BUILD_DIR_TARGET, "var", "configs"))
 
         for f in glob.glob(os.path.join(self.BUILD_DIR_TMP, "dist", "perfect-privacy-service", "*")):

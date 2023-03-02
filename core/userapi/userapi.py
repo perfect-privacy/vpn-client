@@ -76,11 +76,9 @@ class UserAPI(Observable):
             self._logger.error("unable to shut down worker thread")
 
     def request_update(self):
-        self._logger.debug("request update")
         self.request_queue.put({})
 
     def _worker(self):
-        self._logger.debug("worker thread started")
         while self._worker_thread_running:
             request = self.request_queue.get()
             if request is None:

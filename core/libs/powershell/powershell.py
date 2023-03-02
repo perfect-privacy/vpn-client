@@ -17,9 +17,9 @@ class Powershell():
         self.lock = Lock()
         self._logger = logging.getLogger(self.__class__.__name__)
 
-    def execute(self, command, as_data = False):
+    def execute(self, command, as_data = False, may_fail = False):
         self.lock.acquire()
-        result = ""
+        result = b""
         try:
             if as_data is True:
                 if not command.endswith("ConvertTo-Json"):
@@ -29,12 +29,21 @@ class Powershell():
                 result = json.loads(result)
             return result
         except Exception as e:
-            ReporterInstance.report("powershell_failed", {
-                "command" : command,
-                "exception": traceback.format_exc(),
-                "result": result
-            })
-            self._logger.debug("Failed to run powershell '%s' Exception: %s" % (command, e) )
+            if may_fail is False:
+                try:
+                    result = result.decode("UTF-8")
+                except:
+                    pass
+                try:
+                    result = json.dumps(result)
+                except:
+                    result = None
+                ReporterInstance.report("powershell_failed", {
+                    "command" : command,
+                    "exception": traceback.format_exc(),
+                    "result": result
+                })
+                self._logger.debug("Failed to run powershell '%s' Exception: %s" % (command, e) )
             return None
         finally:
             self.lock.release()

@@ -45,13 +45,11 @@ class GenericUpdater(Observable):
         raise NotImplementedError()
 
     def enable(self):
-        self._logger.debug("enabling")
         self._auto_update_timer.enable()
         self.next_check = math.floor(self._auto_update_timer.last_call_timestamp + self._auto_update_timer.interval)
         self.notify_observers()
 
     def disable(self):
-        self._logger.debug("disabling")
         self._auto_update_timer.disable()
         self.next_check = None
         self.notify_observers()

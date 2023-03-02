@@ -42,6 +42,7 @@ class MainApp():
             self.minimized = False
 
         errormsg = ""
+        self.restart = False
         if PLATFORM == PLATFORMS.windows:
             if StartupCheckerWin().check_service_exe() == False:
                 ReporterInstance.report("service_exe_missing", {"was_run_once": SHARED_SECRET != "REPLACE_TOKEN_ON_POST_INSTALL"})
@@ -89,6 +90,8 @@ class MainApp():
         else:
             self.window.show()
         self.app.run()
+        if self.restart is True:
+            os.execv(sys.executable, sys.argv)
 
     def stop(self, *args):
         self.app.stop()
@@ -107,7 +110,7 @@ class MainApp():
             elif StartupCheckerWin().check_service_running() == False:
                 ReporterInstance.report("service_fix_not_running", "")
             if SHARED_SECRET == "REPLACE_TOKEN_ON_POST_INSTALL":
-                os.execv(__file__, sys.argv)
+                self.restart = True
                 self.stop()
 
 class StartupCheckerWin():
@@ -135,8 +138,8 @@ class StartupCheckerWin():
 
     def get_error_msg(self):
         errormsg = None
-        msg = "If this happens repeatedly, make sure no other security software is blocking our service.<br>" \
-            '<button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button><br>' \
+        msg = "If this happens repeatedly, make sure no other security software is blocking our service.<br><br>" \
+            '<button style="background-image:linear-gradient(to bottom,#5cb85c 0,#419641 100%);  border-color: #3e8f3e; cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button><br><br>' \
             'If you repair the service, it might take up to 30 seconds to load.<br>'\
             "If all else fails, please contact Perfect Privacy support<br>"
         if self.check_service_exe() == False:

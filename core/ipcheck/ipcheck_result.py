@@ -5,9 +5,10 @@ from pyhtmlgui import Observable
 
 
 class IPCheckerResult(Observable):
-    def __init__(self):
+    def __init__(self, ipversion = "IPv4"):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
+        self.ipversion = ipversion
         self.vpn_connected = None
         self.public_ip = None
         self.public_rdns = None
@@ -34,7 +35,7 @@ class IPCheckerResult(Observable):
                     or self.public_rdns != prev_public_rdns \
                     or self.public_city != prev_public_city \
                     or self.public_country != prev_public_country:
-                self._logger.debug("IP Check changed: {}".format(repr(self)))
+                self._logger.debug("%s changed, connected: %s" % (self.ipversion, self.vpn_connected))
                 self.notify_observers()
                 return True
 

@@ -117,7 +117,6 @@ class Session(Observable):
         return None
 
     def _long_running_controller_thread(self):
-        self._logger.debug("started")
 
         loop_is_running = True
 
@@ -221,7 +220,9 @@ class Session(Observable):
         # get a list of the lowest level vpn groups (country1 -> a1, a2, a3, b1, c1, c2)
         vpn_servers = []
         for hop in hop_list:
-            vpnservers = hop.servergroup.get_vpn_servers()
+            vpnservers = [s for s in hop.servergroup.get_vpn_servers() if s.bandwidth_available_percent > 0]
+            if len(vpnservers) == 0:
+                vpnservers = hop.servergroup.get_vpn_servers()
             random.shuffle(vpnservers)
             vpn_servers.append(vpnservers)
         if not vpn_servers:

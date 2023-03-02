@@ -52,7 +52,7 @@ class LeakProtection_Generic(Observable):
     def _update(self):
         try:
             self._lock.acquire()
-            self._logger.debug("updating leakprotection state")
+            self._logger.debug("Checking leakprotection state")
             scope = self.core.settings.leakprotection.leakprotection_scope.get()
             if scope == PROTECTION_SCOPES.disabled:
                 self.__disable()
@@ -101,84 +101,3 @@ class LeakProtection_Generic(Observable):
     def _disable(self):
         raise NotImplementedError()
 
-
-'''
-class LeakProtection_Generic(object):
-    def __init__(self):
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self._enabled = False
-        self._primary_interface = ""
-        self._hops = []
-        self.number_of_hops_in_current_cascading = 0
-        self._is_blocking_all_internet_traffic = False
-        self.on_change = Signal()
-        self._enable_disable_lock = RLock()
-
-    def _log_current_config(self):
-        self._logger.debug("current config: enabled: {}, primary interface: {}, hops: {}".format(
-            self._enabled, self.primary_interface, self._hops))
-
-    @property
-    def primary_interface(self):
-        return self._primary_interface
-
-    @primary_interface.setter
-    def primary_interface(self, value):
-        self._primary_interface = value
-        self._log_current_config()
-
-    @property
-    def is_blocking_all_internet_traffic(self):
-        return self._is_blocking_all_internet_traffic
-
-    def add_hop(self, public_ip_address, port, transport_protocol, interface=None):
-        self._hops.append(Hop(len(self._hops) + 1, public_ip_address, port, transport_protocol, interface))
-        self._log_current_config()
-
-    def modify_hop(self, hopid, interface):
-        self._logger.debug("modify hop {} to interface {}".format(hopid, interface))
-        if hopid-1 < 0 or hopid-1 >= len(self._hops):
-            self._logger.error("unknown hopid {}".format(hopid))
-            reporter.report_error(msg="unknown hopid {}".format(hopid))
-            return
-        mod_hop = self._hops[hopid-1]
-        self._hops[hopid-1] = Hop(mod_hop.hop_id, mod_hop.public_ip_address, mod_hop.port,
-                                  mod_hop.transport_protocol, interface)
-        self._log_current_config()
-
-    def clear_hops(self):
-        self.number_of_hops_in_current_cascading = 0
-        self._hops.clear()
-        self._log_current_config()
-
-    def enable(self):
-        with self._enable_disable_lock:
-            self._logger.debug("enabling")
-            if self._enabled:
-                self._logger.debug("already enabled")
-                return
-            self._enabled = True
-            self._update_firewall()
-
-    def apply_changes(self):
-        with self._enable_disable_lock:
-            self._logger.debug("apply changes")
-            self._update_firewall()
-
-    def disable(self):
-        with self._enable_disable_lock:
-            self._logger.debug("disabling")
-            if not self._enabled:
-                self._logger.debug("already disabled")
-                return
-            self._disable_firewall()
-            self._enabled = False
-
-    def _update_firewall(self):
-        return
-        raise NotImplementedError()
-
-    def _disable_firewall(self):
-        return
-        raise NotImplementedError()
-'''
