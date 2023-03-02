@@ -13,7 +13,7 @@ class BuildMacos(BuildCommon):
     def _copy_files(self):
         shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", "macos", "openvpn")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "openvpn") )
         shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", "macos", "stealth")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "stealth") )
-        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", "macos-arm", "stealth")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "stealth-arm") )
+        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", "macos", "stealth-arm")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "stealth-arm") )
         super()._copy_files()
         os.rename(os.path.join(self.BUILD_DIR_TARGET, "perfect-privacy-frontend")         , os.path.join(self.BUILD_DIR_TARGET, "perfect-privacy"))
 
