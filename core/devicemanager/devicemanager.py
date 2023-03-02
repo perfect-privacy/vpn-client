@@ -3,6 +3,7 @@ import logging
 import time
 import traceback
 
+from core.libs.powershell import getPowershellInstance
 from core.libs.web.reporter import ReporterInstance
 from core.openvpndriver.driver_state import OpenVpnDriverState
 from pyhtmlgui import  Observable
@@ -202,7 +203,7 @@ class DeviceManager(Observable):
         success, stdout, stderr = SubCommand().run(TAPCTL, [ "delete", "{%s}" % guid])
 
     def _enum_devices(self):
-        networkdatas = self.core.powershell.execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
+        networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
         name_to_index = {}
         if networkdatas is None:
             self._logger.debug("Failed to load device enumeration")

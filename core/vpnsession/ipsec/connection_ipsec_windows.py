@@ -1,3 +1,4 @@
+from core.libs.powershell import getPowershellInstance
 from core.vpnsession.common import VpnConnectionState, VPNConnection
 import threading
 import time
@@ -50,7 +51,7 @@ class IpsecConnection(VPNConnection):
                 '-AuthenticationMethod' , 'mschapv2',
                 '-Force' ,
         ]
-        r = self.core.powershell.execute(" ".join(cmd))
+        r = getPowershellInstance().execute(" ".join(cmd))
         cmd = ['Set-VpnConnectionIPsecConfiguration',
                '-ConnectionName'                  , '"%s"' % self.hop_name,
                 '-EncryptionMethod'                , 'AES256'   ,  # DES,DES3,AES128,AES192,AES256,GCMAES128, GCMAES256
@@ -63,7 +64,7 @@ class IpsecConnection(VPNConnection):
                 '-PassThru',
                 '-Force'   ,
         ]
-        r = self.core.powershell.execute(" ".join(cmd))
+        r = getPowershellInstance().execute(" ".join(cmd))
 
     def _remove_device(self):
         cmd = ['Remove-VpnConnection',
@@ -71,20 +72,20 @@ class IpsecConnection(VPNConnection):
                 '-AllUserConnection',
                 '-Force',
         ]
-        self.core.powershell.execute(" ".join(cmd))
+        getPowershellInstance().execute(" ".join(cmd))
 
     def _connect_device(self):
         self._logger.debug("Connecting Ipsec")
-        output = self.core.powershell.execute('c:\\Windows\\system32\\rasdial.exe "%s" "%s" "%s"' % ( self.hop_name, self.core.settings.account.username.get(), self.core.settings.account.password.get())).strip()
+        output = getPowershellInstance().execute('c:\\Windows\\system32\\rasdial.exe "%s" "%s" "%s"' % ( self.hop_name, self.core.settings.account.username.get(), self.core.settings.account.password.get())).strip()
         self._logger.debug("Ipsec connect output: %s" % output)
 
     def _disconnect_device(self):
         self._logger.debug("Disconnecting Ipsec")
-        output = self.core.powershell.execute('c:\\Windows\\system32\\rasdial.exe "%s" /DISCONNECT' % self.hop_name).strip()
+        output = getPowershellInstance().execute('c:\\Windows\\system32\\rasdial.exe "%s" /DISCONNECT' % self.hop_name).strip()
         self._logger.debug("Ipsec disconnect output: %s" % output)
 
     def _read_state(self):
-        state = self.core.powershell.execute('(Get-VpnConnection -Name "%s" -AllUserConnection).ConnectionStatus' % self.hop_name).strip()
+        state = getPowershellInstance().execute('(Get-VpnConnection -Name "%s" -AllUserConnection).ConnectionStatus' % self.hop_name).strip()
         if state == b"Connected":
             self.state.set(VpnConnectionState.CONNECTED)
         elif state == b"Connecting":

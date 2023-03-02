@@ -25,8 +25,9 @@ class LeakProtection_Generic(Observable):
         self.state = LeakProtectionState()
         self._lock = threading.Lock()
         self._wakeup_event = threading.Event()
-        self.__worker_thread = threading.Thread(target=self._worker_thread, daemon=True)
-        self.__worker_thread.start()
+        if self.core is not None:
+            self.__worker_thread = threading.Thread(target=self._worker_thread, daemon=True)
+            self.__worker_thread.start()
 
     def whitelist_server(self, public_ip_address, port, protocol):
         self._whitelisted_server = [public_ip_address, port, protocol]

@@ -7,7 +7,6 @@ from threading import Timer
 from pyhtmlgui import Observable
 from core.userapi.userapi import UserAPI
 from .leakprotection.leakprotection_generic import LeakProtectionState
-from .libs.powershell import Powershell
 from .configupdater import ConfigUpdater
 from .leakprotection import LeakProtection
 from .ipcheck import IpCheck
@@ -53,9 +52,6 @@ class Core(Observable):
 
         self.vpnGroupPlanet = VpnGroupPlanet()
         self.vpnGroupPlanet.load_configs_json()
-
-        if PLATFORM == PLATFORMS.windows:
-            self.powershell = Powershell()
 
         self.favourites = Favourites(self)
 

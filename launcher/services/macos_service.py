@@ -12,6 +12,7 @@ from config.config import FRONTEND
 class MacOS_Service():
     def __init__(self ):
         self.gui = None
+        self.core = None
 
     def start(self):
         try:

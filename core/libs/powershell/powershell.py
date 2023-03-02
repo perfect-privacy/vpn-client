@@ -92,8 +92,13 @@ class Powershell():
         pipe.close()
         self._stdout_read_tread = None
 
+powershellInstance = None
 
-
+def getPowershellInstance():
+    global powershellInstance
+    if powershellInstance is None:
+        powershellInstance = Powershell()
+    return powershellInstance
 
 if __name__ == "__main__":
     ps = Powershell()

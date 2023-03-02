@@ -2,7 +2,7 @@ import logging
 import socket
 import struct
 
-from core.libs.powershell import Powershell
+from core.libs.powershell import getPowershellInstance
 from core.libs.permanent_property import PermanentProperty
 from core.libs.web.reporter import ReporterInstance
 
@@ -12,8 +12,6 @@ NET_FW_RULE_DIR_OUT = "Outbound"
 NET_FW_RULE_DIR_IN  = "Inbound"
 NET_FW_IP_PROTOCOL_TCP = "TCP"
 NET_FW_IP_PROTOCOL_UDP = "UDP"
-
-powershell = Powershell()
 
 class FirewallRule():
     def __init__(self):
@@ -43,23 +41,23 @@ class FirewallRule():
         if self.is_enabled is False:
             self._logger.info("%s activating" % self.__class__.__name__)
             new_rule_cmd = "New-NetFirewallRule %s" % self._build()
-            powershell.execute(new_rule_cmd)
+            getPowershellInstance().execute(new_rule_cmd)
         self.is_enabled = True
 
     def update(self):
         self._logger.info("%s updating" % self.__class__.__name__)
         new_rule_cmd = "Set-NetFirewallRule %s" % self._build(update=True)
-        powershell.execute(new_rule_cmd)
+        getPowershellInstance().execute(new_rule_cmd)
 
     def disable(self):
         if self.is_enabled is True:
             self._logger.info("%s disabling" % self.__class__.__name__)
             delete_rule_cmd = 'Remove-NetFirewallRule -Name "%s"' % self.name
-            powershell.execute(delete_rule_cmd, may_fail=True)
+            getPowershellInstance().execute(delete_rule_cmd, may_fail=True)
         self.is_enabled = False
 
     def exists(self):
-        return powershell.execute('Get-NetFirewallRule -Name "%s"  | ConvertTo-Json' % self.name, as_data = True, may_fail=True) != None
+        return getPowershellInstance().execute('Get-NetFirewallRule -Name "%s"  | ConvertTo-Json' % self.name, as_data = True, may_fail=True) != None
 
     def _build(self, update = False):
         args = []
@@ -97,8 +95,8 @@ class FirewallRuleOutgoingProfileDefaultBlock():
             return
         self._logger.info("%s activating" % self.__class__.__name__)
         if self.default_profiles.get() is None:
-            self.default_profiles.set(powershell.execute("Get-NetFirewallProfile | ConvertTo-Json", as_data = True))
-        powershell.execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Block")
+            self.default_profiles.set(getPowershellInstance().execute("Get-NetFirewallProfile | ConvertTo-Json", as_data = True))
+        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Block")
         self.is_enabled.set(True)
 
     def disable(self):
@@ -107,9 +105,9 @@ class FirewallRuleOutgoingProfileDefaultBlock():
         if self.default_profiles.get() is not None:
             self._logger.info("%s disabling" % self.__class__.__name__)
             #for profile in self.default_profiles.get(): # this would be better, for user whos default profile is not "allow", but this results in many more problems
-            #    powershell.execute("Set-NetFirewallProfile -Profile %s -DefaultOutboundAction %s" % (profile["Profile"],  profile["DefaultOutboundAction"]))
+            #    getPowershellInstance().execute("Set-NetFirewallProfile -Profile %s -DefaultOutboundAction %s" % (profile["Profile"],  profile["DefaultOutboundAction"]))
             self.default_profiles.set(None)
-            powershell.execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
+            getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
 
         self.is_enabled.set(False)
 
@@ -382,7 +380,7 @@ class FirewallRuleBlockIpv6Dhcp(FirewallRule):
 
 class FirewallReset():
     def run(self):
-        rules = powershell.execute('Get-NetFirewallRule | ConvertTo-Json', as_data=True)
+        rules = getPowershellInstance().execute('Get-NetFirewallRule | ConvertTo-Json', as_data=True)
         if rules is None:
             ReporterInstance.report("firewall_reset_load_failed","")
             return
@@ -390,8 +388,8 @@ class FirewallReset():
             try:
                 name = rule["Name"].lower()
                 if "perfect" in name and "privacy" in name:
-                    powershell.execute('Remove-NetFirewallRule -Name "%s"' % rule["name"], may_fail=True)
+                    getPowershellInstance().execute('Remove-NetFirewallRule -Name "%s"' % rule["name"], may_fail=True)
             except:
                 pass
-        powershell.execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
+        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
 

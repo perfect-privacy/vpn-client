@@ -1,5 +1,6 @@
 import traceback
 
+from core.libs.powershell import getPowershellInstance
 from core.libs.subcommand import SubCommand
 import random
 from config.files import NETSH
@@ -94,12 +95,16 @@ class NetworkInterfaces():
         self.networkinterfaces = None
 
     def _load(self):
-        all_ipv4_dns_servers = [item.vpn_server_config.dns_ipv4 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv4 != "" and item.vpn_server_config.bandwidth_mbps > 500 and item.bandwidth_available_percent > 0]
-        all_ipv6_dns_servers = [item.vpn_server_config.dns_ipv6 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv6 != "" and item.vpn_server_config.bandwidth_mbps > 500 and item.bandwidth_available_percent > 0]
+        if self.core is not None:
+            all_ipv4_dns_servers = [item.vpn_server_config.dns_ipv4 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv4 != "" and item.vpn_server_config.bandwidth_mbps > 500 and item.bandwidth_available_percent > 0]
+            all_ipv6_dns_servers = [item.vpn_server_config.dns_ipv6 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv6 != "" and item.vpn_server_config.bandwidth_mbps > 500 and item.bandwidth_available_percent > 0]
+        else:
+            all_ipv4_dns_servers = []
+            all_ipv6_dns_servers = []
 
         if self.networkinterfaces is None:
             self.networkinterfaces = {}
-        networkdatas = self.core.powershell.execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
+        networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
         if networkdatas is None:
             ReporterInstance.report("failed_to_load_network_devices","")
             return
@@ -121,7 +126,7 @@ class NetworkInterfaces():
             except Exception as e:
                 ReporterInstance.report("get_dns_failed", traceback.format_exc())
 
-        networkdatas = self.core.powershell.execute("Get-CimInstance -Class Win32_NetworkAdapterConfiguration | ConvertTo-Json", as_data = True )
+        networkdatas = getPowershellInstance().execute("Get-CimInstance -Class Win32_NetworkAdapterConfiguration | ConvertTo-Json", as_data = True )
         if networkdatas is None:
             ReporterInstance.report("failed_to_load_network_devices_part2", "")
             return
