@@ -24,8 +24,8 @@ class BuildMacos(BuildCommon):
         release_data = open(os.path.join(self.SOURCE_DIR, "config", "release.conf"), "r").read()
         APP_VERSION = release_data.split("APP_VERSION=")[1].split("\n")[0]
         subname = ""
-        if self.PLATFORM == "macos":
-            subname = "_intel"
+        if self.PLATFORM == "macos-arm":
+            subname = "_ARM"
         with open(os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup%s.pkg.version" % (branch, subname)), "w") as f:
             f.write(APP_VERSION)
 
