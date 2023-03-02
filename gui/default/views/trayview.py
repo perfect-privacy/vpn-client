@@ -136,6 +136,7 @@ class TrayView(PyHtmlView):
     def exit_app(self):
         self.subject.on_frontend_exit_by_user()
         self.eval_javascript("pyhtmlapp.exit_app()", skip_results=True)
+        self.hide_confirm_exit()
 
 
 class HopListView(PyHtmlView):
