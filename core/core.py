@@ -33,8 +33,8 @@ class Core(Observable):
     def __init__(self, global_logger):
         super().__init__()
         self.global_logger = global_logger
-        logging.getLogger("requests").setLevel(logging.WARNING)
-        logging.getLogger("urllib3").setLevel(logging.WARNING)
+        logging.getLogger("requests").setLevel(logging.CRITICAL)
+        logging.getLogger("urllib3").setLevel(logging.CRITICAL)
 
         self._start_timers = []
         self._is_shutting_down = False

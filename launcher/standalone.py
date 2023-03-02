@@ -1,6 +1,7 @@
 import os, sys
 import traceback
 import threading
+
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
@@ -19,6 +20,7 @@ except:
         ReporterInstance.report("standalone_import_crash", "%s" % traceback.format_exception(*sys.exc_info()))
         ReporterInstance.shutdown()
     os._exit(1)
+
 
 def handle_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):

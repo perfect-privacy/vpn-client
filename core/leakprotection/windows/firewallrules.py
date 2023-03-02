@@ -380,6 +380,8 @@ class FirewallRuleBlockIpv6Dhcp(FirewallRule):
 
 class FirewallReset():
     def run(self):
+        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
+
         rules = getPowershellInstance().execute('Get-NetFirewallRule | ConvertTo-Json', as_data=True)
         if rules is None:
             ReporterInstance.report("firewall_reset_load_failed","")
@@ -391,5 +393,4 @@ class FirewallReset():
                     getPowershellInstance().execute('Remove-NetFirewallRule -Name "%s"' % rule["name"], may_fail=True)
             except:
                 pass
-        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
 

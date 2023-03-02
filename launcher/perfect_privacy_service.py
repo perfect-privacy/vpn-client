@@ -3,17 +3,13 @@ import traceback
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
-try:
-    from core.libs.web.reporter import ReporterInstance
-except:
-    ReporterInstance = None
+from core.libs.web.reporter import ReporterInstance
 
 def handle_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
-    if ReporterInstance is not None:
-        ReporterInstance.report("unhandled_exception", "%s" % traceback.format_exception(exc_type, exc_value, exc_traceback))
+    ReporterInstance.report("unhandled_exception", "%s" % traceback.format_exception(exc_type, exc_value, exc_traceback))
 
 def handle_thread_exception(args):
     handle_exception(args.exc_type, args.exc_value, args.exc_traceback)
@@ -21,15 +17,25 @@ def handle_thread_exception(args):
 sys.excepthook = handle_exception
 threading.excepthook = handle_thread_exception
 
-
 try:
     from config.config import APP_VERSION
     from config.files import PLATFORMS,PLATFORM, SOFTWARE_UPDATE_FILENAME
-    from config.paths import SOFTWARE_UPDATE_DIR
+    from config.paths import SOFTWARE_UPDATE_DIR, APP_DIR
     from gui import getPyHtmlGuiInstance
 except:
     ReporterInstance.report("service_import_crash", "%s" % traceback.format_exception(*sys.exc_info()))
     ReporterInstance.shutdown()
+    os._exit(1)
+
+try:
+    open(os.path.join(APP_DIR, "var", ".test"), "w").write("success")
+except:
+    ReporterInstance.report("failed_appdir_write", {
+        "path_exists": os.path.exists(os.path.join(APP_DIR, "var")),
+        ""
+    })
+    ReporterInstance.shutdown()
+    print("Perfect Privacy Service requires higher privileges (root/admin or system)")
     os._exit(1)
 
 
