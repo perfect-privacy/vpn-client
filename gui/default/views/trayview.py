@@ -53,7 +53,7 @@ class TrayView(PyHtmlView):
                             {% endif %}
                         {% elif pyview.subject.session.state.get() == "connected" %}
                             {% if pyview.subject.leakprotection.state.get() == "ENABLEING" or pyview.subject.ipcheck.state == "ACTIVE" %}
-                                 <h3 class="status_orange">Verifying VPN Security </h3>
+                                 <h3 class="{% if pyview.subject.ipcheck.vpn_connected == true %}status_green{% else %}status_orange{% endif %}">Verifying VPN Security </h3>
                             {% else %}            
                                 {% if pyview.subject.ipcheck.vpn_connected == true %}
                                      <h3 class="status_green">Connected to Perfect Privacy</h3>
