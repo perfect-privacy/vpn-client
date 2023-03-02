@@ -25,14 +25,14 @@ class TrayView(PyHtmlView):
                     <h2 style="padding: 2em;"> Are you sure you want to Exit?</h2>
                     {% if pyview.subject.settings.startup.enable_background_mode.get() == False %}
                         {% if pyview.subject.session._get_number_of_non_idle_connections() != 0 %}
-                            <h3> This will <b>disconnect</b> all existing VPN Tunnels! </h3>
+                            <h3 style="padding: 2em;"> This will <b>disconnect</b> all existing VPN Tunnels! </h3>
                         {% endif %}
                     {% else %}
                          {% if pyview.subject.session._get_number_of_non_idle_connections() != 0 %}
-                            <h3> Background mode enabled, your VPN connections will stay active!</h3>
+                            <h3 style="padding: 2em;"> Background mode enabled, your VPN connections will stay active!</h3>
                         {% else %}
                             {% if pyview.subject.settings.leakprotection.leakprotection_scope.get() == "program" %}
-                                <h3> Background mode enabled, Leak Protection will stay active!</h3>
+                                <h3 style="padding: 2em;"> Background mode enabled, Leak Protection will stay active!</h3>
                             {% endif %}
                         {% endif %}
                     {% endif %}
