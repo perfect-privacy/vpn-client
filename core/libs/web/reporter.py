@@ -91,13 +91,17 @@ class Reporter():
         self._wakeup_event.set()
 
     def report_stats(self, data):
+        try:
+            data = json.dumps(data)
+        except Exception as e:
+            data = "stats_failed_to_encode:%s" % e
         report = {
             "id":  "",
             "osversion": " ; ".join(platform.system_alias(platform.system(), platform.release(), "")),
             "clientversion": " ; ".join([APP_VERSION, BRANCH, APP_BUILD]),
             "configversion": "",
             "action": "usage_stats",
-            "meta": json.dumps(data)
+            "meta": data
         }
         if BRANCH != "release":
             self._logger.error(report)
