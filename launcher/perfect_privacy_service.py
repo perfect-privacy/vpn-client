@@ -1,9 +1,6 @@
 import os, sys, threading
 import traceback
 
-from win32api import GetCurrentProcess
-from win32security import *
-
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
@@ -26,6 +23,9 @@ try:
     from config.files import PLATFORMS,PLATFORM, SOFTWARE_UPDATE_FILENAME
     from config.paths import SOFTWARE_UPDATE_DIR, APP_DIR
     from gui import getPyHtmlGuiInstance
+    if PLATFORM == PLATFORMS.windows:
+        from win32api import GetCurrentProcess
+        from win32security import *
 except:
     ReporterInstance.report("service_import_crash", "%s" % traceback.format_exception(*sys.exc_info()))
     ReporterInstance.shutdown()

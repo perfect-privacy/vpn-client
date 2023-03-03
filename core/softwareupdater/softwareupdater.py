@@ -51,7 +51,6 @@ class SoftwareUpdater(GenericUpdater):
 
         try:
             r = WebRequest().get(self.version_url)
-
             r.raise_for_status()
             [int(x) for x in r.content.decode("UTF-8").split("\n")[0].strip().split(".")]  # crash if content is not a number
             self.version_online = "%s" % r.content.decode("UTF-8").split("\n")[0].strip()
@@ -77,7 +76,6 @@ class SoftwareUpdater(GenericUpdater):
 
         except Exception as e:
             self.last_failed_check.set(math.floor(now))
-            self._logger.debug(traceback.format_exc())
             self._logger.debug("error while checking for updates, retry in {} seconds".format(self._err_check_interval_seconds))
             self._auto_update_timer.interval = self._err_check_interval_seconds
             self.state.set(UpdaterState.UPDATER_STATE_IDLE)
