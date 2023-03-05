@@ -12,7 +12,7 @@ class DashboardView(PyHtmlView):
         <div class="head" style="height: 10vh;width: 100%;">
             <img src="/static/img/logo_dark.png" style="width: fit-content; position: absolute; top: 1em; left: 2em;">
             <div style="width: fit-content; position: absolute; top: 1.5em; right: 3em;">
-                {% if pyview.subject.userapi.credentials_valid.get() == True %}                    
+                {% if pyview.subject.userapi.credentials_valid.get() == True %}
                     <div style="float: left;line-height: 3em;padding-right: 1em;">
                         <h3><a>{{pyview.subject.settings.account.username.get()}}</a></h3>
                     </div>
@@ -25,21 +25,21 @@ class DashboardView(PyHtmlView):
             {% if pyview.subject.userapi.credentials_valid.get() %}
                 {{ pyview.hop_list.render() }}
             {% else %}
-                <div style="width: 40%;margin: auto;"> 
+                <div style="width: 40%;margin: auto;">
                     <input id="username" type="text" placeholder="Username"  value="{{pyview.username_input}}"/>
                     <br>
                     <input id="password" type="password" placeholder="Password"  />
                 </div>
                 <br>
                 {% if pyview.subject.userapi.account_expired %}
-                    <p class="warning">account expired</p>        
+                    <p class="warning">account expired</p>
                 {% endif %}
                 {% if pyview.subject.userapi.account_disabled %}
-                    <p class="warning">account disabled</p>   
+                    <p class="warning">account disabled</p>
                 {% endif %}
                 {% if pyview.subject.userapi.credentials_valid.get() == False %}
                     Failed to login
-                {% endif %} 
+                {% endif %}
                 <br>
                 <br>
                 <button onclick='pyview.login(document.getElementById("username").value, document.getElementById("password").value)' style="width:100%">

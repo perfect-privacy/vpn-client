@@ -96,7 +96,7 @@ class FirewallRuleOutgoingProfileDefaultBlock():
         self._logger.info("%s activating" % self.__class__.__name__)
         if self.default_profiles.get() is None:
             self.default_profiles.set(getPowershellInstance().execute("Get-NetFirewallProfile | ConvertTo-Json", as_data = True))
-        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Block")
+        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Block -Enabled True")
         self.is_enabled.set(True)
 
     def disable(self):

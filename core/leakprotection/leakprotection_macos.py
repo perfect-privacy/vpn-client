@@ -20,7 +20,6 @@ class LeakProtection_macos(LeakProtection_Generic):
         self.core = core
         self._logger = logging.getLogger(self.__class__.__name__)
         self.current_rules_str = None
-        self.networkInterfaces = NetworkInterfaces(core)
         super().__init__(core=core)
 
     def _enable(self):
@@ -39,18 +38,33 @@ class LeakProtection_macos(LeakProtection_Generic):
                 rules.append("pass out on %s all keep state" % hop.connection.openvpn_device)
 
         rules.extend([
-            "pass out inet to 10.0.0.0/8".format(),
-            "pass in  inet from 10.0.0.0/8".format(),
-            "pass out inet to 192.168.0.0/16".format(),
-            "pass in  inet from 192.168.0.0/16".format(),
-            "pass out inet to 172.16.0.0/12".format(),
-            "pass in  inet from 172.16.0.0/12".format(),
-            "pass out inet proto UDP to 224.0.0.251 port 5353".format(),  # mDNS / local discovery
-            "pass out inet to 169.254.0.0/16".format(),  # link-local (works on primary interface only)
+            "pass out inet to 10.0.0.0/8",
+            "pass in  inet from 10.0.0.0/8",
+            "pass out inet to 192.168.0.0/16",
+            "pass in  inet from 192.168.0.0/16",
+            "pass out inet to 172.16.0.0/12",
+            "pass in  inet from 172.16.0.0/12",
+            "pass out inet proto UDP to 224.0.0.251 port 5353",  # mDNS / local discovery
+            "pass out inet to 169.254.0.0/16",  # link-local (works on primary interface only)
         ])
-        # block out inet proto UDP port 161,162,1900
+
+        # BLOCK ROUTER
+        if self.core.settings.leakprotection.block_access_to_local_router.get() is True:
+            for router_ip in self._get_router_ips():
+                rules.append("block out inet to %s" % router_ip)
+
+        # SNMP/UPNP
+        if self.core.settings.leakprotection.enable_snmp_upnp_protection.get() is True:
+            for port in ["161:162", "1900"]:
+                for proto in ["TCP", "UDP"]:
+                    rules.append("block out inet proto %s to  10.0.0.0/8    port %s" % (proto, port))
+                    rules.append("block out inet proto %s to 192.168.0.0/16 port %s" % (proto, port))
+                    rules.append("block out inet proto %s to 172.16.0.0/12  port %s" % (proto, port))
+                    rules.append("block out inet proto %s to 169.254.0.0/16 port %s" % (proto, port))
+                    rules.append("block out inet proto %s to 224.0.0.0/3    port %s" % (proto, port))
 
         rules_str = "\n".join(rules) + "\n"
+
         if rules_str != self.current_rules_str:
             self._logger.debug("Updating firewall rules")
             self.current_rules_str = rules_str
@@ -67,12 +81,22 @@ class LeakProtection_macos(LeakProtection_Generic):
                 self._logger.error("unexpected exception: {}".format(e))
                 self._logger.debug(traceback.format_exc())
 
+        self.networkInterfaces = NetworkInterfaces(self.core)
+
+        # PROTECT IPV6
+        if self.core.settings.leakprotection.enable_ipv6_leak_protection.get() is True:
+            self.networkInterfaces.disableIpv6()
+        else:
+            self.networkInterfaces.enableIpv6()
+
+        # DNS leak protection
         if self.core.settings.leakprotection.enable_dnsleak_protection.get():
             self.networkInterfaces.enableDnsLeakProtection()
         else:
             self.networkInterfaces.disableDnsLeakProtection()
 
     def _disable(self):
+        self.networkInterfaces = NetworkInterfaces(self.core)
         if self.current_rules_str != "":
             self._logger.info("turning off firewall")
             subprocess.Popen([PFCTL, "-d"]).communicate()
@@ -82,7 +106,6 @@ class LeakProtection_macos(LeakProtection_Generic):
     def reset(self):
         subprocess.Popen([PFCTL, "-d"]).communicate()
         self.current_rules_str = ""
-        self.networkinterfaces = []
         success, stdout, stderr = SubCommand().run("/usr/sbin/networksetup", args=["-listallnetworkservices"])
         lines = stdout.decode("utf-8").split("\n")
         if len(lines) > 1:
@@ -92,3 +115,21 @@ class LeakProtection_macos(LeakProtection_Generic):
                     continue
                 _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setdnsservers'   , name, "Empty"])
                 _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setsearchdomains', name, "Empty"])
+
+    def _get_router_ips(self):
+        success, stdout, stderr = SubCommand().run("/usr/sbin/networksetup", args=["-listallnetworkservices"])
+        lines = stdout.decode("utf-8").split("\n")
+        results = []
+        if len(lines) > 1:
+            for line in lines[1:]:
+                name = line.strip()
+                if name == "":
+                    continue
+                success, stdout, stderr = SubCommand().run("/usr/sbin/networksetup", args=["-getinfo", name])
+                try:
+                    ip = stdout.decode("utf-8").split("Router:")[1].split("\n").strip()
+                    if "." in ip or ":" in ip:
+                        results.append(ip)
+                except:
+                    pass
+        return results

@@ -34,6 +34,52 @@ ERROR_PAGE = '''
     </div>
 '''
 
+class AnimatedTrayIcon():
+    def __init__(self, tray):
+        self._icon_path = os.path.join(APP_DIR, "gui", "default", "static", "icons")
+        self._tray = tray
+        self._animation_icons = [
+            os.path.join(self._icon_path, "pp_icon_10.ico"),
+            os.path.join(self._icon_path, "pp_icon_30.ico"),
+            os.path.join(self._icon_path, "pp_icon_50.ico"),
+            os.path.join(self._icon_path, "pp_icon_70.ico"),
+            os.path.join(self._icon_path, "pp_icon_90.ico"),
+            os.path.join(self._icon_path, "pp_icon_110.ico"),
+            os.path.join(self._icon_path, "pp_icon_130.ico"),
+            os.path.join(self._icon_path, "pp_icon_150.ico"),
+            os.path.join(self._icon_path, "pp_icon_170.ico"),
+            os.path.join(self._icon_path, "pp_icon_190.ico"),
+            os.path.join(self._icon_path, "pp_icon_210.ico"),
+        ]
+        self._current_index = 0
+        self._current_direction = -1
+        self._current_state = ""
+        self._timer = QTimer()
+        self._timer.timeout.connect(self._animate_step)
+
+    def set_state(self, state):
+        if self._current_state == state:
+            return
+        self._timer.stop()
+        if state == "connected":
+            self._tray.set_icon(os.path.join(self._icon_path, "pp_icon.ico"))
+        elif state == "disconnected":
+            self._tray.set_icon(os.path.join(self._icon_path, "pp_icon_idle.ico"))
+        elif state == "working":
+            self._current_direction = -1
+            self._current_index = 5 if self._current_state == "connected" else 0
+            self._timer.start(130)
+        self._current_state = state
+
+    def _animate_step(self):
+        self._timer.stop()
+        if self._current_state == "working":
+            self._tray.set_icon(self._animation_icons[self._current_index])
+            if self._current_index == 0 or self._current_index == len(self._animation_icons) -1:
+                self._current_direction *= -1
+            self._current_index += self._current_direction
+            self._timer.start(130)
+
 class MainApp():
     def __init__(self):
         try:
@@ -55,7 +101,7 @@ class MainApp():
                 errormsg = msg
         error_page = ERROR_PAGE % errormsg
 
-        self.icon_path = os.path.join(APP_DIR, "gui", "default", "static", "img", "pp_icon.ico")
+        self.icon_path = os.path.join(APP_DIR, "gui", "default", "static", "icons", "pp_icon.ico")
 
         self.app = PyHtmlQtApp(icon_path= self.icon_path)
 
@@ -64,10 +110,13 @@ class MainApp():
         self.window.addJavascriptFunction("copy_to_clipboard", PyHtmlQtApp.clipboard().setText)
         self.window.addJavascriptFunction("fix_service_as_admin", self.fix_service_as_admin)
 
-        self.tray = PyHtmlQtTray(self.app, url="http://127.0.0.1:%s/tray?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[300,400], icon_path = self.icon_path)
+        self.tray = PyHtmlQtTray(self.app, url="http://127.0.0.1:%s/tray?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[300,400], icon_path = self.icon_path, keep_connected_on_close=True)
+        self.animatedTrayIcon = AnimatedTrayIcon(self.tray)
         self.tray.addJavascriptFunction("exit_app", self.stop)
         self.tray.addJavascriptFunction("show_app", self.window.show)
         self.tray.addJavascriptFunction("hide_app", self.window.hide)
+        self.tray.addJavascriptFunction("set_icon_state", self.animatedTrayIcon.set_state)
+
 
         if PLATFORM == PLATFORMS.macos:
             def confirm_exit():
@@ -83,6 +132,7 @@ class MainApp():
             self.tray.on_left_clicked.attach_observer(self.window.show)
         self.window._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self.tray._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+
 
     def run(self):
         if self.minimized is True:

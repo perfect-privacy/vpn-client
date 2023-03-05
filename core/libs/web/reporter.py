@@ -30,28 +30,31 @@ class Reporter():
         self.reports = []
         self.reports_send = 0
         self._logger = logging.getLogger(self.__class__.__name__)
-        self.installation_id = "%s" % uuid.uuid4()
+        self.installation_id = ""
+        self.new_id = False
         self.send_crashreports = None
         self.last_report_send = 0
+
         tmp_dir = "/tmp" if platform.system() != "Windows" else "C:\\Users\\Public"
         if APP_DIR is not None and os.path.exists(os.path.join(APP_DIR, "var", ".perfect_privacy.instid")):
-            self.installation_id = open(os.path.join(APP_DIR, "var", ".perfect_privacy.instid"), "r").read()
+            self.installation_id = open(os.path.join(APP_DIR, "var", ".perfect_privacy.instid"), "r").read().strip()
             if os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
                 os.remove(os.path.join(tmp_dir, ".perfect_privacy.instid"))
         elif os.path.exists(os.path.join(Path.home(), ".perfect_privacy.instid")):
-            self.installation_id = open(os.path.join(Path.home(), ".perfect_privacy.instid"), "r").read()
+            self.installation_id = open(os.path.join(Path.home(), ".perfect_privacy.instid"), "r").read().strip()
         elif os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
-            self.installation_id = open(os.path.join(tmp_dir, ".perfect_privacy.instid"), "r").read()
-        else:
+            self.installation_id = open(os.path.join(tmp_dir, ".perfect_privacy.instid"), "r").read().strip()
+        if self.installation_id == "":
+            self.new_id = True
             self.installation_id = uuid.uuid4()
 
-        if not os.path.exists(os.path.join(Path.home(), ".perfect_privacy.instid")):
+        if not os.path.exists(os.path.join(Path.home(), ".perfect_privacy.instid")) or self.new_id is True:
             open(os.path.join(Path.home(), ".perfect_privacy.instid"), "w").write(self.installation_id)
-        if APP_DIR is not None and not os.path.exists(os.path.join(APP_DIR, "var", ".perfect_privacy.instid")):
+        if APP_DIR is not None and (not os.path.exists(os.path.join(APP_DIR, "var", ".perfect_privacy.instid")) or self.new_id is True):
             try:
                 open(os.path.join(APP_DIR, "var", ".perfect_privacy.instid"), "w").write(self.installation_id)
             except:
-                if not os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
+                if not os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")) or self.new_id is True:
                     open(os.path.join(tmp_dir, ".perfect_privacy.instid"), "w").write(self.installation_id)
 
         self.from_disk()
