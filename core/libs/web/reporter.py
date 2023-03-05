@@ -40,9 +40,9 @@ class Reporter():
             self.installation_id = open(os.path.join(APP_DIR, "var", ".perfect_privacy.instid"), "r").read().strip()
             if os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
                 os.remove(os.path.join(tmp_dir, ".perfect_privacy.instid"))
-        elif os.path.exists(os.path.join(Path.home(), ".perfect_privacy.instid")):
+        if os.path.exists(os.path.join(Path.home(), ".perfect_privacy.instid")) and self.installation_id == "":
             self.installation_id = open(os.path.join(Path.home(), ".perfect_privacy.instid"), "r").read().strip()
-        elif os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
+        if os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid"))  and self.installation_id == "":
             self.installation_id = open(os.path.join(tmp_dir, ".perfect_privacy.instid"), "r").read().strip()
         if self.installation_id == "":
             self.new_id = True
