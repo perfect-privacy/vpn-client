@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import traceback
+import uuid
 from subprocess import PIPE
 from threading import Thread, Lock
 from queue import Queue, Empty
@@ -23,7 +24,7 @@ class Powershell():
         try:
             if as_data is True:
                 if not command.endswith("ConvertTo-Json"):
-                    command += " | ConvertTo-Json"
+                    command += " | ConvertTo-Json | % { [System.Text.RegularExpressions.Regex]::Unescape(&_) } "
             result = self._execute_locked(command)
             if as_data is True:
                 result = json.loads(result)
@@ -58,13 +59,12 @@ class Powershell():
             self._stderr_read_tread = Thread(target=self._read_thread, args=(self._process.stderr, self._stdout_queue), daemon=True)
             self._stderr_read_tread.start()
         self._process.stdin.write(b'[Console]::OutputEncoding = [Text.Encoding]::UTF8 ; ')
-        self._process.stdin.write(b'Write-Host __STARTMARKER__ ; ')
+        self._process.stdin.write(b"$PSDefaultParameterValues['*:Encoding'] = 'utf-8' ; ")
+        uniq_id = ("%s" % uuid.uuid4()).split("-")[0].strip()
+        self._process.stdin.write(b'Write-Host __STARTMARKER-%s__ ; ' % uniq_id)
         self._process.stdin.write(b'' + command + b" ; ")
-        self._process.stdin.write(b'Write-Host __ENDMARKER__ \n')
+        self._process.stdin.write(b'Write-Host __ENDMARKER-%s__ \n' % uniq_id)
         self._process.stdin.flush()
-
-        # FIXME : Sometimes causes an error if powershell decides to not respond?
-        # FIXME2: Really?
 
         lines = []
         startfound = False
@@ -73,15 +73,15 @@ class Powershell():
                 line = self._stdout_queue.get(timeout=12)
             except Empty:
                 break
-            if line == b"__ENDMARKER__\n":
+            if line == b"__ENDMARKER-%s__\n" % uniq_id:
                 break
             if startfound == True:
                 if line.startswith(b"PS "):  # may be powershell echo output
                     if line.endswith(command + b"\n"): continue  # skip command echoed by powershell
-                    if line.endswith(b'Write-Host __STARTMARKER__\n'): continue  # skip startmarker
-                    if line.endswith(b'Write-Host __ENDMARKER__\n'): continue  # skip endmarker
+                    if line.endswith(b'Write-Host __STARTMARKER-%s__\n' % uniq_id): continue  # skip startmarker
+                    if line.endswith(b'Write-Host __ENDMARKER-%s__\n' % uniq_id): continue  # skip endmarker
                 lines.append(line)
-            if line == b"__STARTMARKER__\n":
+            if line == b"__STARTMARKER-%s__\n" % uniq_id:
                 startfound = True
         return b"".join(lines)
 

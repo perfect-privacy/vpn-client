@@ -206,7 +206,7 @@ class DeviceManager(Observable):
         networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
         name_to_index = {}
         if networkdatas is None:
-            self._logger.debug("Failed to load device enumeration")
+            ReporterInstance.report("devicemanager_enumeration_failed", "")
             return []
 
         for networkdata in networkdatas:
