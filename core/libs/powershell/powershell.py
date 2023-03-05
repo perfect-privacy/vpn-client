@@ -70,7 +70,7 @@ class Powershell():
         startfound = False
         while True:
             try:
-                line = self._stdout_queue.get(timeout=12)
+                line = self._stdout_queue.get(timeout=15)
             except Empty:
                 break
             if line == b"__ENDMARKER-%s__\n" % uniq_id:
