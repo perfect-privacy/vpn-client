@@ -51,6 +51,7 @@ class Powershell():
 
     def _execute_locked(self, command):
         command = command.encode("UTF-8")
+        uniq_id = ("%s" % uuid.uuid4()).split("-")[0].strip().encode("ASCII")
         if self._process is None:
             self._process = subprocess.Popen(['powershell'], stdin=PIPE, stderr=PIPE, stdout=PIPE)
         if self._stdout_read_tread is None:
@@ -60,7 +61,6 @@ class Powershell():
             self._stderr_read_tread.start()
         self._process.stdin.write(b'[Console]::OutputEncoding = [Text.Encoding]::UTF8 ; ')
         self._process.stdin.write(b"$PSDefaultParameterValues['*:Encoding'] = 'utf-8' ; ")
-        uniq_id = ("%s" % uuid.uuid4()).split("-")[0].strip().encode("ASCII")
         self._process.stdin.write(b'Write-Host __STARTMARKER-%s__ ; ' % uniq_id)
         self._process.stdin.write(b'' + command + b" ; ")
         self._process.stdin.write(b'Write-Host __ENDMARKER-%s__ \n' % uniq_id)
