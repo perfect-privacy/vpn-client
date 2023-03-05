@@ -8,7 +8,7 @@ import psutil
 try:
     from PyQt6.QtCore import Qt, QTimer
 except:
-    from PyQt5.QtCore import Qt
+    from PyQt5.QtCore import Qt, QTimer
 
 from pyhtmlgui.apps.qt import PyHtmlQtApp, PyHtmlQtTray, PyHtmlQtWindow
 from config.config import SHARED_SECRET, PLATFORM, SERVICE_PORT
