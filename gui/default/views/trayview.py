@@ -1,20 +1,26 @@
 import random
 
-from pyhtmlgui import PyHtmlView, ObservableListView, ObservableDictView
-from .dashboard import DashboardView
-from .modals.confirm_exit import ConfirmExitModalView
+from pyhtmlgui import PyHtmlView, ObservableListView
 from .modals.select_server import ObservableDictViewWithFilter
 
 
 class TrayView(PyHtmlView):
     TEMPLATE_STR = '''
-        <div id="wrapper">
-    
+        <script>
+            {% if pyview.subject.session.state.get() == "idle" %}
+                pyhtmlapp.set_icon_state("disconnected")
+            {% elif pyview.subject.session.state.get() == "connected" and pyview.subject.ipcheck.vpn_connected == true %}
+                pyhtmlapp.set_icon_state("connected")
+            {% else %}
+                pyhtmlapp.set_icon_state("working")
+            {% endif %}
+        </script>
         
+        <div id="wrapper">
             <section id="intro" class="wrapper style1 fullheight fade-up">
             {% if pyview.select_server == True %}
-             {{ pyview.selectServerView.render()  }}
-          {% else %}
+                {{ pyview.selectServerView.render()  }}
+            {% else %}
               
                 <div class="head" style="height: 10vh;width: 100%;margin-bottom:10px;">
                     <img src="/static/img/logo_dark.png" style="width: 50%; position: absolute; top: 0.5em; left: 1em;">

@@ -30,7 +30,6 @@ class LeakProtection_windows(LeakProtection_Generic):
         self.core = core
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        self.networkInterfaces = NetworkInterfaces(self.core)
         self.deadrouting = DeadRouting()
         self.firewallRuleOutgoingProfileDefaultBlock = FirewallRuleOutgoingProfileDefaultBlock()
         self.firewallRuleAllowConnectionToServer = FirewallRuleAllowConnectionToServer()
@@ -122,11 +121,13 @@ class LeakProtection_windows(LeakProtection_Generic):
         else:
             self.firewallRuleBlockSnmp.disable()
 
-        # BLOCk ROUTER
+        # BLOCK ROUTER
         if self.core.settings.leakprotection.block_access_to_local_router.get() is True:
             self.firewallRuleBlockDefaultGateway.enable()
         else:
             self.firewallRuleBlockDefaultGateway.disable()
+
+        self.networkInterfaces = NetworkInterfaces(self.core)
 
         # PROTECT IPV6
         if self.core.settings.leakprotection.enable_ipv6_leak_protection.get() is True:
@@ -146,6 +147,7 @@ class LeakProtection_windows(LeakProtection_Generic):
 
 
     def _disable(self):
+        self.networkInterfaces = NetworkInterfaces(self.core)
         self.deadrouting.disable()
         for rule in self.firewallRules:
             rule.disable()
@@ -158,6 +160,7 @@ class LeakProtection_windows(LeakProtection_Generic):
         except Exception as e:
             ReporterInstance.report("firewall_reset_deadrouting_failed", traceback.format_exc())
         try:
+            self.networkInterfaces = NetworkInterfaces(self.core)
             self.networkInterfaces.disableDnsLeakProtection()
         except Exception as e:
             ReporterInstance.report("firewall_reset_dns_failed", traceback.format_exc())

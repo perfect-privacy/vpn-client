@@ -44,6 +44,12 @@ class NetworkInterface():
             _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setdnsservers'   , self.name, "Empty"])
             _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setsearchdomains', self.name, "Empty"] )
 
+    def disableIpv6(self):
+        success, stdout, stderr = SubCommand().run("/usr/sbin/networksetup", args=["-setv6off", self.name])
+
+    def enableIpv6(self):
+        success, stdout, stderr = SubCommand().run("/usr/sbin/networksetup", args=["-setv6automatic", self.name])
+
     def __str__(self):
         data = []
         data.append("name: %s" % self.name)
@@ -56,6 +62,7 @@ class NetworkInterfaces():
     def __init__(self,core ):
         self.core = core
         self.networkinterfaces = []
+        self._load()
 
     def _load(self):
         if self.core is not None:
@@ -86,12 +93,17 @@ class NetworkInterfaces():
                             ni.dns_servers_v4.append(line.strip())
 
     def enableDnsLeakProtection(self):
-        self._load()
         for interface in self.networkinterfaces:
             interface.enableDnsLeakProtection()
 
     def disableDnsLeakProtection(self):
-        self._load()
         for interface in self.networkinterfaces:
             interface.disableDnsLeakProtection()
 
+    def disableIpv6(self):
+        for interface in self.networkinterfaces:
+            interface.disableIpv6()
+
+    def enableIpv6(self):
+        for interface in self.networkinterfaces:
+            interface.enableIpv6()

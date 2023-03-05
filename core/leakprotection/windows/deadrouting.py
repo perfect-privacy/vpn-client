@@ -30,8 +30,8 @@ class DeadRouting():
                     SubCommand().run(ROUTE, ["add", self.whitelisted_server_ip, "mask", "255.255.255.255", default_gw])
             SubCommand().run(ROUTE, ["add", "-p",   "0.0.0.0", "mask", "128.0.0.0", "10.255.255.255", "metric", "9999"]) # bugus unreachable ip, 127.0.0.1 does not work
             SubCommand().run(ROUTE, ["add", "-p", "128.0.0.0", "mask", "128.0.0.0", "10.255.255.255", "metric", "9999"])
-            SubCommand().run(NETSH, ["interface", "ipv6", "add", "route", "2000::/4", "interface=1", "store=persistent"])
-            SubCommand().run(NETSH, ["interface", "ipv6", "add", "route", "3000::/4", "interface=1", "store=persistent"])
+            SubCommand().run(NETSH, ["interface", "ipv6", "add", "route", "2000::/4", "interface=1", "store=persistent", "metric=9999"])
+            SubCommand().run(NETSH, ["interface", "ipv6", "add", "route", "3000::/4", "interface=1", "store=persistent", "metric=9999"])
 
     def disable(self, force=False):
         if self.is_enabled is True or force is True:

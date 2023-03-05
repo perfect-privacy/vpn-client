@@ -54,21 +54,20 @@ class LeakProtectionView(PyHtmlView):
                 <br>
                 <h3>Details</h3>
                 <div class="boxes">
-                    {% if pyview.PLATFORM == pyview.PLATFORMS.windows %}
-                        <section>
-                            <h3>
-                                Block access to local router
-                                <div class="input"> {{ pyview.block_access_to_local_router.render() }} </div>
-                            </h3> 
-                            <div>
-                                Prevent programs from determining your external IP address 
-                                <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
-                                <div class="tooltip" style="display:none">
-                                    This setting prevents programs from determining your external IP address through SMTP and XSS, which is possible with some routers. Please note that access to network printers or hard drives connected to the router may also be blocked by the firewall
-                                </div>
+                    <section>
+                        <h3>
+                            Block access to local router
+                            <div class="input"> {{ pyview.block_access_to_local_router.render() }} </div>
+                        </h3>
+                        <div>
+                            Prevent programs from determining your external IP address 
+                            <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                            <div class="tooltip" style="display:none">
+                                This setting prevents programs from determining your external IP address through SMTP and XSS, which is possible with some routers. Please note that access to network printers or hard drives connected to the router may also be blocked by the firewall
                             </div>
-                        </section> 
-                    
+                        </div>
+                    </section>
+                    {% if pyview.PLATFORM == pyview.PLATFORMS.windows %}
                         {% if pyview.subject.settings.interface_level.get()  == "expert" %}
                             <section> 
                                 <h3>
@@ -116,39 +115,41 @@ class LeakProtectionView(PyHtmlView):
                                         potentially revealing your real IP address. Enable this feature to prevent this type of leak.
                                     </div>
                                 </div>
-                            </section>
-                        
-                            <section>                         
-                                <h3>
-                                    SNMP/UPnP Leak Protection
-                                    <div class="input"> {{ pyview.enable_snmp_upnp_protection.render() }} </div>
-                                </h3> 
-                                <div>
-                                    Block SNMP/UPnP access to local router
-                                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
-                                    <div class="tooltip" style="display:none">
-                                        Enabling this feature will prevent programs on your computer from accessing the local router through the SNMP and UPnP protocols. 
-                                        This prevents potentially sensitive information, such as your public IP address, from being revealed to programs on you computer. 
-                                        However, please note that blocking access to these protocols may also prevent certain programs or services from functioning properly.
-                                    </div>
-                                </div>
-                            </section>            
-                        
-                            <section>
-                                <h3>
-                                    Prevent IPv6 Leak
-                                    <div class="input"> {{ pyview.enable_ipv6_leak_protection.render() }} </div>                            
-                                </h3> 
-                                <div>
-                                    Prevent the leak of your public IP address assigned by your ISP through your local IPv6 address.
-                                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
-                                    <div class="tooltip" style="display:none">
-                                        If your ISP provides an IPv6 address, it is possible that it will assign your computer a local IPv6 address that includes your public IP address assigned by the ISP. 
-                                        Enable this option to prevent this type of leak.
-                                    </div>
-                                </div>
-                            </section> 
+                            </section>          
                         {% endif %}  
+                        
+                    {% endif %}		
+                
+                    {% if pyview.subject.settings.interface_level.get()  == "expert" %}
+                        <section>                         
+                            <h3>
+                                SNMP/UPnP Leak Protection
+                                <div class="input"> {{ pyview.enable_snmp_upnp_protection.render() }} </div>
+                            </h3> 
+                            <div>
+                                Block SNMP/UPnP Ports
+                                <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                <div class="tooltip" style="display:none">
+                                    Enabling this feature will prevent programs on your computer from accessing other devices via SNMP and UPnP protocols. 
+                                    This prevents potentially sensitive information, such as your public IP address, from being revealed to programs on your computer from other devices in your network.  
+                                    However, please note that blocking access to these protocols may also prevent certain programs or services from functioning properly.
+                                </div>
+                            </div>
+                        </section>              
+                        <section>
+                            <h3>
+                                Prevent IPv6 Leak
+                                <div class="input"> {{ pyview.enable_ipv6_leak_protection.render() }} </div>                            
+                            </h3> 
+                            <div>
+                                Prevent the leak of your public IP address assigned by your ISP through your local IPv6 address.
+                                <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                <div class="tooltip" style="display:none">
+                                    If your ISP provides an IPv6 address, it is possible that it will assign your computer a local IPv6 address that includes your public IP address assigned by the ISP. 
+                                    Enable this option to prevent this type of leak.
+                                </div>
+                            </div>
+                        </section> 
                     {% endif %}		
                 
                     <section>

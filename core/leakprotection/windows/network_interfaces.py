@@ -25,7 +25,8 @@ class NetworkInterface():
 
     def disableIpv6(self):
         for ipv6 in self.ipv6:
-            success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv6", "delete", "address", "%s" % self.index, "address=%s" % ipv6[0], "store=active"])
+            if ipv6[0].startwith("2") or ipv6[0].startwith("3"):
+                success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv6", "delete", "address", "%s" % self.index, "address=%s" % ipv6[0], "store=active"])
 
     def enableIpv6(self):
         # enable does nothing, if a automatically assigned Ipv6 has been removed, it will come back automatically when announcements are no longer firewalled
@@ -64,7 +65,7 @@ class NetworkInterface():
             if len(new_dnsservers_v6) > 0:
                 success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv6", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v6[0] , "validate=no"])
             if len(new_dnsservers_v6) > 1:
-                success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv4", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v6[1], "index=1", "validate=no"])
+                success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv6", "set", "dnsserver", "%s" % (self.index), "static", "address=%s" % new_dnsservers_v6[1], "index=1", "validate=no"])
 
             self.dnsleakprotection_enabled = True
 
@@ -93,6 +94,7 @@ class NetworkInterfaces():
     def __init__(self,core ):
         self.core = core
         self.networkinterfaces = None
+        self._load()
 
     def _load(self):
         if self.core is not None:
@@ -156,22 +158,20 @@ class NetworkInterfaces():
                 ReporterInstance.report("get_adapters_failed", traceback.format_exc())
 
     def disableIpv6(self):
-        self._load()
         for key, interface in self.networkinterfaces.items():
             interface.disableIpv6()
 
     def enableIpv6(self):
-        self._load()
-        for key, interface in self.networkinterfaces.items():
-            interface.enableIpv6()
+        return # enable does nothing, ipv6 will come back if dhcpv6 is no longer blocked
+        #self._load()
+        #for key, interface in self.networkinterfaces.items():
+        #    interface.enableIpv6()
 
     def enableDnsLeakProtection(self):
-        self._load()
         for key, interface in self.networkinterfaces.items():
             interface.enableDnsLeakProtection()
 
     def disableDnsLeakProtection(self):
-        self._load()
         for key, interface in self.networkinterfaces.items():
             interface.disableDnsLeakProtection()
 

@@ -178,7 +178,7 @@ class Core(Observable):
                 pythoncom.CoInitialize()
                 shell = win32com.client.Dispatch("WScript.Shell")
                 shortcut = shell.CreateShortCut(shortcut_path)
-                shortcut.IconLocation = str(os.path.join(APP_DIR, "gui", "default", "static", "img", "pp_icon.ico"))
+                shortcut.IconLocation = str(os.path.join(APP_DIR, "gui", "default", "static", "icons", "pp_icon.ico"))
                 shortcut.Targetpath = os.path.join(APP_DIR, "perfect-privacy.exe")
                 shortcut.save()
 
