@@ -52,7 +52,7 @@ class BuildMacos(BuildCommon):
         os.system(cmd)
         cmd = 'cp "%s" "%s"' % (os.path.join(self.SOURCE_DIR, "build", "data", "macos", "installer", "perfect-privacy-service.plist" ) ,  os.path.join(self.BUILD_DIR_TMP, "pkg", "app", "Applications", "Perfect Privacy.app", "Contents", "MacOS", "perfect-privacy-service.plist"))
         os.system(cmd)
-        cmd = 'cp "%s" "%s"' % (os.path.join(self.SOURCE_DIR, "build_tmp", "perfect-privacy", "gui", "default", "static", "img", "pp_icons.icns" ),  os.path.join(self.BUILD_DIR_TMP, "pkg", "app", "Applications", "Perfect Privacy.app", "Contents", "Resources", "AppIcons.icns")  )
+        cmd = 'cp "%s" "%s"' % (os.path.join(self.SOURCE_DIR, "build_tmp", "perfect-privacy", "gui", "default", "static", "icons", "pp_icons.icns" ),  os.path.join(self.BUILD_DIR_TMP, "pkg", "app", "Applications", "Perfect Privacy.app", "Contents", "Resources", "AppIcons.icns")  )
         os.system(cmd)
         os.system('cp "%s" "%s"' % (os.path.join(self.BUILD_DIR_TMP, "pkg_uninstaller" , "uninstall.pkg"), os.path.join(self.BUILD_DIR_TMP, "pkg", "app", "Applications", "Perfect Privacy.app" )))
         os.system('rm -rf "%s" ' %  os.path.join(self.BUILD_DIR_TMP, "pkg_uninstaller" ))
