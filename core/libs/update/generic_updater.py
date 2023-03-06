@@ -11,8 +11,8 @@ from pyhtmlgui import Observable
 
 class GenericUpdater(Observable):
 
-    def __init__(self, file_url, signature_url, version_url, download_directory, min_check_interval_seconds=5 * 60, max_check_interval_seconds=7 * 24 * 60 * 60,
-                 err_check_interval_seconds=10 * 60):
+    def __init__(self, file_url, signature_url, version_url, download_directory, min_check_interval_seconds=1 * 24 * 60 * 60, max_check_interval_seconds=7 * 24 * 60 * 60,
+                 err_check_interval_seconds=1 * 60 * 60):
 
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)

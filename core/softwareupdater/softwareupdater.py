@@ -15,9 +15,9 @@ from config.paths  import SOFTWARE_UPDATE_DIR
 
 class SoftwareUpdater(GenericUpdater):
     def __init__(self, core,
-                 min_check_interval_seconds=5*60,
+                 min_check_interval_seconds=  24*60*60,
                  max_check_interval_seconds=7*24*60*60,
-                 err_check_interval_seconds=10*60):
+                 err_check_interval_seconds=   2*60*60):
 
         self.core = core
         super(SoftwareUpdater, self).__init__(
@@ -30,21 +30,26 @@ class SoftwareUpdater(GenericUpdater):
             err_check_interval_seconds = err_check_interval_seconds)
 
         self._logger = logging.getLogger(self.__class__.__name__)
-        self.version_local = APP_VERSION
-        if os.path.exists(os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME)):
-            self.state.set(UpdaterState.UPDATER_STATE_READY_FOR_INSTALL)
-            self.version_online = open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "r").read()
+        self.version_downloaded = None
+        self.version_online = None
+        self.version_local  = APP_VERSION
 
+        if os.path.exists(os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME)):
+            try:
+                self.version_downloaded = open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "r").read()
+                self.state.set(UpdaterState.UPDATER_STATE_READY_FOR_INSTALL)
+            except:
+                pass
 
     def _check_for_updates(self):
-        if self.state.get()  != UpdaterState.UPDATER_STATE_IDLE and self.state.get() != UpdaterState.UPDATER_STATE_READY_FOR_INSTALL:
+        if self.state.get() != UpdaterState.UPDATER_STATE_IDLE:
             self._logger.debug("can not start a check for updates: not idle")
             return
         if  self.core.allow_webrequests() is False:
             self._logger.debug("No webrequests now, everything is firewalled")
             return
+        #  self.state.get() != UpdaterState.UPDATER_STATE_READY_FOR_INSTALL
 
-        self._logger.debug("starting checking for updates and updating")
         now = datetime.now().timestamp()
         self.state.set(UpdaterState.UPDATER_STATE_CHECKING)
         self.notify_observers()
@@ -57,14 +62,17 @@ class SoftwareUpdater(GenericUpdater):
             self.notify_observers()
 
             if self.version_online is not None and self._compare_version_numbers(self.version_online, self.version_local) > 0:
-                downloaded_version = 0
+                self.version_downloaded = 0
                 if os.path.exists(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME)):
-                    downloaded_version = open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "r").read()
-                if self._compare_version_numbers(self.version_online, downloaded_version) > 0:
+                    self.version_downloaded = open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "r").read()
+                if self._compare_version_numbers(self.version_online, self.version_downloaded) > 0:
                     self.state.set(UpdaterState.UPDATER_STATE_DOWNLOADING)
                     executable = SecureDownload().download(self.file_url, self.signature_url)
-                    open(os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME), "wb").write(executable)
-                    open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "w").write(self.version_online)
+                    if executable is not None:
+                        open(os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME), "wb").write(executable)
+                        open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "w").write(self.version_online)
+                        self.version_downloaded = self.version_online
+
                 self.state.set(UpdaterState.UPDATER_STATE_READY_FOR_INSTALL)
                 self.update_installed.notify_observers()
             else:
@@ -76,7 +84,7 @@ class SoftwareUpdater(GenericUpdater):
 
         except Exception as e:
             self.last_failed_check.set(math.floor(now))
-            self._logger.debug("error while checking for updates, retry in {} seconds".format(self._err_check_interval_seconds))
+            #self._logger.debug("error while checking for updates, retry in {} seconds".format(self._err_check_interval_seconds))
             self._auto_update_timer.interval = self._err_check_interval_seconds
             self.state.set(UpdaterState.UPDATER_STATE_IDLE)
 

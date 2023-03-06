@@ -166,9 +166,11 @@ class PreferencesView(PyHtmlView):
                 {% endif %}            
             </div>
         {% endif %}
+        
         <h2>Updates</h2>
         {{ pyview.updater.render() }}
-        {% if pyview.subject.settings.interface_level.get() == "expert" %}
+        
+        {% if pyview.subject.settings.interface_level.get() == "expert" and pyview.PLATFORM == pyview.PLATFORMS.windows %}
             <h2>OpenVPN Driver</h2>
             {% if pyview.openvpndriver %}
                 {{ pyview.openvpndriver.render() }}
@@ -333,9 +335,6 @@ class UpdaterView(PyHtmlView):
             <span class="input" style="width:20em"> 
                 <label></label>
                 <button onclick='pyview.check_now()'> Check now </button>
-                {% if pyview.subject.softwareUpdater.state.get() == "READY_FOR_INSTALL" and pyview.subject.session.state.get() == "idle" %}
-                    <button onclick='run_updates()'> update now</button>
-                {% endif %}
             </span>
             </h3>
             <table class="table">

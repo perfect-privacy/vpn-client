@@ -9,8 +9,7 @@ var/config_update/*
 var/reports
 var/user_settings.bson
 var/storage.db
-thirdparty/*/electron
-thirdparty/windows/tap-windows/
+var/.perfect_privacy.instid
 build_tmp
 venv
 .DS_Store
@@ -29,6 +28,5 @@ thirdparty/thirdparty.zip
 thirdparty/macos
 thirdparty/macos-arm
 thirdparty/windows
-var/.perfect_privacy.instid
 foo.py
 foo.spec

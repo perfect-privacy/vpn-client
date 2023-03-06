@@ -106,7 +106,6 @@ class UserAPI(Observable):
         if time.time() - self._server_groups_last_checked > 3600:
             payload["getServerGroups"] = ""
 
-        self._logger.debug("requesting API: {}".format(payload))
         payload["username"] = username
         payload["password"] = password
 

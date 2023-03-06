@@ -112,9 +112,9 @@ class Core(Observable):
         while len(self.session.hops) > max_hops:
             self.session.remove_hop_by_index(len(self.session.hops) - 1)
 
-    def on_frontend_exit_by_user(self):
+    def on_frontend_exit_by_user(self, for_update=False):
         self.frontend_active = False
-        if self.settings.startup.enable_background_mode.get() == False:
+        if self.settings.startup.enable_background_mode.get() == False or for_update == True:
             self.session.disconnect()
         self.leakprotection.update_async()
 

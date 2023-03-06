@@ -1,5 +1,7 @@
 import os, sys
+import subprocess
 import time
+
 from core.libs.web.reporter import ReporterInstance
 
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
@@ -13,7 +15,8 @@ except:
 from pyhtmlgui.apps.qt import PyHtmlQtApp, PyHtmlQtTray, PyHtmlQtWindow
 from config.config import SHARED_SECRET, PLATFORM, SERVICE_PORT
 from config.constants import PLATFORMS
-from config.paths import APP_DIR
+from config.paths import APP_DIR, SOFTWARE_UPDATE_DIR
+from config.files import SOFTWARE_UPDATE_FILENAME
 
 if PLATFORM == PLATFORMS.windows:
     import win32com.shell.shell as shell
@@ -89,6 +92,8 @@ class MainApp():
 
         errormsg = ""
         self.restart = False
+        self.update_on_exit = False
+
         if PLATFORM == PLATFORMS.windows:
             if StartupCheckerWin().check_service_exe() == False:
                 ReporterInstance.report("service_exe_missing", {"was_run_once": SHARED_SECRET != "REPLACE_TOKEN_ON_POST_INSTALL"})
@@ -107,6 +112,7 @@ class MainApp():
 
         self.window = PyHtmlQtWindow(self.app, url="http://127.0.0.1:%s/?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[1200, 800], title="Perfect Privacy", icon_path = self.icon_path, error_page=error_page)
         self.window.addJavascriptFunction("exit_app", self.stop)
+        self.window.addJavascriptFunction("exit_app_for_update", self.exit_and_update)
         self.window.addJavascriptFunction("copy_to_clipboard", PyHtmlQtApp.clipboard().setText)
         self.window.addJavascriptFunction("fix_service_as_admin", self.fix_service_as_admin)
 
@@ -133,7 +139,6 @@ class MainApp():
         self.window._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self.tray._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
 
-
     def run(self):
         if self.minimized is True:
             self.window.hide()
@@ -142,9 +147,20 @@ class MainApp():
         self.app.run()
         if self.restart is True:
             os.execv(sys.executable, sys.argv)
+        if self.update_on_exit is True:
+            update_file = os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME)
+            if os.path.exists(update_file):
+                if PLATFORM == PLATFORMS.windows:
+                    subprocess.Popen([update_file], creationflags=os.P_DETACH)
+                if PLATFORM == PLATFORMS.macos:
+                    os.system("open '%s' & " % update_file)
 
     def stop(self, *args):
         self.app.stop()
+
+    def exit_and_update(self, *args):
+        self.update_on_exit = True
+        self.stop()
 
     def fix_service_as_admin(self, *args):
         if PLATFORM == PLATFORMS.windows:

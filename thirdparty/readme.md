@@ -68,6 +68,6 @@
     - get openvpn binary from Tunnelblick.app/Content/Resources/openvpn/
     
  
-Or download https://github.com/perfect-privacy/vpn-client/releases/download/ThirdpartySoftwareUpdate/thirdparty.zip
+Or download https://github.com/perfect-privacy/vpn-client/releases/download/ThirdpartySoftware/thirdparty.zip
  ready to use. 
  

@@ -10,9 +10,9 @@ if PLATFORM == PLATFORMS.windows:
     SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.exe" % branch
 if PLATFORM == PLATFORMS.macos:
     if platform.processor() == "arm":
-        SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.pkg" % branch
+        SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup_ARM.pkg" % branch
     else:
-        SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup_intel.pkg" % branch
+        SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.pkg" % branch
 if PLATFORM == PLATFORMS.linux:
     SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.run" % branch
 

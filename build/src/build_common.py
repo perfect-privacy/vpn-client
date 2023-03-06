@@ -2,6 +2,8 @@ import glob
 import os, sys
 import shutil
 
+import requests
+
 
 class BuildCommon():
     def __init__(self):
@@ -18,6 +20,7 @@ class BuildCommon():
         self._prepare_directorys()
         self._run_pyinstaller()
         self._write_runtime_config()
+        self.download_thirdparty()
         self._copy_files()
         self._create_installer()
 
@@ -32,6 +35,7 @@ class BuildCommon():
         os.mkdir(self.BUILD_DIR_TMP)
         if os.path.exists(self.BUILD_DIR_TARGET): shutil.rmtree(self.BUILD_DIR_TARGET)
         os.mkdir(self.BUILD_DIR_TARGET)
+
 
     def _run_pyinstaller(self):
         os.chdir(self.BUILD_DIR_TMP)
@@ -65,6 +69,15 @@ class BuildCommon():
         f.write("APP_BUILD=%s\n" % self.BUILDNUMBER)
         f.write("BRANCH=%s\n" % self.BRANCH)
         f.close()
+
+    def download_thirdparty(self):
+        if not os.path.exists(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty.zip")):
+            r = requests.get("https://github.com/perfect-privacy/vpn-client/releases/download/ThirdpartySoftware/thirdparty.zip")
+            open( os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty.zip"), "wb" ).write(r.content)
+            if self.PLATFORM == "windows":
+                os.system("cd \"%s\" & powershell -command \"Expand-Archive '%s'\"" % (os.path.join(self.SOURCE_DIR, "thirdparty"), "thirdparty.zip"))
+            else:
+                os.system("cd \"%s\" &&  unzip '%s'" % (os.path.join(self.SOURCE_DIR, "thirdparty"), "thirdparty.zip"))
 
     def _copy_files(self):
         # create var dirs

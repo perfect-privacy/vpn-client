@@ -1,4 +1,6 @@
 from pyhtmlgui import PyHtmlView
+
+from .modals.confirm_exit_update import ConfirmExitUpdateModalView
 from .stealth import StealthView
 from .port_forwarding import PortForwardingView
 from .preferences import PreferencesView
@@ -78,9 +80,11 @@ class MainView(PyHtmlView):
                     {{ pyview.logs.render() }}
                 </section>
             {% endif %}
-           
+
+            {{ pyview.softwareUpdateHint.render() }}  
         </div>
         {{ pyview.confirmExitModal.render() }} 
+        {{ pyview.confirmExitUpdateModal.render() }} 
     '''
 
 
@@ -95,6 +99,7 @@ class MainView(PyHtmlView):
         self.logs = LogsView(subject, self)
         self.current_view = self.dashboard
         self.confirmExitModal = ConfirmExitModalView(subject, self)
+        self.confirmExitUpdateModal = ConfirmExitUpdateModalView(subject, self)
         self.add_observable(self.subject.userapi.credentials_valid, self._on_subject_updated)
         self.add_observable(self.subject.settings.interface_level,  self._on_interface_level_updated)
         self.interface_level = SelectComponent(subject.settings.interface_level, self,
@@ -103,6 +108,8 @@ class MainView(PyHtmlView):
                                                 ("advance" , "Advanced"  ),
                                                 ("expert"  , "Expert"  ),
                                             ])
+        self.softwareUpdateHint = SoftwareUpdateHint(self.subject.softwareUpdater.state, self)
+
 
     def show_dashboard(self):
         if self.current_view != self.dashboard:
@@ -112,3 +119,14 @@ class MainView(PyHtmlView):
     def _on_interface_level_updated(self, source, **kwargs):
         self.update()
         self.eval_javascript("document.documentElement.scrollTop = 0;", skip_results=True)
+
+class SoftwareUpdateHint(PyHtmlView):
+    TEMPLATE_STR = '''
+        {% if pyview.subject.get() == "READY_FOR_INSTALL" %}
+            <div style="height:30px;position:fixed;bottom:0px;background-color:green;width:calc(100% - 15em);text-align:center">
+                <b style="cursor:pointer" onclick="pyview.ask_update()">Software update available, click here to install</b>
+            </div>
+        {% endif %}
+    '''
+    def ask_update(self):
+        self.parent.confirmExitUpdateModal.show()
