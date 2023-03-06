@@ -48,7 +48,7 @@ class SoftwareUpdater(GenericUpdater):
         if  self.core.allow_webrequests() is False:
             self._logger.debug("No webrequests now, everything is firewalled")
             return
-   
+
         now = datetime.now().timestamp()
         self.state.set(UpdaterState.UPDATER_STATE_CHECKING)
         self.notify_observers()
