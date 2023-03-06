@@ -61,7 +61,7 @@ class SoftwareUpdater(GenericUpdater):
             self.notify_observers()
 
             if self.version_online is not None and self._compare_version_numbers(self.version_online, self.version_local) > 0:
-                self.version_downloaded = 0
+                self.version_downloaded = "0.0.0"
                 if os.path.exists(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME)):
                     self.version_downloaded = open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "r").read()
                 if self._compare_version_numbers(self.version_online, self.version_downloaded) > 0:
