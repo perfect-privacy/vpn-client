@@ -42,14 +42,13 @@ class SoftwareUpdater(GenericUpdater):
                 pass
 
     def _check_for_updates(self):
-        if self.state.get() != UpdaterState.UPDATER_STATE_IDLE:
+        if self.state.get() != UpdaterState.UPDATER_STATE_IDLE and self.state.get() != UpdaterState.UPDATER_STATE_READY_FOR_INSTALL:
             self._logger.debug("can not start a check for updates: not idle")
             return
         if  self.core.allow_webrequests() is False:
             self._logger.debug("No webrequests now, everything is firewalled")
             return
-        #  self.state.get() != UpdaterState.UPDATER_STATE_READY_FOR_INSTALL
-
+   
         now = datetime.now().timestamp()
         self.state.set(UpdaterState.UPDATER_STATE_CHECKING)
         self.notify_observers()
