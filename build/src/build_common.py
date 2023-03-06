@@ -76,6 +76,9 @@ class BuildCommon():
             open( os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty.zip"), "wb" ).write(r.content)
             if self.PLATFORM == "windows":
                 os.system("cd \"%s\" & powershell -command \"Expand-Archive '%s'\"" % (os.path.join(self.SOURCE_DIR, "thirdparty"), "thirdparty.zip"))
+                shutil.copytree(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty", "windows"),os.path.join(self.SOURCE_DIR, "thirdparty", "windows"))
+                shutil.copytree(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty", "macos"),os.path.join(self.SOURCE_DIR, "thirdparty", "macos"))
+                shutil.rmtree(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty"))
             else:
                 os.system("cd \"%s\" &&  unzip '%s'" % (os.path.join(self.SOURCE_DIR, "thirdparty"), "thirdparty.zip"))
 

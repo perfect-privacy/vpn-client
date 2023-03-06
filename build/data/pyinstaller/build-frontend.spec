@@ -41,7 +41,7 @@ exe = EXE(pyz,
     strip       = False,
     upx         = False,
     console     = False,
-    icon        = os.path.join(root_folder, "gui", "default", "static","img","pp_icons.icns")
+    icon        = os.path.join(root_folder, "gui", "default", "static","icons","pp_icons.icns")
 )
 
 coll = COLLECT(
