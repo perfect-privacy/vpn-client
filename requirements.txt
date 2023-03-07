@@ -10,3 +10,4 @@ markupsafe
 werkzeug
 flask
 flask-sock
+cryptography
