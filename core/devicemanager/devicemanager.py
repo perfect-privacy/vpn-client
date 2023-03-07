@@ -202,7 +202,7 @@ class DeviceManager(Observable):
         success, stdout, stderr = SubCommand().run(TAPCTL, [ "delete", "{%s}" % guid])
 
     def _enum_devices(self):
-        networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
+        networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress", as_data = True)
         name_to_index = {}
         if networkdatas is None:
             ReporterInstance.report("devicemanager_enumeration_failed", "")

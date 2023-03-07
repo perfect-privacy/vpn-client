@@ -136,6 +136,8 @@ class TrayView(PyHtmlView):
 
     def hide_select_server(self):
         self.select_server = False
+        self.selectServerView.filter = ""
+        self.selectServerView.select_subsection("Countries")
         if self.is_visible is True:
             self.update()
 
@@ -228,7 +230,7 @@ class SelectServerView(PyHtmlView):
                 {% if pyview.current_subsection_name  == "Servers" %}"Servers"{% endif %}
                 )'> {{pyview.current_subsection_name}}  
             </div>                                
-            <div style="float:right;font-size: 2em;line-height: 1em;" class="" onclick="pyview.parent.hide_select_server()">
+            <div style="cursor:pointer;float:right;font-size: 2em;line-height: 1em;" class="" onclick="pyview.parent.hide_select_server()">
                 &times;
             </div>
 
@@ -360,7 +362,7 @@ class ServerListsItemView(PyHtmlView):
             </td>
             {% if pyview.subject.subitems %}
                 <td>
-                    <i class="fa fa-arrow-right" style="font-size:1.0em;" onclick="event.stopPropagation();pyview.open_subitem();"></i>
+                    <i class="fa fa-arrow-right" style="cursor:pointer;font-size:1.0em;" onclick="event.stopPropagation();pyview.open_subitem();"></i>
                 </td> 
             {% else %}
                 <td></td> 

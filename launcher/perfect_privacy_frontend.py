@@ -123,7 +123,6 @@ class MainApp():
         self.tray.addJavascriptFunction("hide_app", self.window.hide)
         self.tray.addJavascriptFunction("set_icon_state", self.animatedTrayIcon.set_state)
 
-
         if PLATFORM == PLATFORMS.macos:
             def confirm_exit():
                 self.window.show()

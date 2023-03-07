@@ -23,8 +23,7 @@ class Powershell():
         result = b""
         try:
             if as_data is True:
-                if not command.endswith("ConvertTo-Json"):
-                    command += " | ConvertTo-Json | % { [System.Text.RegularExpressions.Regex]::Unescape(&_) } "
+                command += " | ConvertTo-Json | % { [System.Text.RegularExpressions.Regex]::Unescape(&_) } "
             result = self._execute_locked(command)
             if as_data is True:
                 result = json.loads(result)
@@ -102,6 +101,6 @@ def getPowershellInstance():
 
 if __name__ == "__main__":
     ps = Powershell()
-    #s = ps.execute("Get-NetFirewallProfile | ConvertTo-Json")
+    #s = ps.execute("Get-NetFirewallProfile")
     s = ps.execute("C:\Windows\SysNative\pnputil.exe /enum-drivers /class Net")
     print(s)

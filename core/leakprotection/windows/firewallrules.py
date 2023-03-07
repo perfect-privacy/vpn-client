@@ -57,7 +57,7 @@ class FirewallRule():
         self.is_enabled = False
 
     def exists(self):
-        return getPowershellInstance().execute('Get-NetFirewallRule -Name "%s"  | ConvertTo-Json' % self.name, as_data = True, may_fail=True) != None
+        return getPowershellInstance().execute('Get-NetFirewallRule -Name "%s"' % self.name, as_data = True, may_fail=True) != None
 
     def _build(self, update = False):
         args = []
@@ -95,7 +95,7 @@ class FirewallRuleOutgoingProfileDefaultBlock():
             return
         self._logger.info("%s activating" % self.__class__.__name__)
         if self.default_profiles.get() is None:
-            self.default_profiles.set(getPowershellInstance().execute("Get-NetFirewallProfile | ConvertTo-Json", as_data = True))
+            self.default_profiles.set(getPowershellInstance().execute("Get-NetFirewallProfile", as_data = True))
         getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Block -Enabled True")
         self.is_enabled.set(True)
 
@@ -380,9 +380,9 @@ class FirewallRuleBlockIpv6Dhcp(FirewallRule):
 
 class FirewallReset():
     def run(self):
-        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
+        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow -Enabled True")
 
-        rules = getPowershellInstance().execute('Get-NetFirewallRule | ConvertTo-Json', as_data=True)
+        rules = getPowershellInstance().execute('Get-NetFirewallRule', as_data=True)
         if rules is None:
             ReporterInstance.report("firewall_reset_load_failed","")
             return

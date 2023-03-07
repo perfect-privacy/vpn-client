@@ -36,8 +36,7 @@ class PreferencesView(PyHtmlView):
                     </h3>
                     <div>
                         If background mode is enabled, 
-                        all your VPN connections can be active even if the Perfect Privacy App is not running.
-                        <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                        all your VPN connections can be active even if the Perfect Privacy App is not running.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                         <div class="tooltip" style="display:none">
                            Use this to hide your VPN App usage from screen, 
                            or to automatically connect all users to the vpn after boot, 
@@ -191,8 +190,7 @@ class PreferencesView(PyHtmlView):
                 <div>
                     We, and all other users, would greatly appreciate if you keep this option active. If our VPN client, 
                     or some background component like leak protection crashes on your system, 
-                    it might behave incorrectly for users whose life and liberty depends on a functioning VPN.
-                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                    it might behave incorrectly for users whose life and liberty depends on a functioning VPN.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                     <div class="tooltip" style="display:none">
                         Crash reports include the client version, installation ID, the OS, and the actual internal python stack trace of the crash.
                         They do not contain any of the bullshit information that causes us all to hate and block telemetry and is not assigned to a IP/User/Account or anything else. 
@@ -206,8 +204,7 @@ class PreferencesView(PyHtmlView):
                 </h3> 
                 <div>
                     This option helps us collect statistics about the actually used VPN settings, stealth options and openvpn drivers.
-                    It does not collect any system information except your operating system (Windows, Mac, Linux).
-                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                    It does not collect any system information except your operating system (Windows, Mac, Linux).&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                     <div class="tooltip" style="display:none">
                         Statistics include the following information and nothing else:<br> 
                         Client version, OS (without exact version), interface level (simple,advanced, expert), leak protection settings, 

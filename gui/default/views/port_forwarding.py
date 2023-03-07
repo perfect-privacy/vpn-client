@@ -71,8 +71,7 @@ class PortForwardingView(PyHtmlView):
                         <div class="input"> {{ pyview.default_port_forwarding.render() }}</div>
                     </h3>
                     <div>
-                        Enable standard port forwarding. 
-                        <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                        Enable standard port forwarding.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                         <div class="tooltip" style="display:none">
                             If default port forwarding is enabled, three random ports will be forwarded to your computer.
                         </div>
@@ -93,8 +92,7 @@ class PortForwardingView(PyHtmlView):
                         </div>
                     </h3>
                     <div>
-                        Enable configurable port forwarding. 
-                        <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                        Enable configurable port forwarding.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                         <div class="tooltip" style="display:none">
                             If this option is enabled, you can configure up to five port forwardings from Perfect Privacy servers to your computer. The ports are set randomly on the server side.
                         </div>

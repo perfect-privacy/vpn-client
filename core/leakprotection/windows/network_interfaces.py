@@ -25,7 +25,7 @@ class NetworkInterface():
 
     def disableIpv6(self):
         for ipv6 in self.ipv6:
-            if ipv6[0].startwith("2") or ipv6[0].startwith("3"):
+            if ipv6[0].startswith("2") or ipv6[0].startswith("3"):
                 success, stdout, stderr = SubCommand().run(NETSH, ["interface", "ipv6", "delete", "address", "%s" % self.index, "address=%s" % ipv6[0], "store=active"])
 
     def enableIpv6(self):
@@ -106,7 +106,7 @@ class NetworkInterfaces():
 
         if self.networkinterfaces is None:
             self.networkinterfaces = {}
-        networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress | ConvertTo-Json", as_data = True)
+        networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress", as_data = True)
         if networkdatas is None:
             ReporterInstance.report("failed_to_load_network_devices","")
             return
@@ -128,7 +128,7 @@ class NetworkInterfaces():
             except Exception as e:
                 ReporterInstance.report("get_dns_failed", traceback.format_exc())
 
-        networkdatas = getPowershellInstance().execute("Get-CimInstance -Class Win32_NetworkAdapterConfiguration | ConvertTo-Json", as_data = True )
+        networkdatas = getPowershellInstance().execute("Get-CimInstance -Class Win32_NetworkAdapterConfiguration", as_data = True )
         if networkdatas is None:
             ReporterInstance.report("failed_to_load_network_devices_part2", "")
             return

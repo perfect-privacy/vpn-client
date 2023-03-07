@@ -8,15 +8,15 @@ class SelectServerModalView(Modal):
     <div id="myModal" class="modal">
         <div class="modal-content">
             <div style="width:20%;height:100%;float:left;position:relative">
-                <p style="{% if pyview.current_subsection_name  == "Favourites" %}color:#eee{% endif %};border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Favourites')">Favourites</p>
-                <p style="{% if pyview.current_subsection_name  == "Countries" %}color:#eee{% endif %};border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Countries')">Countries</p> 
-                <p style="{% if pyview.current_subsection_name  == "Cities" %}color:#eee{% endif %};border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Cities')">Cities </p>
-                <p style="{% if pyview.current_subsection_name  == "Servers" %}color:#eee{% endif %};border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Servers')">All Servers </p>
+                <p style="{% if pyview.current_subsection_name  == "Favourites" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Favourites')">Favourites</p>
+                <p style="{% if pyview.current_subsection_name  == "Countries" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Countries')">Countries</p> 
+                <p style="{% if pyview.current_subsection_name  == "Cities" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Cities')">Cities </p>
+                <p style="{% if pyview.current_subsection_name  == "Servers" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Servers')">All Servers </p>
                 <div style="position:absolute;bottom:1em;" onclick="pyview.select_button()"><button>Select</button></div>    
             </div>
              
             <div style="width:80%;float:left;height:100%;font-size: 1.2em">
-                <div style="float:left" onclick='pyview.select_subsection(
+                <div style="float:left;cursor:pointer" onclick='pyview.select_subsection(
                     {% if pyview.current_subsection_name  == "Favourites" %}"Favourites"{% endif %}
                     {% if pyview.current_subsection_name  == "Zones" %}"Zones"{% endif %}
                     {% if pyview.current_subsection_name  == "Countries"%}"Countries"{% endif %}
@@ -24,11 +24,11 @@ class SelectServerModalView(Modal):
                     {% if pyview.current_subsection_name  == "Servers" %}"Servers"{% endif %}
                     )'> {{pyview.current_subsection_name}}  
                 </div>                                
-                <div style="float:right;font-size: 2em;line-height: 1em;" class="" onclick="pyview.hide()">
+                <div style="cursor:pointer;float:right;font-size: 2em;line-height: 1em;" class="" onclick="pyview.hide()">
                     &times;
                 </div>
                 {% for item in pyview.slug %}
-                    <div style="float:left"  onclick='pyview.open_subitem( "{{item}}")'>
+                    <div style="float:left;cursor:pointer"  onclick='pyview.open_subitem( "{{item}}")'>
                         &nbsp;>&nbsp;{{pyview.slug_names[loop.index0]}}
                     </div>
                 {% endfor %}
@@ -99,6 +99,11 @@ class SelectServerModalView(Modal):
         selected = self.current_list.get_selected()
         if selected is not None:
             selected.add_hop()
+
+    def hide(self):
+        self.select_subsection("Countries")
+        self.set_filter("")
+        super().hide()
 
 class ServerListView(PyHtmlView):
     TEMPLATE_STR = '''
@@ -177,14 +182,14 @@ class ServerListsItemView(PyHtmlView):
             </td>
             <td>
                 {% if pyview.core.favourites.contains(pyview.subject.identifier) == false %}
-                    <i class="fa fa-star-o" style="font-size:1.5em;padding-top:0.25em" onclick="event.stopPropagation();pyview.add_to_favourites();"></i>
+                    <i class="fa fa-star-o" style="cursor:pointer;font-size:1.5em;padding-top:0.25em" onclick="event.stopPropagation();pyview.add_to_favourites();"></i>
                 {% else %}
-                    <i class="fa fa-star" style="font-size:1.5em;padding-top:0.25em;color:#ffff1d" onclick="event.stopPropagation();pyview.remove_from_favourites();"></i>
+                    <i class="fa fa-star" style="cursor:pointer;font-size:1.5em;padding-top:0.25em;color:#ffff1d" onclick="event.stopPropagation();pyview.remove_from_favourites();"></i>
                 {% endif %}
             </td>
             {% if pyview.subject.subitems %}
                 <td>
-                    <i class="fa fa-arrow-right" style="font-size:1.5em;padding-top:0.25em" onclick="event.stopPropagation();pyview.open_subitem();"></i>
+                    <i class="fa fa-arrow-right" style="cursor:pointer;font-size:1.5em;padding-top:0.25em" onclick="event.stopPropagation();pyview.open_subitem();"></i>
                 </td> 
             {% else %}
                 <td></td> 

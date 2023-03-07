@@ -46,7 +46,7 @@ class Reporter():
             self.installation_id = open(os.path.join(tmp_dir, ".perfect_privacy.instid"), "r").read().strip()
         if self.installation_id == "":
             self.new_id = True
-            self.installation_id = uuid.uuid4()
+            self.installation_id = "%s" % uuid.uuid4()
 
         if not os.path.exists(os.path.join(Path.home(), ".perfect_privacy.instid")) or self.new_id is True:
             open(os.path.join(Path.home(), ".perfect_privacy.instid"), "w").write(self.installation_id)

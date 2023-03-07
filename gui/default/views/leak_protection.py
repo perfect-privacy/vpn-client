@@ -33,8 +33,7 @@ class LeakProtectionView(PyHtmlView):
                         Leak Protection Scope:
                         <div class="input"> {{ pyview.firewall_scope.render() }} </div>    
                     </h3>
-                    <div> You can choose from three different security levels for leak protection: 
-                        <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                    <div> Depending on your needs, you can choose how and when leak protection is activated for your system.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                         <div class="tooltip" style="display:none">
                             <b>Tunnel:</b> In this mode, leak protection is only active when you are connected to the VPN. If you disconnect the VPN manually, 
                             leak protection is deactivated and you can access the internet without VPN.
@@ -60,8 +59,7 @@ class LeakProtectionView(PyHtmlView):
                             <div class="input"> {{ pyview.block_access_to_local_router.render() }} </div>
                         </h3>
                         <div>
-                            Prevent programs from determining your external IP address 
-                            <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                            Prevent programs from determining your external IP address from your local Router&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                             <div class="tooltip" style="display:none">
                                 This setting prevents programs from determining your external IP address through SMTP and XSS, which is possible with some routers. Please note that access to network printers or hard drives connected to the router may also be blocked by the firewall
                             </div>
@@ -75,8 +73,7 @@ class LeakProtectionView(PyHtmlView):
                                     <div class="input"> {{ pyview.enable_deadrouting.render() }} </div>
                                 </h3> 
                                 <div>
-                                    Deadrouting is a secondary routing-based protection. 
-                                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                    Deadrouting is a secondary routing-based protection.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                                     <div class="tooltip" style="display:none">
                                         There is a potential issue with virtual Hyper-V networking used by Windows Subsystem for Linux 2 (WSL2) whereby data packets can bypass the host's firewall. 
                                         This allows the virtual Hyper-V Ethernet adapter to send and receive all packets from the Linux guest without being checked by the Windows Firewall. 
@@ -93,8 +90,7 @@ class LeakProtectionView(PyHtmlView):
                                     <div class="input">{{ pyview.enable_ms_leak_protection.render() }} </div>
                                 </h3> 
                                 <div>
-                                    Prevent the leak of your Windows login and password information
-                                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                    Prevent the leak of your Windows login and password information.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                                     <div class="tooltip" style="display:none">
                                         If enabled, this feature protects against attacks that may leak your Windows login and password information. 
                                         Our VPN Manager prevents the sending of login information to network shares over the internet, and Perfect Privacy servers block requests on port 445.
@@ -108,8 +104,7 @@ class LeakProtectionView(PyHtmlView):
                                     <div class="input"> {{ pyview.enable_wrong_way_protection.render() }} </div>    
                                 </h3> 
                                 <div>
-                                    Block the potential leak of your real IP address through a routing feature. 
-                                    <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                    Block the potential leak of your real IP address through a routing feature.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                                     <div class="tooltip" style="display:none">
                                         There is a potential issue where packets received over the real IP may be answered via the VPN interface under certain conditions, 
                                         potentially revealing your real IP address. Enable this feature to prevent this type of leak.
@@ -127,8 +122,7 @@ class LeakProtectionView(PyHtmlView):
                                 <div class="input"> {{ pyview.enable_snmp_upnp_protection.render() }} </div>
                             </h3> 
                             <div>
-                                Block SNMP/UPnP Ports
-                                <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                Block SNMP/UPnP Ports.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                                 <div class="tooltip" style="display:none">
                                     Enabling this feature will prevent programs on your computer from accessing other devices via SNMP and UPnP protocols. 
                                     This prevents potentially sensitive information, such as your public IP address, from being revealed to programs on your computer from other devices in your network.  
@@ -142,8 +136,7 @@ class LeakProtectionView(PyHtmlView):
                                 <div class="input"> {{ pyview.enable_ipv6_leak_protection.render() }} </div>                            
                             </h3> 
                             <div>
-                                Prevent the leak of your public IP address assigned by your ISP through your local IPv6 address.
-                                <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                Prevent the leak of your public IP address assigned by your ISP through your local IPv6 address.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                                 <div class="tooltip" style="display:none">
                                     If your ISP provides an IPv6 address, it is possible that it will assign your computer a local IPv6 address that includes your public IP address assigned by the ISP. 
                                     Enable this option to prevent this type of leak.
@@ -158,8 +151,7 @@ class LeakProtectionView(PyHtmlView):
                             <div class="input"> {{ pyview.enable_dnsleak_protection.render() }} </div>
                         </h3>
                         <div>
-                            Ensure that you are using the VPN tunnel for Domain Name Service (DNS) requests.
-                            <a onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                            Ensure that you are using the VPN tunnel for Domain Name Service (DNS) requests.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                             <div class="tooltip" style="display:none">
                                 DNS translates the domain name of a website into IP addresses, which is necessary to establish a connection to the server hosting the web page or service. 
                                 A DNS leak occurs when you are using your provider's DNS server instead of the VPN tunnel.
@@ -205,8 +197,8 @@ class LeakProtectionView(PyHtmlView):
         self.firewall_scope = SelectComponent(subject.settings.leakprotection.leakprotection_scope, self,
                                             options=[
                                                 (PROTECTION_SCOPES.disabled , "Disabled" ),
-                                                (PROTECTION_SCOPES.program  , "Program"  ),
                                                 (PROTECTION_SCOPES.tunnel   , "Tunnel"   ),
+                                                (PROTECTION_SCOPES.program  , "Program"),
                                                 (PROTECTION_SCOPES.permanent, "Permanent"),
                                             ])
         #self.allow_downloads_without_vpn  = CheckboxComponent(subject.settings.leakprotection.allow_downloads_without_vpn , self, label="allow_downloads_without_vpn")
