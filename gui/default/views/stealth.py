@@ -95,12 +95,12 @@ Stealth VPN is designed to obfuscate your VPN traffic, making it difficult to bl
         self.VPN_PROTOCOLS = VPN_PROTOCOLS
         options = [
              (STEALTH_METHODS.no_stealth, "No Stealth"),
-             (STEALTH_METHODS.stunnel   , "Stunnel"),
              (STEALTH_METHODS.socks     , "Socks"),
              (STEALTH_METHODS.http      , "HTTP"),
              (STEALTH_METHODS.obfs      , "OBFS"),
         ]
         if PLATFORM == PLATFORMS.windows:
+            options.append((STEALTH_METHODS.stunnel, "Stunnel"))
             options.append((STEALTH_METHODS.ssh, "SSH"))
         self.stealth_method = SelectComponent(subject.settings.stealth.stealth_method, self, options=options)
         self.add_observable(self.subject.settings.stealth.stealth_method, self._on_stealth_method_changed)

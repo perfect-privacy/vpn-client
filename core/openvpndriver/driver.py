@@ -2,7 +2,6 @@ import threading
 import logging
 import time
 from config.files import WINTUN_INF, TAPWINDOW_LATEST_INF, TAPWINDOW_9_00_00_9_INF, TAPWINDOW_9_00_00_21_INF, PNPUTIL
-from core.devicemanager.devicemanager import DeviceManagerState
 from pyhtmlgui import  Observable
 from core.libs.subcommand import SubCommand
 from config.constants import OPENVPN_DRIVER
@@ -69,7 +68,7 @@ class OpenVpnDriver(Observable):
         while self._is_running is True:
             self._wakeup_event.wait()
             self._wakeup_event.clear()
-            while self.core.deviceManager.state.get() != DeviceManagerState.IDLE:
+            while self.core.deviceManager.state.get() != "IDLE":
                 self._logger.debug("waiting for devicemanager to get ready")
                 time.sleep(1)
             self._update()

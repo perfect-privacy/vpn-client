@@ -205,9 +205,9 @@ class HopListItemView(PyHtmlView):
                 <img src="/static/img/flags/flags-iso/flat/64/{{ pyview.subject.servergroup.country_shortcodes.0 | upper }}.png" style="opacity:0.9">
             </td>
             <td>
-                {{ pyview.subject.servergroup.name }} <br>
+                {{ pyview.subject.servergroup.name |title}} <br>
                 
-                {% if pyview.subject.selected_server %}
+                {% if pyview.subject.selected_server and (pyview.subject.selected_server.name != pyview.subject.servergroup.name) %}
                     {{ pyview.subject.selected_server.name|title }}
                 {% endif %}
             </td>

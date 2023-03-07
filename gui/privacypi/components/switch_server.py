@@ -157,8 +157,8 @@ class Switch_server(PyHtmlView):
                                 <div class="row">
                                     <div class="col-2"></div>
                                     <div class="col-2 {% if pyview.current_list_name  == "Zones" %}   active_scope{% endif %}">o</div>
-                                    <div class="col-2 {% if pyview.current_list_name  == "Countrys"%} active_scope{% endif %}">o</div>
-                                    <div class="col-2 {% if pyview.current_list_name  == "Citys" %}   active_scope{% endif %}">o</div>
+                                    <div class="col-2 {% if pyview.current_list_name  == "Countries"%} active_scope{% endif %}">o</div>
+                                    <div class="col-2 {% if pyview.current_list_name  == "Cities" %}   active_scope{% endif %}">o</div>
                                     <div class="col-2 {% if pyview.current_list_name  == "Servers" %} active_scope{% endif %}">o</div>
                                 </div>
                             </div>
@@ -190,8 +190,8 @@ class Switch_server(PyHtmlView):
         self.server_list  = ServerList(subject.vpnGroupPlanet.servers , self)
         self.lists = [
             ("Zones", self.zone_list),
-            ("Countrys", self.country_list),
-            ("Citys", self.city_list),
+            ("Countries", self.country_list),
+            ("Cities", self.city_list),
             ("Servers", self.server_list),
         ]
         self.current_index = 0

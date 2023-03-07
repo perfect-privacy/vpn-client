@@ -8,26 +8,25 @@ class SelectServerModalView(Modal):
     <div id="myModal" class="modal">
         <div class="modal-content">
             <div style="width:20%;height:100%;float:left;position:relative">
-                <p onclick="pyview.select_subsection_with_filterclear('Favourites')">Favourites</p> <br>
-                <p onclick="pyview.select_subsection_with_filterclear('Countrys')">Countrys</p> <br>
-                <p onclick="pyview.select_subsection_with_filterclear('Citys')">Citys </p><br>
-                <p onclick="pyview.select_subsection_with_filterclear('Servers')">All Servers </p><br>
+                <p style="{% if pyview.current_subsection_name  == "Favourites" %}color:#eee{% endif %};border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Favourites')">Favourites</p>
+                <p style="{% if pyview.current_subsection_name  == "Countries" %}color:#eee{% endif %};border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Countries')">Countries</p> 
+                <p style="{% if pyview.current_subsection_name  == "Cities" %}color:#eee{% endif %};border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Cities')">Cities </p>
+                <p style="{% if pyview.current_subsection_name  == "Servers" %}color:#eee{% endif %};border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Servers')">All Servers </p>
                 <div style="position:absolute;bottom:1em;" onclick="pyview.select_button()"><button>Select</button></div>    
             </div>
-            
+             
             <div style="width:80%;float:left;height:100%;font-size: 1.2em">
                 <div style="float:left" onclick='pyview.select_subsection(
                     {% if pyview.current_subsection_name  == "Favourites" %}"Favourites"{% endif %}
                     {% if pyview.current_subsection_name  == "Zones" %}"Zones"{% endif %}
-                    {% if pyview.current_subsection_name  == "Countrys"%}"Countrys"{% endif %}
-                    {% if pyview.current_subsection_name  == "Citys" %}"Citys"{% endif %}
+                    {% if pyview.current_subsection_name  == "Countries"%}"Countries"{% endif %}
+                    {% if pyview.current_subsection_name  == "Cities" %}"Cities"{% endif %}
                     {% if pyview.current_subsection_name  == "Servers" %}"Servers"{% endif %}
                     )'> {{pyview.current_subsection_name}}  
                 </div>                                
                 <div style="float:right;font-size: 2em;line-height: 1em;" class="" onclick="pyview.hide()">
                     &times;
                 </div>
-
                 {% for item in pyview.slug %}
                     <div style="float:left"  onclick='pyview.open_subitem( "{{item}}")'>
                         &nbsp;>&nbsp;{{pyview.slug_names[loop.index0]}}
@@ -54,11 +53,11 @@ class SelectServerModalView(Modal):
         self.subsections = {
             "Favourites" : ServerListView(subject.favourites.favourites, self),
             "Zones": ServerListView(subject.vpnGroupPlanet.zones, self),
-            "Countrys": ServerListView(subject.vpnGroupPlanet.countrys, self),
-            "Citys": ServerListView(subject.vpnGroupPlanet.citys, self),
+            "Countries": ServerListView(subject.vpnGroupPlanet.countrys, self),
+            "Cities": ServerListView(subject.vpnGroupPlanet.citys, self),
             "Servers": ServerListView(subject.vpnGroupPlanet.servers, self),
         }
-        self.current_subsection_name = "Countrys"
+        self.current_subsection_name = "Countries"
         self.current_list = self.subsections[self.current_subsection_name]
         self.slug = []
         self.slug_names = []

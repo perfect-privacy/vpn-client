@@ -5,7 +5,6 @@ import traceback
 
 from core.libs.powershell import getPowershellInstance
 from core.libs.web.reporter import ReporterInstance
-from core.openvpndriver.driver_state import OpenVpnDriverState
 from pyhtmlgui import  Observable
 from config.constants import OPENVPN_DRIVER
 from config.files import OPENVPN, TAPCTL
@@ -93,7 +92,7 @@ class DeviceManager(Observable):
         while self._is_running is True:
             self._wakeup_event.wait()
             self._wakeup_event.clear()
-            while self.core.openVpnDriver.state.get() != OpenVpnDriverState.IDLE:
+            while self.core.openVpnDriver.state.get() != "IDLE":
                 self._logger.debug("waiting for driver to get ready")
                 time.sleep(1)
             self._update()
@@ -214,7 +213,7 @@ class DeviceManager(Observable):
                 name_to_index[networkdata["InterfaceAlias"]] = networkdata["InterfaceIndex"]
             except Exception as e:
                 self._logger.debug("Failed to load networkdata, %s" % e)
-                ReporterInstance.report("devicemanager_get_interfaces_failed", traceback.format_exc())
+                ReporterInstance.report("devicemanager_get_interfaces_failed", { "exception" : traceback.format_exc(), "networkdata" : networkdata })
 
         success, stdout, stderr = SubCommand().run(OPENVPN, [ "--show-adapters"])
         for line in stdout.split(b"\n"):

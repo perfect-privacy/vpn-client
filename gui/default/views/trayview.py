@@ -223,8 +223,8 @@ class SelectServerView(PyHtmlView):
             <div style="float:left;font-size:0.8em" onclick='pyview.select_subsection(
                 {% if pyview.current_subsection_name  == "Favourites" %}"Favourites"{% endif %}
                 {% if pyview.current_subsection_name  == "Zones" %}"Zones"{% endif %}
-                {% if pyview.current_subsection_name  == "Countrys"%}"Countrys"{% endif %}
-                {% if pyview.current_subsection_name  == "Citys" %}"Citys"{% endif %}
+                {% if pyview.current_subsection_name  == "Countries"%}"Countries"{% endif %}
+                {% if pyview.current_subsection_name  == "Cityies" %}"Cityies"{% endif %}
                 {% if pyview.current_subsection_name  == "Servers" %}"Servers"{% endif %}
                 )'> {{pyview.current_subsection_name}}  
             </div>                                
@@ -251,11 +251,11 @@ class SelectServerView(PyHtmlView):
         self.subsections = {
             "Favourites": ServerListView(subject.favourites.favourites, self),
             "Zones": ServerListView(subject.vpnGroupPlanet.zones, self),
-            "Countrys": ServerListView(subject.vpnGroupPlanet.countrys, self),
-            "Citys": ServerListView(subject.vpnGroupPlanet.citys, self),
+            "Countries": ServerListView(subject.vpnGroupPlanet.countrys, self),
+            "Cities": ServerListView(subject.vpnGroupPlanet.citys, self),
             "Servers": ServerListView(subject.vpnGroupPlanet.servers, self),
         }
-        self.current_subsection_name = "Countrys"
+        self.current_subsection_name = "Countries"
         self.current_list = self.subsections[self.current_subsection_name]
         self.slug = []
         self.slug_names = []

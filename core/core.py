@@ -87,6 +87,11 @@ class Core(Observable):
             self._start_timers.append(Timer(5, self.deviceManager.update_async))
 
         if self.settings.is_first_startup.get() is True:
+            if len(self.session.hops) == 0:
+                try:
+                    self.session.add_hop(self.vpnGroupPlanet.countrys.get("Netherlands"))
+                except:
+                    pass
             if PLATFORM == PLATFORMS.windows:
                 self.leakprotection.reset()
             self.settings.is_first_startup.set(False)
