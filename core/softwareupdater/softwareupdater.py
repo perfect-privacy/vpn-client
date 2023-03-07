@@ -68,8 +68,10 @@ class SoftwareUpdater(GenericUpdater):
                     self.state.set(UpdaterState.UPDATER_STATE_DOWNLOADING)
                     executable = SecureDownload().download(self.file_url, self.signature_url)
                     if executable is not None:
-                        open(os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME), "wb").write(executable)
-                        open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "w").write(self.version_online)
+                        with open(os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME), "wb") as f:
+                            f.write(executable)
+                        with open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "w") as f:
+                            f.write(self.version_online)
                         self.version_downloaded = self.version_online
 
                 self.state.set(UpdaterState.UPDATER_STATE_READY_FOR_INSTALL)
@@ -82,8 +84,9 @@ class SoftwareUpdater(GenericUpdater):
                 self.state.set(UpdaterState.UPDATER_STATE_IDLE)
 
         except Exception as e:
+            print(e)
             self.last_failed_check.set(math.floor(now))
-            #self._logger.debug("error while checking for updates, retry in {} seconds".format(self._err_check_interval_seconds))
+            self._logger.debug("error while checking for updates, retry in {} seconds".format(self._err_check_interval_seconds))
             self._auto_update_timer.interval = self._err_check_interval_seconds
             self.state.set(UpdaterState.UPDATER_STATE_IDLE)
 

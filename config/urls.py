@@ -5,7 +5,7 @@ SOFTWARE_UPDATE_URL = "https://www.perfect-privacy.com/downloads/%s" % SOFTWARE_
 TRAFFIC_JSON_URL    = "https://www.perfect-privacy.com/api/traffic.json"
 
 HOST_IP_MAP = {  # to circumvent dns resolution in some cases
-    "www.perfect-privacy.com"       : [ "217.114.218.30", "31.204.152.232"],
+    "www.perfect-privacy.com"       : [ "212.7.210.184"], # amsterdam1 only for now
     "checkip.perfect-privacy.com"   : [ "95.211.186.91" , "178.162.211.99"],
     "v6-checkip.perfect-privacy.com": [ "2001:1af8:4020:a019:2::1", "2a00:c98:2050:a034:3::1"],
     "check.torproject.org"          : [ "116.202.120.181"]
