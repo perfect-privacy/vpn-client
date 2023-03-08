@@ -150,10 +150,14 @@ class MainApp():
             update_file = os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME)
             if os.path.exists(update_file):
                 if PLATFORM == PLATFORMS.windows:
-                    subprocess.Popen([update_file], creationflags=os.P_DETACH)
+                    flags = 0
+                    flags |= 0x00000008  # DETACHED_PROCESS
+                    flags |= 0x00000200  # CREATE_NEW_PROCESS_GROUP
+                    flags |= 0x08000000  # CREATE_NO_WINDOW
+                    subprocess.Popen([update_file], close_fds=True, creationflags=flags)
                 if PLATFORM == PLATFORMS.macos:
                     os.system("open '%s' & " % update_file)
-                time.sleep(1)
+
     def stop(self, *args):
         self.app.stop()
 
