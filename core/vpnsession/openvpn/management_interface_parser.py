@@ -16,19 +16,19 @@ class ManagementInterfaceParser(Thread):
     _READING_MODE_BULK_LOG = 1
     _READING_MODE_BULK_STATE = 2
 
-    def __init__(self, identifier, socket, username, password, proxy_username=None, proxy_password=None):
+    def __init__(self, identifier, socket, username, password, proxy_username=None, proxy_password=None, management_password=""):
         """
         :type socket: socket.socket
         """
         super(ManagementInterfaceParser, self).__init__()
 
         self._logger = logging.getLogger(self.__class__.__name__ + " ({})".format(identifier))
-
         self._socket = socket
         self._username = username
         self._password = password
         self._proxy_username = proxy_username
         self._proxy_password = proxy_password
+        self._management_password = management_password
 
         self.openvpn_state = OpenVPNState()
         self.pid = None
@@ -50,6 +50,7 @@ class ManagementInterfaceParser(Thread):
 
     def run(self):
         self._logger.debug("starting to parse management interface")
+        self._send_command(self._management_password)
         try:
             for line in self._get_line_from_socket():
                 try:

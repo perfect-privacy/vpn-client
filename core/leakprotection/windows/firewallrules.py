@@ -134,7 +134,7 @@ class FirewallRuleAllowNetworkingLan(FirewallRule):
         self.description = self.name
         self.action = NET_FW_ACTION_ALLOW
         self.direction = NET_FW_RULE_DIR_OUT
-        self.remote_addresses = ["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16"]
+        self.remote_addresses = ["10.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12","192.168.0.0/16"]
         super().__init__()
 
 class FirewallRuleAllowFromVpnLocalIps(FirewallRule):

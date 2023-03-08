@@ -1,6 +1,8 @@
 import time
 
 from pyhtmlgui import PyHtmlView
+
+from core.libs.web.reporter import ReporterInstance
 from gui.common.components import CheckboxComponent, SelectComponent
 from config.constants import VPN_PROTOCOLS, OPENVPN_CIPHER, OPENVPN_PROTOCOLS, OPENVPN_TLS_METHOD, OPENVPN_DRIVER, \
     PLATFORMS, OPENVPN_PORTS
@@ -214,7 +216,9 @@ class PreferencesView(PyHtmlView):
                         Statistics are only collected once approximatly every 500 days. 
                     </div>
                 </div>
-            </section>      
+            </section>  
+            {{ pyview.reporterView.render()}}
+            
         </div>
         
     </div>
@@ -288,6 +292,8 @@ class PreferencesView(PyHtmlView):
         self.send_crashreports = CheckboxComponent(subject.settings.send_crashreports, self)
         self.send_statistics = CheckboxComponent(subject.settings.send_statistics, self)
         self.updater = UpdaterView(subject, self)
+        ReporterInstance.report("test_report","data" )
+        self.reporterView = ReporterView(ReporterInstance, self)
 
         self.osname = ""
         if PLATFORM == PLATFORMS.windows:
@@ -377,6 +383,56 @@ class UpdaterView(PyHtmlView):
     def update_now(self):
         self.subject.start_updater()
 
+class ReporterView(PyHtmlView):
+    DOM_ELEMENT = "section"
+    TEMPLATE_STR = '''
+        <h3>
+            {{ pyview.subject.reports_send }} Reports have been send 
+            {% if pyview.subject.latest_reports | length > 0 %}
+                <div class="input" style="width:20em;margin-top:10px">
+                {% if pyview.is_shown %}
+                    <button onclick="pyview.clear_reports()"> Clear</button> 
+                    <button onclick="pyview.hide_reports()"> Hide</button> 
+                {% else %}
+                    <button onclick="pyview.show_reports()"> Show Latest</button> 
+                {% endif %}
+                </div>
+            {% endif %}
+        </h3> 
+        {% if pyview.is_shown == True %}
+            <div style="margin-top: 40px;max-height: 70vh;overflow: auto;width:100%;background-color: rgba(0, 0, 0, 0.03);padding:10px;">
+                {% for report in pyview.subject.latest_reports[::-1][:-1] %}
+                    <div style="border-bottom:1px solid #ddd;display: inline-block;width:100%;padding-bottom:10px">
+                        <div style="width:20%;float:left">{{report["action"]}}</div>
+                        <div style="width:20%;float:left">{{report["clientversion"]}}</div>
+                        <div style="width:60%;float:left">{{report["osversion"]}}</div>
+                        <div style="width:100%;float:left;padding-top:10px;padding-left: 30px;padding-right: 30px;">{{report["meta"]}}</div>
+                    </div>
+                {% endfor %}
+                {% if pyview.subject.latest_reports|length > 0 %}
+                   <div style="width:100%;display: inline-block;padding-bottom:10px">
+                        <div style="width:20%;float:left">{{pyview.subject.latest_reports[0]["action"]}}</div>
+                        <div style="width:20%;float:left">{{pyview.subject.latest_reports[0]["clientversion"]}}</div>
+                        <div style="width:60%;float:left">{{pyview.subject.latest_reports[0]["osversion"]}}</div>
+                        <div style="width:100%;float:left;padding-top:10px;padding-left: 30px;padding-right: 30px;">{{pyview.subject.latest_reports[0]["meta"]}}</div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    '''
+    def __init__(self, subject, parent, **kwargs):
+        super().__init__(subject, parent, **kwargs)
+        self.is_shown = False
+    def show_reports(self):
+        self.is_shown = True
+        if self.is_visible:
+            self.update()
+    def hide_reports(self):
+        self.is_shown = False
+        if self.is_visible:
+            self.update()
+    def clear_reports(self):
+        self.subject.clear()
 
 class StatusOpenVpnDriverView(PyHtmlView):
     TEMPLATE_STR = '''

@@ -10,7 +10,8 @@ class StealthView(PyHtmlView):
         <div class="inner">
             <h1>Stealth</h1>
             <p>
-Stealth VPN is designed to obfuscate your VPN traffic, making it difficult to block for network administrators or ISPs. When enabled, stealth VPN  uses encryption and obfuscation techniques to scramble your VPN traffic and make it difficult to identify as such.            </p>
+Stealth VPN is designed to obfuscate your VPN traffic, making it difficult to block for network administrators or ISPs. 
+When enabled, stealth VPN  uses encryption and obfuscation techniques to scramble your VPN traffic and make it difficult to identify as such.</p>
         
             {% if pyview.subject.settings.vpn.vpn_protocol.get() == pyview.VPN_PROTOCOLS.openvpn %}
                 <div class="boxes">

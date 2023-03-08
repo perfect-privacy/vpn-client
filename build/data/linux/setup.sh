@@ -7,7 +7,7 @@ echo " Stopping Service"
 service perfect-privacy stop 2>/dev/null
 
 echo " Stopping Frontend"
-killall "/opt/perfect-privacy/perfect-privacy-gui" 2>/dev/null
+killall "/opt/perfect-privacy/perfect-privacy" 2>/dev/null
 
 echo " Copying Files"
 mkdir /opt/perfect-privacy    2>/dev/null
@@ -16,7 +16,7 @@ cp install_files/daemon/systemd/perfect-privacy.service /etc/systemd/system/
 
 systemctl daemon-reload
 
-echho " Installing dependecyn"
+echho " Installing dependency"
 apt-get -y install openvpn
 apt-get -y install obfsproxy
 apt-get -y install stunnel

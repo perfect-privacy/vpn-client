@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import platform
 import requests
+from pyhtmlgui import Observable
+
 try:
     from config.config import BRANCH
 except:
@@ -25,10 +27,12 @@ REPORT_URL = "https://www.perfect-privacy.com/api/client.php"
 REPORT_FILE = os.path.join(Path.home(),".perfect_privacy.reports")
 
 
-class Reporter():
+class Reporter(Observable):
     def __init__(self):
+        super().__init__()
         self.reports = []
         self.reports_send = 0
+        self.latest_reports = []
         self._logger = logging.getLogger(self.__class__.__name__)
         self.installation_id = ""
         self.new_id = False
@@ -65,6 +69,13 @@ class Reporter():
         if len(self.reports) > 0:
             self._wakeup_event.set()
 
+    def clear(self):
+        self.reports_send = 0
+        self.latest_reports = []
+        self.to_disk()
+        self.notify_observers()
+
+
     def report(self, name, data = '', noid = False):
         try:
             data = json.dumps(data)
@@ -80,8 +91,6 @@ class Reporter():
         }
         self._logger.error(report)
 
-        if BRANCH != "release":
-            return
         if self.send_crashreports is not None and self.send_crashreports.get() == False:
             return
         if (self.reports_send > 5 or len(self.reports) > 5) and self.last_report_send + 3600 < time.time()  and self.last_report_send < time.time() - 20:
@@ -106,9 +115,6 @@ class Reporter():
             "action": "usage_stats",
             "meta": data
         }
-        if BRANCH != "release":
-            self._logger.error(report)
-            return
         self.reports.append(report)
         self.to_disk()
         self._wakeup_event.set()
@@ -118,7 +124,8 @@ class Reporter():
             d = json.dumps({
                 "reports" : self.reports,
                 "reports_send" : self.reports_send,
-                "last_report_send" : self.last_report_send
+                "last_report_send" : self.last_report_send,
+                "latest_reports" : self.latest_reports
             })
             with open(REPORT_FILE, "w") as f:
                 f.write(d)
@@ -132,6 +139,7 @@ class Reporter():
                 self.reports = d["reports"]
                 self.reports_send = d["reports_send"]
                 self.last_report_send = d["last_report_send"]
+                self.latest_reports = d["latest_reports"]
         except:
             pass
 
@@ -155,9 +163,12 @@ class Reporter():
                 try:
                     requests.post(url=REPORT_URL, data=self.reports[0], timeout=5)
                     self._logger.error("crashreport send: %s" % self.reports[0])
+                    self.latest_reports.append(self.reports[0])
+                    self.latest_reports = self.latest_reports[-30:]
                     self.reports_send += 1
                     del self.reports[0]
                     self.to_disk()
+                    self.notify_observers()
                 except Exception as e:
                     print(e)
                     if self._enabled is True:

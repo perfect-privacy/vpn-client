@@ -57,11 +57,7 @@ class LeakProtection_macos(LeakProtection_Generic):
         if self.core.settings.leakprotection.enable_snmp_upnp_protection.get() is True:
             for port in ["161:162", "1900"]:
                 for proto in ["TCP", "UDP"]:
-                    rules.append("block out inet proto %s to  10.0.0.0/8    port %s" % (proto, port))
-                    rules.append("block out inet proto %s to 192.168.0.0/16 port %s" % (proto, port))
-                    rules.append("block out inet proto %s to 172.16.0.0/12  port %s" % (proto, port))
-                    rules.append("block out inet proto %s to 169.254.0.0/16 port %s" % (proto, port))
-                    rules.append("block out inet proto %s to 224.0.0.0/3    port %s" % (proto, port))
+                    rules.append("block out inet proto %s port %s" % (proto, port))
 
         rules_str = "\n".join(rules) + "\n"
 

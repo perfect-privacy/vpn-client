@@ -11,7 +11,7 @@ class LogsView(PyHtmlView):
                 Internal Log
             </h1>           
             <input id="filter_str" type="text" onkeyup="pyview.set_filter(document.getElementById('filter_str').value)" value="{{filter_str}}" placeholder="filter"> </input>
-            <div  style="height:80vh;overflow:auto;">
+            <div  style="max-height: 100vh;overflow: auto;margin-bottom: 30px;">
                 {{ pyview.log.render() }}
             </div>
         </div>  

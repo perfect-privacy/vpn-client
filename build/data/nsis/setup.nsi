@@ -153,7 +153,7 @@ Section "Perfect Privacy" SEC_MAIN
     StrCpy $switch_overwrite 1
 
     nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" stop   ' # windows service stop
-    #nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" remove ' # windows service uninstall
+    nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" remove ' # windows service uninstall
     Sleep 3000
     nsExec::ExecToStack  "TaskKill /IM perfect-privacy-service.exe /F"    # kill if needed
     nsExec::ExecToStack  "TaskKill /IM perfect-privacy.exe /F"    # kill if needed
@@ -195,7 +195,7 @@ Section -Post
     WriteUninstaller "$INSTDIR\uninstall.exe"
     WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\${MAIN_FILE}"
     WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
-    WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
+    WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninstall.exe"
     WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\${MAIN_FILE}"
     WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
     WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
@@ -229,7 +229,7 @@ FunctionEnd
 Section Uninstall
     nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" stop '      # windows service stop
     nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" remove '    # windows service uninstall
-    nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" uninstall ' # disable firewall/network and eveything we installed
+    nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" uninstall ' # disable firewall/network and everything we installed
 
     nsExec::ExecToStack  "TaskKill /IM perfect-privacy-service.exe /F"    # kill if needed
     nsExec::ExecToStack  "TaskKill /IM perfect-privacy.exe /F"    # kill if needed

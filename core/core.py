@@ -49,14 +49,12 @@ class Core(Observable):
         self.settings.account.attach_observer(self._on_credentials_updated)
         self.settings.startup.start_on_boot.attach_observer(self._on_start_on_boot_updated)
         ReporterInstance.send_crashreports = self.settings.send_crashreports
-
         self.vpnGroupPlanet = VpnGroupPlanet()
         self.vpnGroupPlanet.load_configs_json()
 
         self.favourites = Favourites(self)
 
         self.session = Session(self)
-
         self.leakprotection = LeakProtection(core=self)
         self._start_timers.append(Timer(2, self.leakprotection.update_async))
 

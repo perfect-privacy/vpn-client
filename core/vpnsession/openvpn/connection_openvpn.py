@@ -4,6 +4,7 @@ import socket
 import subprocess
 import time
 import traceback
+import uuid
 from gettext import gettext as _
 from subprocess import CalledProcessError
 
@@ -144,13 +145,16 @@ class OpenVPNConnection(VPNConnection):
 
 
         management_port = self._get_free_tcp_port()
+        if not os.path.exists(os.path.join(CONFIG_DIR, "mpass")):
+            open(os.path.join(CONFIG_DIR, "mpass"), "w").write("%s" % uuid.uuid4())
+        management_password = open(os.path.join(CONFIG_DIR, "mpass"), "r").read()
 
         args = [
             OPENVPN,
             "--cd"        , CONFIG_DIR,
             "--config"    , "common.conf",
             "--proto"     , self.openvpn_protocol,
-            "--management", "127.0.0.1", str(management_port),
+            "--management", "127.0.0.1", str(management_port), "mpass",
             "--cipher"    , self.core.settings.vpn.openvpn.cipher.get(),
             "--remote"    , self.openvpn_remote_host, str( self.openvpn_remote_port),
             "--cert"      , "cl.%s.crt" % self.servergroup.vpn_server_config.groupname,
@@ -222,7 +226,8 @@ class OpenVPNConnection(VPNConnection):
             username       = self.core.settings.account.username.get(),
             password       = self.core.settings.account.password.get(),
             proxy_username = self.stealth_plugin.proxy_username if self.stealth_plugin is not None else None,
-            proxy_password = self.stealth_plugin.proxy_password if self.stealth_plugin is not None else None
+            proxy_password = self.stealth_plugin.proxy_password if self.stealth_plugin is not None else None,
+            management_password = management_password
         )
 
         self._connect_parser_signals()

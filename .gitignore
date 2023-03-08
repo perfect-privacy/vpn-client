@@ -6,6 +6,7 @@ __pycache__/
 dist
 var/software_update/*
 var/config_update/*
+var/configs/mpass
 var/reports
 var/user_settings.bson
 var/storage.db

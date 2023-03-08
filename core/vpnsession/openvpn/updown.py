@@ -190,4 +190,51 @@ class UpDown_Macos(UpDown_Generic):
 
 
 class UpDown_Linux(UpDown_Generic):
-    pass
+    def __init__(self, openvpnConnection):
+        super().__init__(openvpnConnection)
+
+    def find_gateway(self, netmask_search):
+        success, stdout, stderr = SubCommand().run("route", [ "-n", ])
+        stdout = stdout.decode("UTF-8")
+        while "  " in stdout:
+            stdout = stdout.replace("  "," ")
+        lines = stdout.split("\n")
+        for line in lines:
+            parts = line.split(" ")
+            if len(parts) < 4:
+                continue
+            destination = parts[0].strip()
+            gateway = parts[1].strip()
+            flags = parts[2].strip()
+            interface = parts[3].strip()
+            if destination == netmask_search or destination.endswith("/%s" % netmask_search):
+                return gateway
+        return None
+
+    def add_route_ipv4(self, source_ip, source_mask, target, device = ""):
+        args =  ["add", "-net", source_ip, "netmask", source_mask, "gw", target]
+        #route add -net 192.168.1.0 netmask 255.255.255.0 gw 192.168.1.254
+        success, stdout, stderr = SubCommand().run("route", args)
+
+    def add_route_ipv6(self, source_ip, source_mask, target, device = ""):
+        #/sbin/route add -inet6 2000::/4 -iface utun2
+        if device is None:
+            self._logger.debug("No OpenVPN device, no adding ipv6 route")
+            return
+        success, stdout, stderr = SubCommand().run("route", ["-n", "add", "-inet6", "%s/%s" % (source_ip, source_mask),"-iface" ,device])
+        self._logger.debug("add_route_ipv6 %s %s %s %s" % ( source_ip, source_mask, target, device))
+
+    def delete_route_ipv4(self, source_ip, source_mask, target = "", device = ""):
+        args = ["delete", "-net", source_ip, "netmask", source_mask, "gw"]
+        if target != "":
+            args.append(target)
+        success, stdout, stderr = SubCommand().run("route", args)
+
+    def delete_route_ipv6(self, source_ip, source_mask, target = "", device = ""):
+        if device is None:
+            self._logger.debug("No OpenVPN device, no deleting ipv6 route")
+            return
+        args = ["-n", "delete", "-inet6", "%s/%s" % (source_ip, source_mask),"-iface" ,device]
+        success, stdout, stderr = SubCommand().run("route", args)
+        self._logger.debug("delete_route_ipv6 %s %s %s %s" % (source_ip, source_mask, target, device))
+

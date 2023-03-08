@@ -63,10 +63,13 @@ class LeakProtection_windows(LeakProtection_Generic):
 
 
     def _enable(self):
-        '''
-        :type settings: core.settings.Settings
-        :return:
-        '''
+        # DEFAULT BLOCK
+        self.firewallRuleOutgoingProfileDefaultBlock.enable()
+
+        # ALLOW LAN
+        self.firewallRuleAllowNetworkingLan.enable()
+
+        # DEADROUTING
         if self.core.settings.leakprotection.enable_deadrouting.get() is True:
             if self._whitelisted_server is not None:  #[public_ip_address, port, protocol]
                 self.deadrouting.whitelist_server(self._whitelisted_server[0])
@@ -74,9 +77,7 @@ class LeakProtection_windows(LeakProtection_Generic):
         else:
             self.deadrouting.disable()
 
-        self.firewallRuleOutgoingProfileDefaultBlock.enable()
-        self.firewallRuleAllowNetworkingLan.enable()
-
+        # ALLOW TO LOWEST HOP IP
         public_ip_address = None
         if self._whitelisted_server is not None:
             public_ip_address, port, protocol = self._whitelisted_server
@@ -84,6 +85,7 @@ class LeakProtection_windows(LeakProtection_Generic):
         else:
             self.firewallRuleAllowConnectionToServer.disable()
 
+        # ALLOW FROM LOCAL VPN IPS
         local_vpn_ipv4s = []
         local_vpn_ipv6s = []
         for hop in self.core.session.hops:
@@ -91,13 +93,12 @@ class LeakProtection_windows(LeakProtection_Generic):
                 local_vpn_ipv4s.append( hop.connection.ipv4_local_ip)
                 if  hop.connection.ipv6_local_ip is not None:
                     local_vpn_ipv6s.append( hop.connection.ipv6_local_ip)
-
         if len(local_vpn_ipv4s) > 0:
             self.firewallRuleAllowFromVpnLocalIps.enable(local_vpn_ipv4s, local_vpn_ipv6s)
         else:
             self.firewallRuleAllowFromVpnLocalIps.disable()
 
-        # BLOCK INTERNET, OVERWRITE WINDOWS ALLOW RULES
+        # BLOCK TO INTERNET, except from vpn ip and to vpn server, OVERWRITE WINDOWS ALLOW RULES
         if public_ip_address is None:
             self.firewallRuleBlockInternet.enable(remote_ipv4s=[], local_ipv4s=local_vpn_ipv4s)
         else:
