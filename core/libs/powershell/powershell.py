@@ -10,6 +10,7 @@ import json
 from core.libs.web.reporter import ReporterInstance
 
 
+
 class Powershell():
     def __init__(self):
         self._stdout_queue = Queue()
@@ -23,7 +24,7 @@ class Powershell():
         result = b""
         try:
             if as_data is True:
-                command += " | ConvertTo-Json | % { [System.Text.RegularExpressions.Regex]::Unescape(&_) } "
+                command += " | ConvertTo-Json "
             result = self._execute_locked(command)
             if as_data is True:
                 result = json.loads(result)
@@ -50,7 +51,7 @@ class Powershell():
 
     def _execute_locked(self, command):
         command = command.encode("UTF-8")
-        uniq_id = ("%s" % uuid.uuid4()).split("-")[0].strip().encode("ASCII")
+        uniq_id = ("%s" % uuid.uuid4()).split("-")[0].strip().encode("UTF-8")
         if self._process is None:
             self._process = subprocess.Popen(['powershell'], stdin=PIPE, stderr=PIPE, stdout=PIPE)
         if self._stdout_read_tread is None:
@@ -72,6 +73,7 @@ class Powershell():
                 line = self._stdout_queue.get(timeout=15)
             except Empty:
                 break
+
             if line == b"__ENDMARKER-%s__\n" % uniq_id:
                 break
             if startfound == True:

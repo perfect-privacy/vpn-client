@@ -153,7 +153,7 @@ Section "Perfect Privacy" SEC_MAIN
     StrCpy $switch_overwrite 1
 
     nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" stop   ' # windows service stop
-    nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" remove ' # windows service uninstall
+    #nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" remove ' # windows service uninstall
     Sleep 3000
     nsExec::ExecToStack  "TaskKill /IM perfect-privacy-service.exe /F"    # kill if needed
     nsExec::ExecToStack  "TaskKill /IM perfect-privacy.exe /F"    # kill if needed

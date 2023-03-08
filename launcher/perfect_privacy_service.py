@@ -81,6 +81,12 @@ if __name__ == "__main__":
                 from launcher.services.windows_service import Windows_Service
                 import servicemanager
                 import win32serviceutil
+                import ctypes
+
+                kernel32 = ctypes.WinDLL('kernel32')
+                kernel32.SetConsoleCP(1251)
+                kernel32.SetConsoleOutputCP(65001)
+
                 if len(sys.argv) == 1:
                     servicemanager.Initialize()
                     servicemanager.PrepareToHostSingle(Windows_Service)
