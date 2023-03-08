@@ -84,9 +84,8 @@ class SoftwareUpdater(GenericUpdater):
                 self.state.set(UpdaterState.UPDATER_STATE_IDLE)
 
         except Exception as e:
-            print(e)
             self.last_failed_check.set(math.floor(now))
-            self._logger.debug("error while checking for updates, retry in {} seconds".format(self._err_check_interval_seconds))
+            self._logger.debug("error while checking for updates, retry in %s seconds, %s" % (self._err_check_interval_seconds, e))
             self._auto_update_timer.interval = self._err_check_interval_seconds
             self.state.set(UpdaterState.UPDATER_STATE_IDLE)
 
