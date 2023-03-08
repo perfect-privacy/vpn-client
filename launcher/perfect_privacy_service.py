@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
         if option == "prepare":   # just run once so secrets and ids are generated
             pass
-        if option == "uninstall":   # run silent uninstall, disable firewall, dns, network stuff we installed
+        elif option == "uninstall":   # run silent uninstall, disable firewall, dns, network stuff we installed
             from core.leakprotection import LeakProtection
             LeakProtection(core=None).reset()
             if PLATFORM == PLATFORMS.windows:

@@ -153,7 +153,7 @@ class MainApp():
                     subprocess.Popen([update_file], creationflags=os.P_DETACH)
                 if PLATFORM == PLATFORMS.macos:
                     os.system("open '%s' & " % update_file)
-
+                time.sleep(1)
     def stop(self, *args):
         self.app.stop()
 
