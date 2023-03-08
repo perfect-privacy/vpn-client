@@ -184,6 +184,7 @@ Section "Perfect Privacy" SEC_MAIN
     CopyFiles /SILENT /FILESONLY $TEMP\storage.db $INSTDIR\var
 
     nsExec::ExecToStack '"$INSTDIR\perfect-privacy-service.exe" --startup auto install' # install windows service
+    nsExec::ExecToStack '"$INSTDIR\perfect-privacy-service.exe" prepare'                # prepare windows service
     nsExec::ExecToStack '"$INSTDIR\perfect-privacy-service.exe" start'                  # start windows service
 
     Sleep 4000 # wait some time so background service is started before we launch frontend in next step

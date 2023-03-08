@@ -292,7 +292,6 @@ class PreferencesView(PyHtmlView):
         self.send_crashreports = CheckboxComponent(subject.settings.send_crashreports, self)
         self.send_statistics = CheckboxComponent(subject.settings.send_statistics, self)
         self.updater = UpdaterView(subject, self)
-        ReporterInstance.report("test_report","data" )
         self.reporterView = ReporterView(ReporterInstance, self)
 
         self.osname = ""

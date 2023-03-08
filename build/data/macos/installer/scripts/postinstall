@@ -9,10 +9,10 @@ echo "Install Service"
 cp /Applications/Perfect\ Privacy.app/Contents/MacOS/perfect-privacy-service.plist /Library/LaunchDaemons/
 chown root /Library/LaunchDaemons/perfect-privacy-service.plist
 
+/Applications/Perfect\ Privacy.app/Contents/MacOS/perfect-privacy-service prepare
+
 launchctl load /Library/LaunchDaemons/perfect-privacy-service.plist
-while [ "1$(launchctl list|grep com.perfect-privacy.service|cut -f1)" -eq 0 ]; do
-  sleep 1  # wait for service to start
-done
+sleep 4  # wait for service to start
 
 su "$USER" -c "open /Applications/Perfect\ Privacy.app"
 
