@@ -382,7 +382,7 @@ class FirewallReset():
     def run(self):
         getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow -Enabled True")
 
-        rules = getPowershellInstance().execute('Get-NetFirewallRule', as_data=True)
+        rules = getPowershellInstance().execute('Get-NetFirewallRule -DisplayName *perfect*', as_data=True)
         if rules is None:
             ReporterInstance.report("firewall_reset_load_failed","")
             return

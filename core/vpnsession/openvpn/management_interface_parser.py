@@ -100,13 +100,13 @@ class ManagementInterfaceParser(Thread):
         self._init_step += 1
 
     def _send_command(self, command):
-        self._logger.debug("sending: '{}'".format(command))
+        self._logger.debug("sending: '{}'".format(self._replace_secrets(command)))
         command = command.strip() + "\r\n"
         with self._send_lock:
             try:
                 self._socket.sendall(command.encode())
             except:
-                self._logger.debug("sending '{}' failed".format(command))
+                self._logger.debug("sending '{}' failed".format(self._replace_secrets(command)))
 
     def _get_line_from_socket(self):
         """
@@ -145,7 +145,7 @@ class ManagementInterfaceParser(Thread):
 
     def _process_line(self, line):
         line = line.strip()
-        self._logger.debug(line)
+        self._logger.debug(self._replace_secrets(line))
 
         if line.startswith(">HOLD:Waiting for hold release"):
             self._next_init_step()
@@ -179,8 +179,7 @@ class ManagementInterfaceParser(Thread):
             # send state changed signal on last change only
             send_signal = self._reading_mode != self._READING_MODE_BULK_STATE
 
-            if (openvpn_state == OpenVPNState.OPENVPN_STATE_RECONNECTING
-                    and description == "auth-failure"):
+            if (openvpn_state == OpenVPNState.OPENVPN_STATE_RECONNECTING and description == "auth-failure"):
                 # auth-failure: delete user/pass to ask for new one
                 self.openvpn_state.set(openvpn_state)
                 self._logger.debug("invalid credentials")
@@ -289,6 +288,12 @@ class ManagementInterfaceParser(Thread):
     def request_disconnect(self):
         # request openvpn to shut down
         self._send_command("signal SIGTERM")
+
+    def _replace_secrets(self, string):
+        return string.replace(self._username, "USERNAME-REMOVED")\
+            .replace(self._password, "USERNAME-REMOVED")\
+            .replace(self._proxy_username, "USERNAME-REMOVED")\
+            .replace(self._proxy_password, "USERNAME-REMOVED")
 
     def __del__(self):
         try:

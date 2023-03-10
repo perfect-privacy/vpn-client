@@ -152,9 +152,10 @@ Section "Perfect Privacy" SEC_MAIN
     Var /GLOBAL switch_overwrite
     StrCpy $switch_overwrite 1
 
-    nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" stop   ' # windows service stop
-    #nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" remove ' # windows service uninstall
-    Sleep 3000
+    IfFileExists $INSTDIR\perfect-privacy-service.exe 0 +3
+        nsExec::ExecToStack  '"$INSTDIR\perfect-privacy-service.exe" stop   ' # windows service stop
+        Sleep 3000
+
     nsExec::ExecToStack  "TaskKill /IM perfect-privacy-service.exe /F"    # kill if needed
     nsExec::ExecToStack  "TaskKill /IM perfect-privacy.exe /F"    # kill if needed
     nsExec::ExecToStack  "TaskKill /IM pp.tapctl.exe /F"     # kill if needed
@@ -171,8 +172,11 @@ Section "Perfect Privacy" SEC_MAIN
     nsExec::ExecToStack  "TaskKill /IM pp.plink.exe /F"       # kill if needed
     nsExec::ExecToStack  "TaskKill /IM pp.tstunnel.exe /F"    # kill if needed
 
-    CopyFiles /SILENT /FILESONLY $INSTDIR\var\storage.db $TEMP
-    RMDir /r /REBOOTOK $INSTDIR
+    IfFileExists $INSTDIR\var\storage.db 0 +2
+        CopyFiles /SILENT /FILESONLY $INSTDIR\var\storage.db $TEMP
+
+    IfFileExists $INSTDIR 0 +2
+        RMDir /r /REBOOTOK $INSTDIR
 
     File /r ..\..\..\build_tmp\perfect-privacy\*
 
@@ -181,7 +185,9 @@ Section "Perfect Privacy" SEC_MAIN
     CreateShortCut  "$SMPROGRAMS\Perfect Privacy\Uninstall.lnk"       "$INSTDIR\uninstall.exe"
     CreateShortCut  "$DESKTOP\Perfect Privacy.lnk"                    "$INSTDIR\perfect-privacy.exe"
 
-    CopyFiles /SILENT /FILESONLY $TEMP\storage.db $INSTDIR\var
+    IfFileExists $TEMP\storage.db 0 +2
+        CopyFiles /SILENT /FILESONLY $TEMP\storage.db $INSTDIR\var
+
 
     nsExec::ExecToStack '"$INSTDIR\perfect-privacy-service.exe" --startup auto install' # install windows service
     nsExec::ExecToStack '"$INSTDIR\perfect-privacy-service.exe" prepare'                # prepare windows service
