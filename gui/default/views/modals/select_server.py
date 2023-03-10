@@ -174,12 +174,18 @@ class ServerListsItemView(PyHtmlView):
             <td>
                 <b>{{ pyview.subject.name|title }}</b>
             </td>
-            <td>
-                {{ pyview.subject.bandwidth_max }} Mbit
-            </td>
-            <td>
-                {{ pyview.subject.bandwidth_used_percent }}%
-            </td>
+            
+            {% if pyview.subject.is_online %}
+                <td>
+                    {{ pyview.subject.bandwidth_max }} Mbit
+                </td>
+                <td>
+                    {{ pyview.subject.bandwidth_used_percent }}%
+                </td>
+            {% else %}
+                <td colspan="2">down for maintenance</td>
+            {% endif %}
+            
             <td>
                 {% if pyview.core.favourites.contains(pyview.subject.identifier) == false %}
                     <i class="fa fa-star-o" style="cursor:pointer;font-size:1.5em;padding-top:0.25em" onclick="event.stopPropagation();pyview.add_to_favourites();"></i>

@@ -48,7 +48,7 @@ class GenericIPChecker(object):
         """
         public_ip, public_dns, public_city, public_country = None, None, None, None
         successfull = False
-        for i in range(2):
+        for i in range(3):
             try:
                 response = getattr(self, get_func)()
                 public_ip, public_dns, public_city, public_country = self._parse_response(response)

@@ -59,8 +59,10 @@ class Powershell():
             self._stdout_read_tread.start()
             self._stderr_read_tread = Thread(target=self._read_thread, args=(self._process.stderr, self._stdout_queue), daemon=True)
             self._stderr_read_tread.start()
-        self._process.stdin.write(b'[Console]::OutputEncoding = [Text.Encoding]::UTF8 ; ')
-        self._process.stdin.write(b"$PSDefaultParameterValues['*:Encoding'] = 'utf-8' ; ")
+            self._process.stdin.write(b'[Console]::OutputEncoding = [Text.Encoding]::UTF8 ; ')
+            self._process.stdin.write(b"$PSDefaultParameterValues['*:Encoding'] = 'utf-8' ; ")
+            self._process.stdin.write(b"Import-Module DnsClient ; ")
+
         self._process.stdin.write(b'Write-Host __STARTMARKER-%s__ ; ' % uniq_id)
         self._process.stdin.write(b'' + command + b" ; ")
         self._process.stdin.write(b'Write-Host __ENDMARKER-%s__ \n' % uniq_id)
@@ -100,9 +102,3 @@ def getPowershellInstance():
     if powershellInstance is None:
         powershellInstance = Powershell()
     return powershellInstance
-
-if __name__ == "__main__":
-    ps = Powershell()
-    #s = ps.execute("Get-NetFirewallProfile")
-    s = ps.execute("C:\Windows\SysNative\pnputil.exe /enum-drivers /class Net")
-    print(s)

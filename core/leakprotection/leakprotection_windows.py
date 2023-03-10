@@ -63,11 +63,6 @@ class LeakProtection_windows(LeakProtection_Generic):
 
 
     def _enable(self):
-        # DEFAULT BLOCK
-        self.firewallRuleOutgoingProfileDefaultBlock.enable()
-
-        # ALLOW LAN
-        self.firewallRuleAllowNetworkingLan.enable()
 
         # DEADROUTING
         if self.core.settings.leakprotection.enable_deadrouting.get() is True:
@@ -97,6 +92,12 @@ class LeakProtection_windows(LeakProtection_Generic):
             self.firewallRuleAllowFromVpnLocalIps.enable(local_vpn_ipv4s, local_vpn_ipv6s)
         else:
             self.firewallRuleAllowFromVpnLocalIps.disable()
+
+        # ALLOW LAN
+        self.firewallRuleAllowNetworkingLan.enable()
+
+        # DEFAULT BLOCK
+        self.firewallRuleOutgoingProfileDefaultBlock.enable()
 
         # BLOCK TO INTERNET, except from vpn ip and to vpn server, OVERWRITE WINDOWS ALLOW RULES
         if public_ip_address is None:

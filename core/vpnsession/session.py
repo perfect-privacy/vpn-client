@@ -24,6 +24,9 @@ class SessionHop(Observable):
         self.servergroup = servergroup
         self.selected_server = None
         self.connection = None
+        self.last_connection_failed = False
+        self.should_remove = False
+        # state : idle, connecting, connected, disconnecting, disconnected, error_retry
 
     def set_selected_server(self, selected_vpn_server_group):
         self.selected_server = selected_vpn_server_group
@@ -43,9 +46,16 @@ class SessionHop(Observable):
         self.notify_observers()
 
     def _on_connection_state_changed(self, sender, new_state, **kwargs):
-        self.notify_observers()
         if self.session._should_be_connected.get() is False and  new_state == VpnConnectionState.IDLE:
+            self.last_connection_failed = False
             self.after_disconnected()
+
+        if self.session._should_be_connected.get() is True and self.should_remove == False:
+            if new_state not in [VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTING]:
+                self.last_connection_failed = True
+            if new_state in [VpnConnectionState.CONNECTED]:
+                self.last_connection_failed = False
+            self.notify_observers()
 
     def after_disconnected(self):
         if self.connection is not None:
@@ -109,11 +119,14 @@ class Session(Observable):
 
     def calculate_ports(self):
         if self.state.get() == SessionState.CONNECTED:
-            ip = self.hops[-1].connection.ipv4_local_ip
-            if ip != None:
-                p= ((int(ip.split(".")[2]) & 0x0f) << 8 ) | int(ip.split(".")[3])
-                p = ("%s" % p).zfill(4)
-                return ["1%s" % p, "2%s" % p, "3%s" % p]
+            try:
+                ip = self.hops[-1].connection.ipv4_local_ip
+                if ip != None:
+                    p= ((int(ip.split(".")[2]) & 0x0f) << 8 ) | int(ip.split(".")[3])
+                    p = ("%s" % p).zfill(4)
+                    return ["1%s" % p, "2%s" % p, "3%s" % p]
+            except:
+                pass
         return None
 
     def _long_running_controller_thread(self):
@@ -143,7 +156,9 @@ class Session(Observable):
                                 self._hops_stored.set(",".join([hop.servergroup.identifier for hop in self.hops]))
                                 if len(self.hops) == 0 and self._should_be_connected.get() is True:
                                     self._should_be_connected.set(False)
+
                             self.notify_observers()
+                        self.core.leakprotection.update_async()
 
                     if self._get_number_of_connected_vpn_connections() != len(self.hops):
                         self._logger.info("connecting")
@@ -156,7 +171,6 @@ class Session(Observable):
                         if len(self.hops) > 0:
                             try:
                                 self._update_low_level_cascade()
-                                #self._create_new_low_level_cascade()
                             except Exception as e:
                                 self._logger.debug(traceback.format_exc())
                                 self._logger.error("unable to create the cascade: {}".format(e))
@@ -169,7 +183,6 @@ class Session(Observable):
                                 except VPNConnectionError:
                                     self._logger.info("connecting failed, retrying in a few moments")
                                     self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
-                                    self._disconnect_all()
                                 except:
                                     self._logger.info("connecting failed, retrying in a few moments")
                                     self._logger.debug(traceback.format_exc())
@@ -181,6 +194,12 @@ class Session(Observable):
 
                         else:
                             self.state.set(SessionState.IDLE)
+                    else:
+                        if len(self.hops) > 0:
+                            if len([hop for hop in self.hops if  hop.connection is not None and hop.connection.state.get() == VpnConnectionState.CONNECTED]) == len(self.hops):
+                                if self.state.get() != SessionState.CONNECTED:
+                                    self.state.set(SessionState.CONNECTED)
+
                 else:
                     if self._get_number_of_non_idle_connections() != 0:
                         self._logger.info("disconnecting")
@@ -203,12 +222,6 @@ class Session(Observable):
 
         self._logger.debug("stopped")
 
-    def get_number_of_paths(self, hop_list=None):
-        """
-        :type vpn_groups: list[core.vpn.vpn_groups.VpnServerOrVpnServerCollection]
-        """
-        return len(self.get_all_possible_paths(hop_list))
-
     def get_all_possible_paths(self, hop_list, limit = 10):
         """
         :type vpn_groups: list[core.vpn.vpn_groups.VpnServerOrVpnServerCollection]
@@ -218,20 +231,25 @@ class Session(Observable):
             return []
 
         # get a list of the lowest level vpn groups (country1 -> a1, a2, a3, b1, c1, c2)
-        vpn_servers = []
+        vpn_servers_per_hop = []
         for hop in hop_list:
-            vpnservers = [s for s in hop.servergroup.get_vpn_servers() if s.bandwidth_available_percent > 0]
-            if len(vpnservers) == 0:
+            if hop.connection is not None and hop.selected_server is not None:
+                vpn_servers_per_hop.append([hop.selected_server])
+            else:
                 vpnservers = hop.servergroup.get_vpn_servers()
-            random.shuffle(vpnservers)
-            vpn_servers.append(vpnservers)
-        if not vpn_servers:
-            raise Exception("an error occurred while getting the servers")
-        paths = [[g] for g in vpn_servers[0]]
-        for i in range(1, len(vpn_servers)):
+                vpnservers_online = [s for s in vpnservers if s.is_online is True]
+                if len(vpnservers_online) > 0:
+                    vpnservers = vpnservers_online
+                random.shuffle(vpnservers)
+                vpn_servers_per_hop.append(vpnservers)
+
+        if len(vpn_servers_per_hop) == 0:
+            return []
+        paths = [[g] for g in vpn_servers_per_hop[0]]
+        for i in range(1, len(vpn_servers_per_hop)):
             new_paths = []
             new_paths_length = 0
-            for group in vpn_servers[i]:
+            for group in vpn_servers_per_hop[i]:
                 for path in paths:
                     if group not in path:
                         new_path = path[:]
@@ -241,40 +259,25 @@ class Session(Observable):
                         if new_paths_length >= limit: break
                 if new_paths_length >= limit: break
             paths = new_paths
+
+        paths = [p for p in paths if len(p) == len(hop_list)]
+        online_paths = [path for path in paths if not False in [hop.is_online for hop in path]]
+        if len(online_paths) > 0:
+            return online_paths
         return paths
 
-    def _create_new_low_level_cascade(self):
-        if self._get_number_of_non_idle_connections() > 0:
-            raise Exception("at least one connection not idle")
-
-        # FIXME: set failed connections to lower priority
-        all_possible_paths = self.get_all_possible_paths(self.hops)
-        if not all_possible_paths:
-            raise Exception("couldn't find a valid cascade for the selected locations")
-        self._logger.debug("all possible paths: {}".format(all_possible_paths))
-        path = random.choice(all_possible_paths)
-        self._logger.debug(path)
-        assert len(path) == len(self.hops)
-
-        i = 0
-        for selected_vpn_server_group in path:
-            self.hops[i].set_selected_server(selected_vpn_server_group)
-            i += 1
-        self.notify_observers()
-
     def _update_low_level_cascade(self):
-        # FIXME: set failed connections to lower priority
         all_possible_paths = self.get_all_possible_paths(self.hops)
         if not all_possible_paths:
             raise Exception("couldn't find a valid cascade for the selected locations")
-        self._logger.debug("all possible paths: {}".format(all_possible_paths))
+        self._logger.debug("All possible paths: {}".format(all_possible_paths))
         path = random.choice(all_possible_paths)
-        self._logger.debug(path)
-        assert len(path) == len(self.hops)
+        self._logger.debug("Selected path %s" % path)
         i = 0
         for selected_vpn_server_group in path:
             if self.hops[i].connection is None or self.hops[i].selected_server is None:
                 self.hops[i].set_selected_server(selected_vpn_server_group)
+                self._logger.debug("Selected Hop %s Server %s" % (i, selected_vpn_server_group))
             i += 1
         self.notify_observers()
 
@@ -314,14 +317,17 @@ class Session(Observable):
         self.notify_observers()
 
     def remove_hop_by_index(self, index):
-        if self.hops[index].connection is not None and self.hops[index].connection.state.get() !=  VpnConnectionState.IDLE:
-            self.hops[index].should_remove = True
+        hop_to_remove = self.hops[index]
+        if hop_to_remove.connection is not None and hop_to_remove.connection.state.get() !=  VpnConnectionState.IDLE:
+            hop_to_remove.should_remove = True
             self._controller_thread_wakeup_event.set()
+            self._connecting_state_changed_event.set()
         else:
-            self.hops[index].detach_observer(self._on_hop_changed)
+            hop_to_remove.detach_observer(self._on_hop_changed)
             del self.hops[index]
             self._hops_stored.set(",".join([hop.servergroup.identifier for hop in self.hops]))
             self.notify_observers()
+        hop_to_remove.notify_observers()
         if len(self.hops) == 0 and self._should_be_connected.get() is True:
             self._should_be_connected.set(False)
 
@@ -352,10 +358,15 @@ class Session(Observable):
     def _connect_all(self):
         hop_number = 0
         for hop in self.hops:
+            if hop.connection is None:
+                self._logger.debug("Hop %s has no connection, connect all failed for now" % hop_number)
+                return
+            if hop.selected_server is None:
+                self._logger.debug("Hop %s has no selected server, connect all failed for now" % hop_number)
+                return
+
             hop_number += 1
             self.state.set(self.state.get(),"Connecting to {}".format(hop.selected_server.name))
-            if hop.connection is None:
-                raise Exception("Hops has no connection")
 
             if hop.connection.state.get() == VpnConnectionState.CONNECTED:
                 self._logger.debug("Hop #{} ({}) is already connected".format(hop_number, hop.selected_server.name))
@@ -363,17 +374,25 @@ class Session(Observable):
 
             self._logger.debug("connecting to hop #{} ({})".format(hop_number, hop.selected_server.name))
 
+            if hop_number > 1:  # wait on lower hops to get stable
+                time.sleep(3)
+
             hop.connection.connect(hop.selected_server, hop_number)
             self._connecting_state_changed_event.clear()
 
             if hop.connection is None:
                 self._logger.debug("Hop #{} connection removed".format(hop_number))
+                self._disconnect_hop(hop)
                 raise VPNConnectionError()
 
             hop.connection.state.attach_observer(self._wait_for_state_change)
             started_waiting = time.time()
             CONNECT_TIMEOUT = 60
             while hop.connection.state.get() not in [VpnConnectionState.CONNECTED, VpnConnectionState.IDLE] and self._should_be_connected.get() == True:
+                if hop.should_remove is True:
+                    break
+                if len([h for h in self.hops[0:self.hops.index(hop)] if h.should_remove is True]) > 0:
+                    break
                 self._logger.debug("waiting for state change")
                 signal_received = self._connecting_state_changed_event.wait(timeout=CONNECT_TIMEOUT)
                 self._connecting_state_changed_event.clear()
@@ -382,7 +401,9 @@ class Session(Observable):
             hop.connection.state.detach_observer(self._wait_for_state_change)
             if hop.connection.state.get() != VpnConnectionState.CONNECTED:
                 self._logger.error("Couldn't connect within {} seconds".format(CONNECT_TIMEOUT))
+                self._disconnect_hop(hop)
                 raise VPNConnectionError()
+
             self.core.leakprotection.update_async()
 
     def _wait_for_state_change(self, sender, new_state, **kwargs):
@@ -390,12 +411,16 @@ class Session(Observable):
 
     def connect(self):
         self._logger.debug("received connect request")
+        if self.state.get() == VpnConnectionState.IDLE:
+            self.state.set(SessionState.CONNECTING, "Connecting")
         self._should_be_connected.set(True)
         self._controller_thread_wakeup_event.set()
         self.notify_observers()
 
     def disconnect(self):
         self._logger.debug("received disconnect request")
+        if self.state.get() in [VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTING]:
+            self.state.set(SessionState.DISCONNECTING, "Disconnecting")
         self._should_be_connected.set(False)
         self._controller_thread_wakeup_event.set()
         self._connecting_state_changed_event.set()

@@ -195,7 +195,7 @@ class HopListItemView(PyHtmlView):
                 <img style="max-width:25px" src="/static/img/flags/flags-iso/flat/64/{{ pyview.subject.servergroup.country_shortcodes.0 | upper }}.png" style="opacity:0.9">
             </td>
             <td>
-                {{ pyview.subject.servergroup.name }} <br>
+                {{ pyview.subject.servergroup.name }} 
             </td>
             <td>
                 {% if pyview.subject.connection != None %}
@@ -358,7 +358,11 @@ class ServerListsItemView(PyHtmlView):
                 <img src="/static/img/flags/flags-iso/flat/64/{{ pyview.subject.country_shortcodes.0 | upper}}.png" style="width:25px">
             </td>
             <td>
-                <h4 style="padding-top:4px">{{ pyview.subject.name|title }}</h4>
+                <h4 style="padding-top:4px">{{ pyview.subject.name|title }}
+                {% if pyview.subject.is_online == False %}
+                    <p style="margin:0px;padding:0px;font-size:0.8em;color:orange">maintenance</p>
+                {% endif %}
+                </h4>
             </td>
             {% if pyview.subject.subitems %}
                 <td>

@@ -15,6 +15,13 @@ class Logger():
             level    = level,
             handlers = handlers)
 
+    def clear(self):
+        for i in range(len( self.logs)):
+            try:
+                del self.logs[-1]
+            except:
+                pass
+
 class LogHandler(logging.Handler):
     def __init__(self, target_log):
         super(LogHandler, self).__init__()

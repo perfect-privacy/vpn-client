@@ -171,13 +171,6 @@ class DeviceManager(Observable):
             if changed:
                 self._load_existing_devices()
 
-            # if not all installed:
-            # data = {
-            #   "max_hops": 2
-            #   "installed hops"
-            #   "driver" : wintun
-            #   "logs" : last x log entry from this class
-            # }
             self.state.set(DeviceManagerState.IDLE)
 
         finally:
@@ -202,7 +195,7 @@ class DeviceManager(Observable):
         success, stdout, stderr = SubCommand().run(TAPCTL, [ "delete", "{%s}" % guid])
 
     def _enum_devices(self):
-        networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress", as_data = True)
+        networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress | Select-Object -Property InterfaceAlias,InterfaceIndex ", as_data = True)
         name_to_index = {}
         if networkdatas is None:
             ReporterInstance.report("devicemanager_enumeration_failed", "")

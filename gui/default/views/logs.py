@@ -7,6 +7,7 @@ class LogsView(PyHtmlView):
     TEMPLATE_STR = '''
         <div class="inner">
             <button style="float:right" onclick='pyview.copy_to_clipboard()'>To Clipboard</button>
+            <button style="float:right" onclick='pyview.clear_log()'>Clear</button>
             <h1 style="float:left">
                 Internal Log
             </h1>           
@@ -25,6 +26,9 @@ class LogsView(PyHtmlView):
         super(LogsView, self).__init__(subject, parent)
         self.log = ObservableListView(subject.global_logger.logs, self, filter_function=lambda x:self._filter(x), item_class=LogListItem)
         self.filter_str = ""
+
+    def clear_log(self):
+        self.subject.global_logger.clear()
 
     def copy_to_clipboard(self):
         lines = []

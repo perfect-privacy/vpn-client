@@ -213,7 +213,7 @@ class OpenVPNConnection(VPNConnection):
                 break
             except socket.error:
                 self._logger.debug("attempt #{} failed".format(number_of_attempts))
-                time.sleep(.1)
+                time.sleep(0.1 * number_of_attempts)
         else:
             self._logger.error("Couldn't connect to management interface: maximum number of retries exceeded")
             self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
@@ -278,12 +278,13 @@ class OpenVPNConnection(VPNConnection):
         if sender.is_connecting:
             self.state.set(VpnConnectionState.CONNECTING, VpnConnectionState.CONNECTING)
         elif sender.is_connected:
-            self.state.set(VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTED)
             self.up_down_controller.up()
+            self.state.set(VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTED)
         elif sender.is_disconnecting:
             self.state.set(VpnConnectionState.DISCONNECTING, VpnConnectionState.DISCONNECTING)
         elif sender.is_disconnected:
             self.up_down_controller.down()
+            self.core.ipcheck.check_now()
             self.state.set(VpnConnectionState.IDLE, VpnConnectionState.IDLE)
 
     def _on_invalid_credentials_detected(self, sender):

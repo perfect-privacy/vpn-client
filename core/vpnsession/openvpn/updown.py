@@ -95,7 +95,9 @@ class UpDown_Windows(UpDown_Generic):
                 gateway = parts[2].strip().decode("UTF-8")
             except:
                 gateway = None
-            network = parts[3].strip().decode("UTF-8")
+            #network = parts[3].strip().decode("UTF-8")
+            if gateway == "10.255.255.255": # our deadrouting entry
+                continue
             if target == "0.0.0.0" and netmask == netmask_search and self._is_ip(gateway):
                 return gateway
         return None

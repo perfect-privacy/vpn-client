@@ -34,6 +34,11 @@ class IpCheck(Observable):
         self._ip_checker = PerfectPrivacyIPChecker(fallback_checker=TorIPChecker())
         self.result4 = IPCheckerResult("Ipv4")
         self.result6 = IPCheckerResult("Ipv6")
+        self.result4.attach_observer(self.on_result_updated)
+        self.result6.attach_observer(self.on_result_updated)
+
+    def on_result_updated(self):
+        self.notify_observers()
 
     @property
     def vpn_connected(self):

@@ -46,9 +46,6 @@ class DashboardView(PyHtmlView):
                     login
                 </button>
             {% endif %}
-            <br>
-            <br>
-
             {{ pyview.vpnStatusView.render() }}
             {{ pyview.leakProtectionStateView.render() }}
             {{ pyview.defaultPortforwardingView.render() }}
@@ -150,7 +147,29 @@ class LeakProtectionStateView(PyHtmlView):
 
 class HopListView(PyHtmlView):
     TEMPLATE_STR = '''
-    <h2>Connections</h2>
+        <div>
+            <h2 style="width:50%;float:left">Connections</h2>
+            {% if pyview.core.session._should_be_connected.get()  %}
+                {% if pyview.core.session.state.get() == "disconnecting" %}
+                    <button disabled style="float:right">Disconnecting</button>    
+                {% else %}
+                    <button onclick='pyview.core.session.disconnect()' style="float:right">Disconnect</button>    
+                {% endif %}   
+            {% else %}
+                {% if pyview.core.session.hops | length > 0  %}
+                     {% if pyview.core.session._get_number_of_non_idle_connections() == 0 %}
+                        <button  onclick='pyview.core.session.connect()' style="float:right;background-color:#33c533a6">Connect</button>
+                     {% else %}
+                         {% if pyview.core.session.state.get() == "disconnecting" %}
+                            <button style="float:right" disabled>Disconnecting</button>
+                         {% endif %}
+                     {% endif %}
+                {% endif %}
+            {% endif %}
+            {% if pyview.can_add_server()  %}
+                <button style="float:right;margin-right:10px" onclick='pyview.parent.select_server_modal.show()'>Add Server</button>
+            {% endif %}  <!---  if pyview.core.session._should_be_connected.get() == false and ---->
+        </div>
         <table style="width:100%">
             <thead>
                 <tr>
@@ -162,16 +181,7 @@ class HopListView(PyHtmlView):
             </thead>
             {{pyview.items.render()}}
         </table>
-        {% if pyview.core.session._should_be_connected.get()  %}
-            <button  onclick='pyview.core.session.disconnect()'>Disconnect</button>            
-        {% else %}
-            {% if pyview.core.session.hops | length > 0 and pyview.core.session._get_number_of_non_idle_connections() == 0 %}
-                <button  onclick='pyview.core.session.connect()' style="background-color:#33c533a6">Connect</button>
-            {% endif %}
-        {% endif %}
-        {% if pyview.can_add_server()  %}
-            <button  onclick='pyview.parent.select_server_modal.show()'>Add Server</button>
-        {% endif %}  <!---  if pyview.core.session._should_be_connected.get() == false and ---->
+
     '''
 
     def __init__(self, subject, parent):
@@ -183,6 +193,7 @@ class HopListView(PyHtmlView):
         self.core = parent.parent.subject
 
         self.add_observable(self.core.session)
+        self.add_observable(self.core.session.state)
         self.add_observable(self.core.session.hops)
         self.add_observable(self.core.settings.vpn.vpn_protocol)
         self.add_observable(self.core.settings.vpn.openvpn.cascading_max_hops)
@@ -205,19 +216,33 @@ class HopListItemView(PyHtmlView):
                 <img src="/static/img/flags/flags-iso/flat/64/{{ pyview.subject.servergroup.country_shortcodes.0 | upper }}.png" style="opacity:0.9">
             </td>
             <td>
-                {{ pyview.subject.servergroup.name |title}} <br>
-                
+                <p style="margin-bottom:0px; font-size:1.2em;">{{ pyview.subject.servergroup.name |title}} </p>
                 {% if pyview.subject.selected_server and (pyview.subject.selected_server.name != pyview.subject.servergroup.name) %}
-                    {{ pyview.subject.selected_server.name|title }}
+                    <p style="margin-bottom:0px; font-size:1em;">{{ pyview.subject.selected_server.name|title }} </p>
                 {% endif %}
+                {% if  pyview.subject.servergroup.is_online == False or pyview.subject.selected_server.is_online == False %}
+                   <p style="margin-bottom:0px; font-size:0.9em;color:orange">down for maintenance</p>
+                {% endif %}                
             </td>
             <td>
-                {% if pyview.subject.connection != None %}
-                    {{ pyview.subject.connection.state.get() |title }}
-                {% endif %}             
+                {% if pyview.subject.connection != None and pyview.subject.connection.state.get() != "idle" %}
+                    {% if pyview.subject.should_remove %}
+                        removing
+                    {% else %} 
+                        {{ pyview.subject.connection.state.get() |title }}
+                    {% endif %} 
+                {% endif %} 
+                {% if  pyview.subject.last_connection_failed == True  %}
+                    {% if pyview.subject.connection != None %}
+                        <p style="margin-bottom:0px; font-size:0.9em;color:orange">retrying failed connection</p>
+                    {% else %}
+                          <p style="margin-bottom:0px; font-size:1em;color:orange">Connection Failed</p>
+                          <p style="margin-bottom:0px; font-size:0.9em;color:orange">retrying in a few seconds</p>
+                    {% endif %}
+                {% endif %}       
             </td>
             <td>
-                {% if pyview.core.session._get_number_of_non_idle_connections() == 0  %}
+                {% if pyview.core.session._get_number_of_non_idle_connections() != 24  %}
                     <button onclick='pyview.core.session.remove_hop_by_index( {{ pyview.element_index() }})' >remove</button>
                 {% endif %}
             </td>
@@ -249,31 +274,30 @@ class HopListItemView(PyHtmlView):
 
 class IpCheckView(PyHtmlView):
     TEMPLATE_STR = ''' 
-    
         {% if pyview.subject.session.state.get() == "connected" or  pyview.subject.session.state.get() == "idle"  %}
-
-            {% if pyview.subject.ipcheck.result4.public_ip != None %}
-                <div style="width:{% if pyview.subject.ipcheck.result4.public_ip == None or pyview.subject.ipcheck.result6.public_ip == None %}100%{% else  %}50%{% endif %};float:left">
-                    <h2 style="text-align:center">IP: {{ pyview.subject.ipcheck.result4.public_ip }}</h2>
-                    <h3 style="text-align:center">{{ pyview.subject.ipcheck.result4.public_rdns }}</h3>
-                    <h3 style="text-align:center">
-                        {{ pyview.subject.ipcheck.result4.public_city }}{% if pyview.subject.ipcheck.result4.public_city != "" %},{% endif %}
-                        {{ pyview.subject.ipcheck.result4.public_country }}
-                    </h3>
-                </div>
-            {% endif %}
-            {% if pyview.subject.ipcheck.result6.public_ip != None %}
-                <div style="width:{% if pyview.subject.ipcheck.result4.public_ip == None or pyview.subject.ipcheck.result6.public_ip == None %}100%{% else  %}50%{% endif %};float:left">
-                    <h2 style="text-align:center">IP: {{ pyview.subject.ipcheck.result6.public_ip }}</h2>
-                    <h3 style="text-align:center">{{ pyview.subject.ipcheck.result6.public_rdns }}</h3>
-                    <h3 style="text-align:center">
-                        {{ pyview.subject.ipcheck.result6.public_city }}{% if pyview.subject.ipcheck.result6.public_city != "" %},{% endif %}
-                        {{ pyview.subject.ipcheck.result6.public_country }}
-                    </h3>
-                </div>
-            {% endif %}
-                
-            <div style="width:100%;text-align:center;float:left">
+            <div style="width:100%;text-align:center;display:flex">
+                {% if pyview.subject.ipcheck.result4.public_ip != None %}
+                    <div style="width:{% if pyview.subject.ipcheck.result4.public_ip == None or pyview.subject.ipcheck.result6.public_ip == None %}100%{% else  %}50%{% endif %};">
+                        <h2 style="text-align:center">IP: {{ pyview.subject.ipcheck.result4.public_ip }}</h2>
+                        <h3 style="text-align:center">{{ pyview.subject.ipcheck.result4.public_rdns }}</h3>
+                        <h3 style="text-align:center">
+                            {{ pyview.subject.ipcheck.result4.public_city }}{% if pyview.subject.ipcheck.result4.public_city != "" %},{% endif %}
+                            {{ pyview.subject.ipcheck.result4.public_country }}
+                        </h3>
+                    </div>
+                {% endif %}
+                {% if pyview.subject.ipcheck.result6.public_ip != None %}
+                    <div style="width:{% if pyview.subject.ipcheck.result4.public_ip == None or pyview.subject.ipcheck.result6.public_ip == None %}100%{% else  %}50%{% endif %};">
+                        <h2 style="text-align:center">IP: {{ pyview.subject.ipcheck.result6.public_ip }}</h2>
+                        <h3 style="text-align:center">{{ pyview.subject.ipcheck.result6.public_rdns }}</h3>
+                        <h3 style="text-align:center">
+                            {{ pyview.subject.ipcheck.result6.public_city }}{% if pyview.subject.ipcheck.result6.public_city != "" %},{% endif %}
+                            {{ pyview.subject.ipcheck.result6.public_country }}
+                        </h3>
+                    </div>
+                {% endif %}
+            </div>
+            <div style="width:100%;text-align:center;padding-bottom:20px">
                 {% if pyview.subject.ipcheck.state == "ACTIVE"%}
                     <button disabled>Verify Connection..</button> </h3>
                 {% else %}

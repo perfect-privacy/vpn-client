@@ -19,6 +19,10 @@ class VpnServerOrGroup(Observable):
         self.bandwidth_max = 0
 
     @property
+    def is_online(self):
+        return self.bandwidth_in >= 0 and self.bandwidth_out >= 0 and self.bandwidth_max >= 0
+
+    @property
     def bandwidth_used_mbit(self):
         if self.bandwidth_in < 0 or self.bandwidth_out < 0:
             return 0
@@ -187,9 +191,9 @@ class VpnGroupCity(VpnGroup):
 
     def _on_server_updated(self, sender):
         self.set_bandwidth(
-            sum([x.bandwidth_in  for _,x in self.servers.items() if x.bandwidth_in  > 0]),
-            sum([x.bandwidth_out for _,x in self.servers.items() if x.bandwidth_out > 0]),
-            sum([x.bandwidth_max for _,x in self.servers.items() if x.bandwidth_max > 0]),
+            -1 if len([_ for _,x in self.servers.items() if x.bandwidth_in  >= 0]) == 0 else sum([x.bandwidth_in   for _,x in self.servers.items() if x.bandwidth_in  > 0]),
+            -1 if len([_ for _,x in self.servers.items() if x.bandwidth_out >= 0]) == 0 else sum([x.bandwidth_out  for _,x in self.servers.items() if x.bandwidth_out  > 0]),
+            -1 if len([_ for _,x in self.servers.items() if x.bandwidth_max >= 0]) == 0 else sum([x.bandwidth_max  for _,x in self.servers.items() if x.bandwidth_max  > 0])
         )
 
     def __repr__(self, prefix=""):
@@ -222,9 +226,9 @@ class VpnGroupCountry(VpnGroup):
 
     def _on_city_updated(self, sender):
         self.set_bandwidth(
-            sum([x.bandwidth_in  for _,x in self.citys.items() if x.bandwidth_in  > 0]),
-            sum([x.bandwidth_out for _,x in self.citys.items() if x.bandwidth_out > 0]),
-            sum([x.bandwidth_max for _,x in self.citys.items() if x.bandwidth_max > 0]),
+            -1 if len([_ for _, x in self.citys.items() if x.bandwidth_in  >= 0]) == 0 else sum([x.bandwidth_in  for _, x in self.citys.items() if x.bandwidth_in  > 0]),
+            -1 if len([_ for _, x in self.citys.items() if x.bandwidth_out >= 0]) == 0 else sum([x.bandwidth_out for _, x in self.citys.items() if x.bandwidth_out > 0]),
+            -1 if len([_ for _, x in self.citys.items() if x.bandwidth_max >= 0]) == 0 else sum([x.bandwidth_max for _, x in self.citys.items() if x.bandwidth_max > 0])
         )
 
     def __repr__(self, prefix=""):
@@ -260,9 +264,9 @@ class VpnGroupZone(VpnGroup):
 
     def _on_country_updated(self, sender):
         self.set_bandwidth(
-            sum([x.bandwidth_in  for _,x in self.countrys.items() if x.bandwidth_in  > 0]),
-            sum([x.bandwidth_out for _,x in self.countrys.items() if x.bandwidth_out > 0]),
-            sum([x.bandwidth_max for _,x in self.countrys.items() if x.bandwidth_max > 0]),
+            -1 if len([_ for _, x in self.countrys.items() if x.bandwidth_in  >= 0]) == 0 else sum([x.bandwidth_in  for _, x in self.countrys.items() if x.bandwidth_in  > 0]),
+            -1 if len([_ for _, x in self.countrys.items() if x.bandwidth_out >= 0]) == 0 else sum([x.bandwidth_out for _, x in self.countrys.items() if x.bandwidth_out > 0]),
+            -1 if len([_ for _, x in self.countrys.items() if x.bandwidth_max >= 0]) == 0 else sum([x.bandwidth_max for _, x in self.countrys.items() if x.bandwidth_max > 0])
         )
 
     def __repr__(self, prefix=""):
@@ -314,9 +318,9 @@ class VpnGroupPlanet(VpnGroup):
 
     def _on_zone_updated(self, sender):
         self.set_bandwidth(
-            sum([x.bandwidth_in  for _,x in self.zones.items() if x.bandwidth_in  > 0]),
-            sum([x.bandwidth_out for _,x in self.zones.items() if x.bandwidth_out > 0]),
-            sum([x.bandwidth_max for _,x in self.zones.items() if x.bandwidth_max > 0]),
+            -1 if len([_ for _, x in self.zones.items() if x.bandwidth_in  >= 0]) == 0 else sum([x.bandwidth_in  for _, x in self.zones.items() if x.bandwidth_in  > 0]),
+            -1 if len([_ for _, x in self.zones.items() if x.bandwidth_out >= 0]) == 0 else sum([x.bandwidth_out for _, x in self.zones.items() if x.bandwidth_out > 0]),
+            -1 if len([_ for _, x in self.zones.items() if x.bandwidth_max >= 0]) == 0 else sum([x.bandwidth_max for _, x in self.zones.items() if x.bandwidth_max > 0])
         )
 
     def load_configs_json(self):
