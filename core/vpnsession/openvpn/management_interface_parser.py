@@ -298,7 +298,7 @@ class ManagementInterfaceParser(Thread):
             string = string.replace(self._proxy_username, "USERNAME-REMOVED")
         if self._proxy_password is not None and self._proxy_password != "":
             string = string.replace(self._proxy_password, "PASSWORD-REMOVED")
-
+        return string
     def __del__(self):
         try:
             if self.is_alive():
