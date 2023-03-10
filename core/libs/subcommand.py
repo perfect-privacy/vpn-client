@@ -19,9 +19,9 @@ class SubCommand():
                 proc.kill()
                 stdout, stderr = proc.communicate()
             success = proc.returncode == 0
-            msg = "Command: %s , Success: %s" % ( args, success)
+            msg = "%s , Success: %s" % ( args, success)
         except Exception as e:
-            msg = "Command: %s , Failed: %s" % ( args, e)
+            msg = "%s , Failed: %s" % ( args, e)
 
         if success is False or stderr != b"":
             if stdout != b"":

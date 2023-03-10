@@ -290,10 +290,14 @@ class ManagementInterfaceParser(Thread):
         self._send_command("signal SIGTERM")
 
     def _replace_secrets(self, string):
-        return string.replace(self._username, "USERNAME-REMOVED")\
-            .replace(self._password, "USERNAME-REMOVED")\
-            .replace(self._proxy_username, "USERNAME-REMOVED")\
-            .replace(self._proxy_password, "USERNAME-REMOVED")
+        if self._username is not None and self._username != "":
+            string = string.replace(self._username, "USERNAME-REMOVED")
+        if self._password is not None and self._password != "":
+            string = string.replace(self._password, "PASSWORD-REMOVED")
+        if self._proxy_username is not None and self._proxy_username != "":
+            string = string.replace(self._proxy_username, "USERNAME-REMOVED")
+        if self._proxy_password is not None and self._proxy_password != "":
+            string = string.replace(self._proxy_password, "PASSWORD-REMOVED")
 
     def __del__(self):
         try:

@@ -44,7 +44,7 @@ class Powershell():
                     "exception": traceback.format_exc(),
                     "result": result
                 })
-                self._logger.debug("Failed to run powershell '%s' Exception: %s" % (command, e) )
+                self._logger.debug("Failed '%s' Exception: %s" % (command, e) )
             return None
         finally:
             self.lock.release()
