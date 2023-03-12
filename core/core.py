@@ -11,6 +11,7 @@ from .configupdater import ConfigUpdater
 from .leakprotection import LeakProtection
 from .ipcheck import IpCheck
 from .libs.web.reporter import ReporterInstance
+from .routing.routing import Routing
 from .settings import Settings
 from .softwareupdater import SoftwareUpdater
 from .trafficdownload import TrafficDownload
@@ -56,9 +57,10 @@ class Core(Observable):
 
         self.session = Session(self)
         self.leakprotection = LeakProtection(core=self)
-        self._start_timers.append(Timer(2, self.leakprotection.update_async))
+        self.routing = Routing(self)
 
-        self.settings.leakprotection.attach_observer(self._on_leakprotection_settings_changed)
+        self.settings.leakprotection.attach_observer(self.check_connection)
+        self._start_timers.append(Timer(2, self.check_connection))
 
         self.configUpdater = ConfigUpdater(self)
         self.configUpdater.update_installed.attach_observer(self._on_config_update_installed)
@@ -139,11 +141,9 @@ class Core(Observable):
             Timer(2, self.ipcheck.check_now).start()
 
     def check_connection(self):
+        self.routing.update_async()
+        self.leakprotection.update_async()
         self.ipcheck.check_now()
-        self.leakprotection.update_async()
-
-    def _on_leakprotection_settings_changed(self, event):
-        self.leakprotection.update_async()
 
     def _on_software_update_installed(self, event):
         pass

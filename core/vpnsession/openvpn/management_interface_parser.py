@@ -109,10 +109,6 @@ class ManagementInterfaceParser(Thread):
                 self._logger.debug("sending '{}' failed".format(self._replace_secrets(command)))
 
     def _get_line_from_socket(self):
-        """
-        Generator reading lines from socket
-        :rtype: str
-        """
         buff = ""
         done = False
         try:
@@ -146,6 +142,22 @@ class ManagementInterfaceParser(Thread):
     def _process_line(self, line):
         line = line.strip()
         self._logger.debug(self._replace_secrets(line))
+        device = None
+        try:
+            if "Opened utun device " in line:
+                device = line.split("Opened utun device ")[1].split(" ")[0].strip()
+            elif "ARP Flush on interface [" in line:
+                device = line.split("ARP Flush on interface [")[1].split("]")[0].strip()
+            elif "interface ipv6 set address " in line:
+                device = line.split("interface ipv6 set address ")[1].split(" ")[0].strip()
+            elif " MTU set to " in line:
+                device = line.split(" on interface ")[1].split(" ")[0].strip()
+        except:
+            pass
+
+        if device is not None:
+            self._logger.debug("Selected tun device: \"%s\"" % device)
+            self.on_device_change.notify_observers(openvpn_device=device)
 
         if line.startswith(">HOLD:Waiting for hold release"):
             self._next_init_step()
@@ -187,17 +199,7 @@ class ManagementInterfaceParser(Thread):
                 self._password = None
                 self.on_invalid_credentials_detected.notify_observers()
             elif openvpn_state == OpenVPNState.OPENVPN_STATE_CONNECTED:
-                # CONNECTED: publish local/remote ip addresses
-                #if re.match("^\d+\.\d+\.\d+\.\d+$", tun_tap_ip) is not None:
-                #    self._logger.debug("local ip: {}".format(tun_tap_ip))
-                #    self.on_local_ip_address_available.send(
-                #        self, address=tun_tap_ip)
-                #if re.match("^\d+\.\d+\.\d+\.\d+$", remote_ip) is not None:
-                #    self._logger.debug("remote ip: {}".format(remote_ip))
-                #    self.on_remote_ip_address_available.send(
-                #        self, address=remote_ip)
-                ## TODO: IPv6
-                description = None
+                pass
             self.openvpn_state.set(openvpn_state)
 
         elif line.startswith(">LOG:") or self._reading_mode == self._READING_MODE_BULK_LOG:
@@ -221,34 +223,8 @@ class ManagementInterfaceParser(Thread):
                         reply_message = reply_part.replace("PUSH_REPLY,", "")
                         break
 
-                '''
-                #topology subnet,
-                #redirect-gateway def1,
-                #sndbuf 131072,
-                #rcvbuf 131072,
-                route-gateway 10.4.180.2,
-                #redirect-gateway ipv6,
-                #route-ipv6 2000::/3,
-                #ping 10,
-                #ping-restart 60,
-                dhcp-option DNS 80.255.7.126,
-                dhcp-option DNS 185.152.32.78,
-                ifconfig-ipv6 fdbf:1d37:bbe0:0:75:12:0:30/112 fdbf:1d37:bbe0:0:75:12:0:1,
-                ifconfig 10.4.180.48 255.255.255.0,
-                peer-id 0
-                '''
-
-                #ipv4_local_ip = "10.4.180.48"
-                #ipv4_local_netmask = "255.255.255.0"
-                #ipv4_remote_gateway = "10.4.180.2"
-                #ipv6_local_ip = "fdbf:1d37:bbe0:0:75:12:0:30"
-                #ipv6_local_netmask = "112"
-                #ipv6_remote_gateway = "fdbf:1d37:bbe0:0:75:12:0:1"
-
                 dns = []
                 for opt in reply_message.split(","):
-                    #if opt.startswith("dhcp-option DNS "):
-                    #    dns.append(opt.replace("dhcp-option DNS ", ""))
                     if opt.startswith("ifconfig "):
                         cmd,ipv4_local_ip,ipv4_local_netmask = opt.split(" ")
                         self.on_ipv4_local_ip_change.notify_observers(address=ipv4_local_ip)
@@ -264,11 +240,6 @@ class ManagementInterfaceParser(Thread):
 
                 if dns:
                     self.on_ipv4_dns_servers_change.notify_observers(dns_servers=dns)
-
-            elif message.startswith("Opened utun device"):
-                utun_device = message.replace("Opened utun device", "").replace(" ", "").strip()
-                self._logger.debug("got utun device: {}".format(utun_device))
-                self.on_device_change.notify_observers(openvpn_device=utun_device)
 
         elif line == ">PASSWORD:Need 'Auth' username/password":
             self._send_command("username \"Auth\" {}".format(self._username))
@@ -290,6 +261,8 @@ class ManagementInterfaceParser(Thread):
         self._send_command("signal SIGTERM")
 
     def _replace_secrets(self, string):
+        if self._management_password in string:
+            string = string.replace(self._management_password, "PASSWORD-REMOVED")
         if self._username is not None and self._username != "":
             string = string.replace(self._username, "USERNAME-REMOVED")
         if self._password is not None and self._password != "":
@@ -299,6 +272,7 @@ class ManagementInterfaceParser(Thread):
         if self._proxy_password is not None and self._proxy_password != "":
             string = string.replace(self._proxy_password, "PASSWORD-REMOVED")
         return string
+
     def __del__(self):
         try:
             if self.is_alive():

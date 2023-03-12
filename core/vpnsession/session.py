@@ -24,9 +24,8 @@ class SessionHop(Observable):
         self.servergroup = servergroup
         self.selected_server = None
         self.connection = None
-        self.last_connection_failed = False
+        self.last_connection_failed = False # so the ui can show if hop has failed last connection, because the actual connection and selected server will be removed after failure
         self.should_remove = False
-        # state : idle, connecting, connected, disconnecting, disconnected, error_retry
 
     def set_selected_server(self, selected_vpn_server_group):
         self.selected_server = selected_vpn_server_group
@@ -112,7 +111,7 @@ class Session(Observable):
     def _on_state_changed(self, sender, new_state, **kwargs):
         self._logger.debug("connection controller state changed: {}".format(new_state))
         self.last_state_change_time = datetime.now()
-        self.core.leakprotection.update_async()
+        self.core.check_connection()
 
     def _on_hop_changed(self, sender, **kwargs):
         self.notify_observers()
@@ -148,7 +147,8 @@ class Session(Observable):
 
                     indexes_to_disconnect = [index for index, hop in enumerate(self.hops) if hasattr(hop, "should_remove") is True and hop.should_remove is True ]
                     if len(indexes_to_disconnect) > 0:
-                        for hop in [h for h in reversed(self.hops[indexes_to_disconnect[0]:])]:
+                        hops_to_remove = [h for h in reversed(self.hops[indexes_to_disconnect[0]:])]
+                        for hop in hops_to_remove:
                             self._disconnect_hop(hop)
                             if hasattr(hop, "should_remove") is True and hop.should_remove is True:
                                 hop.detach_observer(self._on_hop_changed)
@@ -156,17 +156,16 @@ class Session(Observable):
                                 self._hops_stored.set(",".join([hop.servergroup.identifier for hop in self.hops]))
                                 if len(self.hops) == 0 and self._should_be_connected.get() is True:
                                     self._should_be_connected.set(False)
-
                             self.notify_observers()
-                        self.core.leakprotection.update_async()
+                        self.state.set(self.state.get(), "Removed %s hops" % len(indexes_to_disconnect))
 
                     if self._get_number_of_connected_vpn_connections() != len(self.hops):
                         self._logger.info("connecting")
 
                         if self._get_number_of_non_idle_connections() == 0:
-                            self.state.set(SessionState.CONNECTING,"Connecting")
+                            self.state.set(SessionState.CONNECTING,"Connecting to %s" % ",".join([hop.servergroup.name for hop in self.hops]))
                         else:
-                            self.state.set(SessionState.CONNECTING,"Reconnecting")
+                            self.state.set(SessionState.CONNECTING,"Reconnecting to %s" % ",".join([hop.servergroup.name for hop in self.hops]))
 
                         if len(self.hops) > 0:
                             try:
@@ -174,7 +173,7 @@ class Session(Observable):
                             except Exception as e:
                                 self._logger.debug(traceback.format_exc())
                                 self._logger.error("unable to create the cascade: {}".format(e))
-                                self.state.set(SessionState.CONNECTING, "Unable to connect")
+                                self.state.set(SessionState.CONNECTING, "Unable to connect %s" % ",".join([hop.servergroup.name for hop in self.hops]))
                             else:
                                 try:
                                     self._logger.debug("connecting all")
@@ -190,27 +189,26 @@ class Session(Observable):
                                     self._disconnect_all()
                                 else:
                                     self._logger.info("all connected")
-                                    self.state.set(SessionState.CONNECTED, "Connection established")
+                                    self.state.set(SessionState.CONNECTED, "Connection established to %s" % ",".join([hop.servergroup.name for hop in self.hops]))
 
                         else:
-                            self.state.set(SessionState.IDLE)
+                            self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
                     else:
                         if len(self.hops) > 0:
                             if len([hop for hop in self.hops if  hop.connection is not None and hop.connection.state.get() == VpnConnectionState.CONNECTED]) == len(self.hops):
                                 if self.state.get() != SessionState.CONNECTED:
-                                    self.state.set(SessionState.CONNECTED)
+                                    self.state.set(SessionState.CONNECTED, "Connection established to %s" % ",".join([hop.servergroup.name for hop in self.hops]))
 
                 else:
                     if self._get_number_of_non_idle_connections() != 0:
                         self._logger.info("disconnecting")
-                        self.state.set(SessionState.DISCONNECTING, "Disconnecting")
+                        self.state.set(SessionState.DISCONNECTING, "Disconnecting from %s" % ",".join([hop.servergroup.name for hop in self.hops]))
                         self._disconnect_all()
-
                         if self._get_number_of_non_idle_connections() == 0:
-                            self.state.set(SessionState.IDLE)
+                            self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
                     elif self.state != SessionState.IDLE and self._get_number_of_non_idle_connections() == 0:
                         #self._logger.info("all connections are already disconnected")
-                        self.state.set(SessionState.IDLE)
+                        self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
 
             except Exception as e:
                 self._logger.error("unexpected exception: {}".format(e))
@@ -223,48 +221,39 @@ class Session(Observable):
         self._logger.debug("stopped")
 
     def get_all_possible_paths(self, hop_list, limit = 10):
-        """
-        :type vpn_groups: list[core.vpn.vpn_groups.VpnServerOrVpnServerCollection]
-        :rtype: list[list[core.vpn.vpn_groups.VpnServer]]
-        """
-        if len(hop_list) == 0:
-            return []
-
-        # get a list of the lowest level vpn groups (country1 -> a1, a2, a3, b1, c1, c2)
         vpn_servers_per_hop = []
         for hop in hop_list:
             if hop.connection is not None and hop.selected_server is not None:
                 vpn_servers_per_hop.append([hop.selected_server])
             else:
                 vpnservers = hop.servergroup.get_vpn_servers()
-                vpnservers_online = [s for s in vpnservers if s.is_online is True]
-                if len(vpnservers_online) > 0:
-                    vpnservers = vpnservers_online
                 random.shuffle(vpnservers)
                 vpn_servers_per_hop.append(vpnservers)
 
-        if len(vpn_servers_per_hop) == 0:
-            return []
-        paths = [[g] for g in vpn_servers_per_hop[0]]
-        for i in range(1, len(vpn_servers_per_hop)):
-            new_paths = []
-            new_paths_length = 0
-            for group in vpn_servers_per_hop[i]:
-                for path in paths:
-                    if group not in path:
-                        new_path = path[:]
-                        new_path.append(group)
-                        new_paths.append(new_path)
-                        new_paths_length = len(new_paths)
-                        if new_paths_length >= limit: break
-                if new_paths_length >= limit: break
-            paths = new_paths
+        paths_good = []
+        paths_all = []
+        for path in self._get_next_hops([], vpn_servers_per_hop):
+            if len(path) != len(hop_list):
+                continue
+            if not False in [s.is_online and (s.last_connection_failed is False or random.randint(0,10) == 1) for s in path]:
+                paths_good.append(path)
+            else:
+                paths_all.append(path)
+            if len(paths_good) >= limit:
+                break
+        if len(paths_good) > 0:
+            return paths_good
+        return paths_all
 
-        paths = [p for p in paths if len(p) == len(hop_list)]
-        online_paths = [path for path in paths if not False in [hop.is_online for hop in path]]
-        if len(online_paths) > 0:
-            return online_paths
-        return paths
+    def _get_next_hops(self, current_path, vpn_servers_for_next_hops):
+        for vpn_server_for_next_hop in vpn_servers_for_next_hops[0]:
+            if vpn_server_for_next_hop not in current_path:
+                if len(vpn_servers_for_next_hops) == 1:
+                    yield current_path + [vpn_server_for_next_hop]
+                else:
+                    for next_hops in self._get_next_hops(current_path + vpn_server_for_next_hop, vpn_servers_for_next_hops[1:]):
+                        yield current_path + [vpn_server_for_next_hop] + next_hops
+        return []
 
     def _update_low_level_cascade(self):
         all_possible_paths = self.get_all_possible_paths(self.hops)
@@ -318,18 +307,11 @@ class Session(Observable):
 
     def remove_hop_by_index(self, index):
         hop_to_remove = self.hops[index]
-        if hop_to_remove.connection is not None and hop_to_remove.connection.state.get() !=  VpnConnectionState.IDLE:
-            hop_to_remove.should_remove = True
-            self._controller_thread_wakeup_event.set()
-            self._connecting_state_changed_event.set()
-        else:
-            hop_to_remove.detach_observer(self._on_hop_changed)
-            del self.hops[index]
-            self._hops_stored.set(",".join([hop.servergroup.identifier for hop in self.hops]))
-            self.notify_observers()
-        hop_to_remove.notify_observers()
+        hop_to_remove.should_remove = True
         if len(self.hops) == 0 and self._should_be_connected.get() is True:
             self._should_be_connected.set(False)
+        self._controller_thread_wakeup_event.set()
+        self._connecting_state_changed_event.set()
 
     def _get_number_of_non_idle_connections(self):
         return len([hop for hop in self.hops if hop.connection is not None and hop.connection.state.get() !=  VpnConnectionState.IDLE ])
@@ -402,25 +384,24 @@ class Session(Observable):
             if hop.connection.state.get() != VpnConnectionState.CONNECTED:
                 self._logger.error("Couldn't connect within {} seconds".format(CONNECT_TIMEOUT))
                 self._disconnect_hop(hop)
+                hop.selected_server.last_connection_failed = True
                 raise VPNConnectionError()
-
-            self.core.leakprotection.update_async()
+            hop.selected_server.last_connection_failed = False
+            self.state.set(self.state.get(),"Connected to {}".format(hop.selected_server.name))
 
     def _wait_for_state_change(self, sender, new_state, **kwargs):
         self._connecting_state_changed_event.set()
 
     def connect(self):
-        self._logger.debug("received connect request")
         if self.state.get() == VpnConnectionState.IDLE:
-            self.state.set(SessionState.CONNECTING, "Connecting")
+            self.state.set(SessionState.CONNECTING, "Connection startup requested")
         self._should_be_connected.set(True)
         self._controller_thread_wakeup_event.set()
         self.notify_observers()
 
     def disconnect(self):
-        self._logger.debug("received disconnect request")
-        if self.state.get() in [VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTING]:
-            self.state.set(SessionState.DISCONNECTING, "Disconnecting")
+        if self.state.get() in [VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTING, SessionState.DISCONNECTING]:
+            self.state.set(SessionState.DISCONNECTING, "Disconnect requested")
         self._should_be_connected.set(False)
         self._controller_thread_wakeup_event.set()
         self._connecting_state_changed_event.set()

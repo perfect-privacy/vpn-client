@@ -1,9 +1,14 @@
 import ipaddress
 import logging
 
+from config.config import PLATFORM
+from config.constants import PLATFORMS
 from core.libs.permanent_property import PermanentProperty
 from core.libs.subcommand import SubCommand
 from config.files import ROUTE, NETSH
+
+
+
 
 class DeadRouting():
     def __init__(self):
@@ -23,12 +28,6 @@ class DeadRouting():
         self.default_gw.set(default_gw)
         if self.is_enabled.get() is True and default_gw is not None and (self.whitelisted_server_ip.get() != server or self.default_gw.get() != default_gw):
             SubCommand().run(ROUTE, ["add", self.whitelisted_server_ip.get(), "mask", "255.255.255.255", default_gw])
-
-    def clear_whitelist(self):
-        if self.whitelisted_server_ip.get() is not None and self.is_enabled.get() is True:
-            SubCommand().run(ROUTE, ["delete", self.whitelisted_server_ip.get(), "mask", "255.255.255.255"])
-        self.whitelisted_server_ip.set(None)
-        self.default_gw.set(None)
 
     def enable(self):
         if self.is_enabled.get() is False:

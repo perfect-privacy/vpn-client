@@ -20,7 +20,7 @@ class DeviceManagerState(GenericState):
 
 class OpenVpnDevice():
     def __init__(self):
-        self.index = None
+        #self.index = None
         self.name  = None
         self.guid  = None
         self.type  = None
@@ -195,19 +195,6 @@ class DeviceManager(Observable):
         success, stdout, stderr = SubCommand().run(TAPCTL, [ "delete", "{%s}" % guid])
 
     def _enum_devices(self):
-        networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress | Select-Object -Property InterfaceAlias,InterfaceIndex ", as_data = True)
-        name_to_index = {}
-        if networkdatas is None:
-            ReporterInstance.report("devicemanager_enumeration_failed", "")
-            return []
-
-        for networkdata in networkdatas:
-            try:
-                name_to_index[networkdata["InterfaceAlias"]] = networkdata["InterfaceIndex"]
-            except Exception as e:
-                self._logger.debug("Failed to load networkdata, %s" % e)
-                ReporterInstance.report("devicemanager_get_interfaces_failed", { "exception" : traceback.format_exc(), "networkdata" : networkdata })
-
         success, stdout, stderr = SubCommand().run(OPENVPN, [ "--show-adapters"])
         for line in stdout.split(b"\n"):
             try:
@@ -217,7 +204,6 @@ class DeviceManager(Observable):
                     except:
                         continue # no, or foreign character name, aka not ours.
                     d = OpenVpnDevice()
-                    d.index = name_to_index[name]
                     d.name = name
                     d.guid = line.split(b"{")[1].split(b"}")[0].strip().decode("UTF-8")
                     d.type = line.split(b"}")[1].strip().decode("UTF-8")

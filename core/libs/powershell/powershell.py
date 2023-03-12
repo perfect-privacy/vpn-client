@@ -74,6 +74,7 @@ class Powershell():
             try:
                 line = self._stdout_queue.get(timeout=15)
             except Empty:
+                self._logger.debug("Timeout in '%s'" % command)
                 break
 
             if line == b"__ENDMARKER-%s__\n" % uniq_id:

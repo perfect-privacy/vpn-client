@@ -17,6 +17,7 @@ class VpnServerOrGroup(Observable):
         self.bandwidth_in  = 0
         self.bandwidth_out = 0
         self.bandwidth_max = 0
+        self.last_connection_failed = False
 
     @property
     def is_online(self):
