@@ -26,6 +26,7 @@ class SessionHop(Observable):
         self.connection = None
         self.last_connection_failed = False # so the ui can show if hop has failed last connection, because the actual connection and selected server will be removed after failure
         self.should_remove = False
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def set_selected_server(self, selected_vpn_server_group):
         self.selected_server = selected_vpn_server_group
@@ -45,16 +46,22 @@ class SessionHop(Observable):
         self.notify_observers()
 
     def _on_connection_state_changed(self, sender, new_state, **kwargs):
-        if self.session._should_be_connected.get() is False and  new_state == VpnConnectionState.IDLE:
+        if self.session._should_be_connected.get() is False and new_state == VpnConnectionState.IDLE:
             self.last_connection_failed = False
             self.after_disconnected()
 
         if self.session._should_be_connected.get() is True and self.should_remove == False:
             if new_state not in [VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTING]:
                 self.last_connection_failed = True
+                self.selected_server.last_connection_failed = True
+
             if new_state in [VpnConnectionState.CONNECTED]:
                 self.last_connection_failed = False
-            self.notify_observers()
+                self.selected_server.last_connection_failed = False
+
+        self._logger.debug("Connection state changed for Hop %s, %s" % (self.servergroup.name, new_state))
+        self.session.core.check_connection()
+        self.notify_observers()
 
     def after_disconnected(self):
         if self.connection is not None:
@@ -111,7 +118,6 @@ class Session(Observable):
     def _on_state_changed(self, sender, new_state, **kwargs):
         self._logger.debug("connection controller state changed: {}".format(new_state))
         self.last_state_change_time = datetime.now()
-        self.core.check_connection()
 
     def _on_hop_changed(self, sender, **kwargs):
         self.notify_observers()
@@ -220,7 +226,7 @@ class Session(Observable):
 
         self._logger.debug("stopped")
 
-    def get_all_possible_paths(self, hop_list, limit = 10):
+    def get_random_paths(self, hop_list, limit = 1):
         vpn_servers_per_hop = []
         for hop in hop_list:
             if hop.connection is not None and hop.selected_server is not None:
@@ -249,18 +255,17 @@ class Session(Observable):
         for vpn_server_for_next_hop in vpn_servers_for_next_hops[0]:
             if vpn_server_for_next_hop not in current_path:
                 if len(vpn_servers_for_next_hops) == 1:
-                    yield current_path + [vpn_server_for_next_hop]
+                    yield [vpn_server_for_next_hop]
                 else:
-                    for next_hops in self._get_next_hops(current_path + vpn_server_for_next_hop, vpn_servers_for_next_hops[1:]):
-                        yield current_path + [vpn_server_for_next_hop] + next_hops
+                    for next_hops in self._get_next_hops(current_path + [vpn_server_for_next_hop], vpn_servers_for_next_hops[1:]):
+                        yield [vpn_server_for_next_hop] + next_hops
         return []
 
     def _update_low_level_cascade(self):
-        all_possible_paths = self.get_all_possible_paths(self.hops)
-        if not all_possible_paths:
+        paths = self.get_random_paths(self.hops,limit=1)
+        if not paths:
             raise Exception("couldn't find a valid cascade for the selected locations")
-        self._logger.debug("All possible paths: {}".format(all_possible_paths))
-        path = random.choice(all_possible_paths)
+        path = random.choice(paths)
         self._logger.debug("Selected path %s" % path)
         i = 0
         for selected_vpn_server_group in path:
@@ -283,7 +288,7 @@ class Session(Observable):
         else:
             tmp_hops = self.hops[:]
             tmp_hops.append(SessionHop(self, servergroup))
-            return len(self.get_all_possible_paths(tmp_hops, limit=1)) > 0
+            return len(self.get_random_paths(tmp_hops, limit=1)) > 0
 
     def add_hop(self, servergroup):
         if not self.can_add_hop(servergroup):
@@ -308,6 +313,12 @@ class Session(Observable):
     def remove_hop_by_index(self, index):
         hop_to_remove = self.hops[index]
         hop_to_remove.should_remove = True
+        if hop_to_remove.connection is None or hop_to_remove.connection.state.get() == VpnConnectionState.IDLE:
+            hop_to_remove.detach_observer(self._on_hop_changed)
+            del self.hops[index]
+            self._hops_stored.set(",".join([hop.servergroup.identifier for hop in self.hops]))
+            self.notify_observers()
+        hop_to_remove.notify_observers()
         if len(self.hops) == 0 and self._should_be_connected.get() is True:
             self._should_be_connected.set(False)
         self._controller_thread_wakeup_event.set()
@@ -384,9 +395,7 @@ class Session(Observable):
             if hop.connection.state.get() != VpnConnectionState.CONNECTED:
                 self._logger.error("Couldn't connect within {} seconds".format(CONNECT_TIMEOUT))
                 self._disconnect_hop(hop)
-                hop.selected_server.last_connection_failed = True
                 raise VPNConnectionError()
-            hop.selected_server.last_connection_failed = False
             self.state.set(self.state.get(),"Connected to {}".format(hop.selected_server.name))
 
     def _wait_for_state_change(self, sender, new_state, **kwargs):

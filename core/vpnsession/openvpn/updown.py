@@ -34,12 +34,12 @@ class UpDown_Generic():
 
         if self.openvpnConnection.ipv4_remote_gateway is not None:
             for i in range(0, 223, v4_mask):
-                self.add_route_ipv4(source_ip="%s.0.0.0" % i, source_mask="%s.0.0.0" % (256-v4_mask), target=self.openvpnConnection.ipv4_remote_gateway, device=self.openvpnConnection.openvpn_device)
+                self.add_route_ipv4(source_ip="%s.0.0.0" % i, source_mask="%s.0.0.0" % (256-v4_mask), target=self.openvpnConnection.ipv4_remote_gateway, device=self.openvpnConnection.interface)
         else:
             self._logger.error("No ipv4_remote_gateway found for hop %s" % self.openvpnConnection.hop_number)
 
         for i in range(0x2000,0x3800,v6_mask):
-            self.add_route_ipv6(source_ip= "%s::" % format(i,"x"), source_mask=3+self.openvpnConnection.hop_number, target="fe80::8", device=self.openvpnConnection.openvpn_device)
+            self.add_route_ipv6(source_ip= "%s::" % format(i,"x"), source_mask=3+self.openvpnConnection.hop_number, target="fe80::8", device=self.openvpnConnection.interface)
 
     def down(self):
         self._logger.debug("Down")
@@ -49,12 +49,12 @@ class UpDown_Generic():
 
         if self.openvpnConnection.ipv4_remote_gateway is not None:
             for i in range(0, 223, v4_mask):
-                self.delete_route_ipv4(source_ip="%s.0.0.0" % i, source_mask="%s.0.0.0" % (256-v4_mask), target=self.openvpnConnection.ipv4_remote_gateway, device=self.openvpnConnection.openvpn_device)
+                self.delete_route_ipv4(source_ip="%s.0.0.0" % i, source_mask="%s.0.0.0" % (256-v4_mask), target=self.openvpnConnection.ipv4_remote_gateway, device=self.openvpnConnection.interface)
         else:
             self._logger.error("No ipv4_remote_gateway found for hop %s" % self.openvpnConnection.hop_number)
 
         for i in range(0x2000, 0x3800, v6_mask):
-            self.delete_route_ipv6(source_ip="%s::" % format(i,"x"), source_mask=3+self.openvpnConnection.hop_number, target="fe80::8", device=self.openvpnConnection.openvpn_device)
+            self.delete_route_ipv6(source_ip="%s::" % format(i,"x"), source_mask=3+self.openvpnConnection.hop_number, target="fe80::8", device=self.openvpnConnection.interface)
 
     def _is_ip(self, str):
         try:

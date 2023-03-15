@@ -11,7 +11,7 @@ from .configupdater import ConfigUpdater
 from .leakprotection import LeakProtection
 from .ipcheck import IpCheck
 from .libs.web.reporter import ReporterInstance
-from .routing.routing import Routing
+from .routing import Routing
 from .settings import Settings
 from .softwareupdater import SoftwareUpdater
 from .trafficdownload import TrafficDownload
@@ -60,7 +60,7 @@ class Core(Observable):
         self.routing = Routing(self)
 
         self.settings.leakprotection.attach_observer(self.check_connection)
-        self._start_timers.append(Timer(2, self.check_connection))
+        self._start_timers.append(Timer(4, self.check_connection))
 
         self.configUpdater = ConfigUpdater(self)
         self.configUpdater.update_installed.attach_observer(self._on_config_update_installed)
@@ -122,13 +122,16 @@ class Core(Observable):
         if self.settings.startup.enable_background_mode.get() == False or for_update == True:
             self.session.disconnect()
         self.leakprotection.update_async()
+        self.routing.update_async()
 
     def on_frontend_connected(self, pyHtmlGuiInstance, nr_of_active_frontends):
-        if self.frontend_active is False and nr_of_active_frontends > 0 and self.settings.startup.connect_on_start.get() == True:
-            self.session.connect()
+        was_active = self.frontend_active
         self.frontend_active = nr_of_active_frontends > 0
+        if was_active is False:
+            self.check_connection()
+            if nr_of_active_frontends > 0 and self.settings.startup.connect_on_start.get() == True:
+                self.session.connect()
         self.trafficDownload.check_now()
-        self.ipcheck.check_now()
         self.userapi.request_update()
 
     def on_frontend_disconnected(self, pyHtmlGuiInstance, nr_of_active_frontends):

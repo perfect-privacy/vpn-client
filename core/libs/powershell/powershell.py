@@ -72,11 +72,10 @@ class Powershell():
         startfound = False
         while True:
             try:
-                line = self._stdout_queue.get(timeout=15)
+                line = self._stdout_queue.get(timeout=60)
             except Empty:
                 self._logger.debug("Timeout in '%s'" % command)
                 break
-
             if line == b"__ENDMARKER-%s__\n" % uniq_id:
                 break
             if startfound == True:

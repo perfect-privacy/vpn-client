@@ -29,13 +29,17 @@ class LeakProtection_macos(LeakProtection_Generic):
             "block in all",
             "block out all",
         ]
-        if self._whitelisted_server is not None:
-            public_ip_address, port, protocol = self._whitelisted_server
-            rules.append("pass out  inet proto {protocol} to {public_ip_address} port {port} keep state".format( protocol=protocol, public_ip_address=public_ip_address, port=port))
+
+        if len(self.core.session.hops) > 0:
+            lowest_hop = self.core.session.hops[0]
+            if lowest_hop.connection is not None and lowest_hop.connection.external_host_ip is not None:
+                rules.append("pass out  inet proto {protocol} to {public_ip_address} port {port} keep state".format(protocol=lowest_hop.connection.external_host_protocol,
+                                                                                                   public_ip_address=lowest_hop.connection.external_host_ip,
+                                                                                                   port=lowest_hop.connection.external_host_port))
 
         for hop in self.core.session.hops:
-            if hop.connection is not None and hop.connection.openvpn_device is not None:
-                rules.append("pass out on %s all keep state" % hop.connection.openvpn_device)
+            if hop.connection is not None and hop.connection.interface is not None:
+                rules.append("pass out on %s all keep state" % hop.connection.interface)
 
         rules.extend([
             "pass out inet to 10.0.0.0/8",

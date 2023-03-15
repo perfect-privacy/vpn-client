@@ -10,12 +10,22 @@ class VPNConnection(Observable):
         self._logger = logging.getLogger(self.__class__.__name__ + " ({})".format(identifier))
         self._identifier = identifier
         self.core = core
+        self.state = VpnConnectionState()
+
+        self.hop_number = None
+        self.external_host_ip  = None
+        self.interface = None
+
+        self.ipv4_local_ip       = None  # local vpn adapter ipv4
+        self.ipv4_local_netmask  = None  # local vpn adapter netmask
+        self.ipv4_remote_gateway = None  # vpn adapter gateway ipv4 (a 10.x.x.x ip on vpn server)
+        self.ipv4_dns_servers    = []    # dns servers pushed by openvpn server
+        self.ipv6_local_ip       = None  # local vpn adapter ipv6
+        self.ipv6_local_netmask  = None  # local vpn adapter netmask
+        self.ipv6_remote_gateway = None  # vpn adapter gateway ipv6 (a 10.x.x.x ip on vpn server)
+
 
         self._connect_disconnect_lock = RLock()
-
-        self.state = VpnConnectionState()
-        self.hop_number = None
-
         self.on_invalid_credentials_detected = Observable()
 
     def connect(self, servergroup, hop_number):
@@ -27,9 +37,6 @@ class VPNConnection(Observable):
             self.hop_number = hop_number
             self._connect(servergroup, hop_number)
 
-    def _connect(self, servergroup, hop_number):
-        raise NotImplementedError()
-
     def disconnect(self):
         self._logger.info("disconnecting")
         with self._connect_disconnect_lock:
@@ -40,6 +47,9 @@ class VPNConnection(Observable):
                 self._logger.warning("disconnecting cancelled: VPN is already disconnecting")
                 return
             self._disconnect()
+
+    def _connect(self, servergroup, hop_number):
+        raise NotImplementedError()
 
     def _disconnect(self):
         raise NotImplementedError()

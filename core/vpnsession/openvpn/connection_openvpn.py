@@ -30,38 +30,17 @@ if PLATFORM == PLATFORMS.macos:
     from .updown import UpDown_Macos as UpDown
 
 class OpenVPNConnection(VPNConnection):
-    """
-    :type _parser: core.vpn.openvpn_management_interface_parser.OpenVPNManagementInterfaceParser
-    """
-
     def __init__(self, identifier, core):
         super(OpenVPNConnection, self).__init__(identifier, core)
 
         self._openvpn_process = None
         self._parser = None
 
-        self.up_down_controller = UpDown(self)
-
         self.servergroup = None
         self.hop_number = 0
-
+        self.type = "openvpn"
         self.stealth_plugin = None
 
-        self.openvpn_tls_method  = None  # tlscrypt | tlsath
-        self.openvpn_protocol    = None  # tcp | udp
-        self.openvpn_remote_host = None  # remote ip passed to openvpn commandline
-        self.openvpn_remote_port = None  # remote port passed to openvpn commandline
-
-        self.ipv4_local_ip       = None  # local vpn adapter ipv4 pushed by openvpn server dhcp
-        self.ipv4_local_netmask  = None  # local vpn adapter netmask pushed by openvpn server dhcp
-        self.ipv4_remote_gateway = None  # vpn adapter gateway ipv4 (a 10.x.x.x ip on vpn server)
-        self.ipv4_dns_servers    = []    # dns servers pushed by openvpn server
-        self.ipv6_local_ip       = None  # local vpn adapter ipv6 pushed by openvpn server dhcp
-        self.ipv6_local_netmask  = None  # local vpn adapter netmask pushed by openvpn server dhcp
-        self.ipv6_remote_gateway = None  # vpn adapter gateway ipv6 (a 10.x.x.x ip on vpn server)
-
-        self.external_host_ip  = None
-        self.openvpn_device = None
 
     def _connect(self, servergroup, hop_number):
 
@@ -72,26 +51,26 @@ class OpenVPNConnection(VPNConnection):
             self._logger.debug("connecting cancelled: still alive")
             raise VPNConnectionError()
 
-        openvpn_device = None
+        interface = None
         if self.core.deviceManager is not None:
             if self.hop_number == 1:
                 self.core.deviceManager.update() # check tun/tap adapters
-            openvpn_device = self.core.deviceManager.get_device_by_hop(self.hop_number)
-            if openvpn_device is None:
+            interface = self.core.deviceManager.get_device_by_hop(self.hop_number)
+            if interface is None:
                 self._logger.error("starting OpenVPN process failed: no device found")
                 self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
                 raise VPNConnectionError()
 
-        self.openvpn_tls_method = self.core.settings.vpn.openvpn.tls_method.get()
-        self.openvpn_protocol = self.core.settings.vpn.openvpn.protocol.get()
+        openvpn_tls_method = self.core.settings.vpn.openvpn.tls_method.get()
+        openvpn_protocol = self.core.settings.vpn.openvpn.protocol.get()
         if self.core.settings.stealth.stealth_method.get() != STEALTH_METHODS.no_stealth:
-            self.openvpn_protocol = OPENVPN_PROTOCOLS.tcp
+            openvpn_protocol = OPENVPN_PROTOCOLS.tcp
 
         openvpn_ports = []
-        if self.openvpn_protocol == OPENVPN_PROTOCOLS.tcp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt: openvpn_ports = OPENVPN_PORTS.TLSCRYPT.tcp
-        if self.openvpn_protocol == OPENVPN_PROTOCOLS.tcp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:  openvpn_ports = OPENVPN_PORTS.TLSAUTH.tcp
-        if self.openvpn_protocol == OPENVPN_PROTOCOLS.udp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt: openvpn_ports = OPENVPN_PORTS.TLSCRYPT.udp
-        if self.openvpn_protocol == OPENVPN_PROTOCOLS.udp and self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:  openvpn_ports = OPENVPN_PORTS.TLSAUTH.udp
+        if openvpn_protocol == OPENVPN_PROTOCOLS.tcp and openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt: openvpn_ports = OPENVPN_PORTS.TLSCRYPT.tcp
+        if openvpn_protocol == OPENVPN_PROTOCOLS.tcp and openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:  openvpn_ports = OPENVPN_PORTS.TLSAUTH.tcp
+        if openvpn_protocol == OPENVPN_PROTOCOLS.udp and openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt: openvpn_ports = OPENVPN_PORTS.TLSCRYPT.udp
+        if openvpn_protocol == OPENVPN_PROTOCOLS.udp and openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:  openvpn_ports = OPENVPN_PORTS.TLSAUTH.udp
         if self.core.settings.vpn.openvpn.port.get() not in openvpn_ports:
             openvpn_port = random.choice(openvpn_ports)
         else:
@@ -110,19 +89,18 @@ class OpenVPNConnection(VPNConnection):
                 self.stealth_plugin = StealthSocks(self.core, servergroup, servergroup.vpn_server_config.primary_ipv4, openvpn_port)
 
         if self.stealth_plugin is None:
-            self.openvpn_remote_host = servergroup.vpn_server_config.primary_ipv4
-            self.openvpn_remote_port = openvpn_port
-            self.external_host_ip = self.openvpn_remote_host
-            self.external_host_port = self.openvpn_remote_port
+            openvpn_remote_host = servergroup.vpn_server_config.primary_ipv4
+            openvpn_remote_port = openvpn_port
+            self.external_host_ip = openvpn_remote_host
+            self.external_host_port = openvpn_remote_port
         else:
-            self.openvpn_remote_host = self.stealth_plugin.remote_host
-            self.openvpn_remote_port = self.stealth_plugin.remote_port
+            openvpn_remote_host = self.stealth_plugin.remote_host
+            openvpn_remote_port = self.stealth_plugin.remote_port
             self.external_host_ip = self.stealth_plugin.external_host_ip
             self.external_host_port = self.stealth_plugin.external_host_port
-
+        self.external_host_protocol = openvpn_protocol
 
         if self.hop_number == 1:
-            self.core.leakprotection.whitelist_server(public_ip_address=self.external_host_ip, port=self.external_host_port, protocol=self.openvpn_protocol)
             if PLATFORM == PLATFORMS.macos:
                 os.system("killall pp.obfs4proxy pp.openvpn pp.stunnel")
             if PLATFORM == PLATFORMS.windows:
@@ -150,25 +128,25 @@ class OpenVPNConnection(VPNConnection):
             OPENVPN,
             "--cd"        , CONFIG_DIR,
             "--config"    , "common.conf",
-            "--proto"     , self.openvpn_protocol,
+            "--proto"     , openvpn_protocol,
             "--management", "127.0.0.1", str(management_port), "mpass",
             "--cipher"    , self.core.settings.vpn.openvpn.cipher.get(),
-            "--remote"    , self.openvpn_remote_host, str( self.openvpn_remote_port),
+            "--remote"    , openvpn_remote_host, str(openvpn_remote_port),
             "--cert"      , "cl.%s.crt" % self.servergroup.vpn_server_config.groupname,
             "--key"       , "cl.%s.key" % self.servergroup.vpn_server_config.groupname,
         ]
 
-        if openvpn_device is not None:
-            args.extend(["--dev-node", "{%s}" % openvpn_device.guid])
+        if interface is not None:
+            args.extend(["--dev-node", "{%s}" % interface.guid])
 
-        if self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt:
+        if openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt:
             args.extend(["--tls-crypt", "ta.tls-crypt.key"])
             args.extend(["--tun-mtu-extra", "32"])
 
-        if self.openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:
+        if openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:
             args.extend(["--tls-auth", "ta.tls-auth.%s.key" % self.servergroup.vpn_server_config.groupname, "1"])
             args.extend(["--compress"])
-            if self.openvpn_protocol == OPENVPN_PROTOCOLS.udp:
+            if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
                 args.extend(["--fragment", "1300"])
                 args.extend(["--mssfix"])
 
@@ -275,13 +253,13 @@ class OpenVPNConnection(VPNConnection):
         if sender.is_connecting:
             self.state.set(VpnConnectionState.CONNECTING, VpnConnectionState.CONNECTING)
         elif sender.is_connected:
-            self.up_down_controller.up()
+            #self.up_down_controller.up()
             self.state.set(VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTED)
         elif sender.is_disconnecting:
             self.state.set(VpnConnectionState.DISCONNECTING, VpnConnectionState.DISCONNECTING)
         elif sender.is_disconnected:
-            self.up_down_controller.down()
-            self.core.ipcheck.check_now()
+            #self.up_down_controller.down()
+            #self.core.ipcheck.check_now()
             self.state.set(VpnConnectionState.IDLE, VpnConnectionState.IDLE)
 
     def _on_invalid_credentials_detected(self, sender):
@@ -322,8 +300,8 @@ class OpenVPNConnection(VPNConnection):
     def _on_remote_ip_available(self, sender, address):
         self._remote_ip_address = address
 
-    def _on_device_change(self, sender, openvpn_device):
-        self.openvpn_device = openvpn_device
+    def _on_device_change(self, sender, interface):
+        self.interface = interface
 
     def _disconnect(self):
         self._logger.debug("sending disconnect request to openvpn process")

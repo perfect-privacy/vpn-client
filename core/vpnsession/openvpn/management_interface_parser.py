@@ -62,10 +62,8 @@ class ManagementInterfaceParser(Thread):
 
             self._logger.debug("no more lines left")
         except Exception as e:
-            self._logger.error(str(e))
             exc_type, exc_value, exc_traceback = sys.exc_info()
-            tb = traceback.format_exception(exc_type, exc_value,
-                                            exc_traceback, limit=2)
+            tb = traceback.format_exception(exc_type, exc_value, exc_traceback, limit=2)
             self._logger.debug("".join(tb))
         finally:
             try:
@@ -157,7 +155,7 @@ class ManagementInterfaceParser(Thread):
 
         if device is not None:
             self._logger.debug("Selected tun device: \"%s\"" % device)
-            self.on_device_change.notify_observers(openvpn_device=device)
+            self.on_device_change.notify_observers(interface=device)
 
         if line.startswith(">HOLD:Waiting for hold release"):
             self._next_init_step()

@@ -394,3 +394,67 @@ class FirewallReset():
             except:
                 pass
 
+
+# tcp port 1723
+
+class FirewallRuleAllowIpSecUDP(FirewallRule):
+    def __init__(self):
+        self.name = "Perfect Privacy - Allow IPSEC UDP to server"
+        self.description = self.name
+        self.action = NET_FW_ACTION_ALLOW
+        self.direction = NET_FW_RULE_DIR_OUT
+        self.protocol = NET_FW_IP_PROTOCOL_UDP
+        self.remote_ports = [500,4500]
+        super().__init__()
+
+    def enable(self, ip):
+        changed =  self.remote_addresses is None or self.remote_ports is None or self.remote_addresses[0] != ip
+        if changed is True or self.is_enabled is False:
+            self.remote_addresses = [ip]
+            super().enable() if self.is_enabled is False else self.update()
+
+class FirewallRuleAllowIpSecTCP(FirewallRule):
+    def __init__(self):
+        self.name = "Perfect Privacy - Allow IPSEC TCP to server"
+        self.description = self.name
+        self.action = NET_FW_ACTION_ALLOW
+        self.direction = NET_FW_RULE_DIR_OUT
+        self.protocol = NET_FW_IP_PROTOCOL_TCP
+        self.remote_ports = [1723]
+        super().__init__()
+
+    def enable(self, ip):
+        changed =  self.remote_addresses is None or self.remote_ports is None or self.remote_addresses[0] != ip
+        if changed is True or self.is_enabled is False:
+            self.remote_addresses = [ip]
+            super().enable() if self.is_enabled is False else self.update()
+
+class FirewallRuleAllowIpSec(FirewallRule):
+    def __init__(self):
+        self.name = "Perfect Privacy - Allow IPSEC to server"
+        self.description = self.name
+        self.action = NET_FW_ACTION_ALLOW
+        self.direction = NET_FW_RULE_DIR_OUT
+        self.protocol = 4
+        super().__init__()
+
+    def enable(self, ip):
+        changed =  self.remote_addresses is None or self.remote_ports is None or self.remote_addresses[0] != ip
+        if changed is True or self.is_enabled is False:
+            self.remote_addresses = [ip]
+            super().enable() if self.is_enabled is False else self.update()
+
+class FirewallRuleAllowIpSecGRE(FirewallRule):
+    def __init__(self):
+        self.name = "Perfect Privacy - Allow IPSEC GRE to server"
+        self.description = self.name
+        self.action = NET_FW_ACTION_ALLOW
+        self.direction = NET_FW_RULE_DIR_OUT
+        self.protocol = 47
+        super().__init__()
+
+    def enable(self, ip):
+        changed = self.remote_addresses is None or self.remote_ports is None or self.remote_addresses[0] != ip
+        if changed is True or self.is_enabled is False:
+            self.remote_addresses = [ip]
+            super().enable() if self.is_enabled is False else self.update()
