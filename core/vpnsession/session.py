@@ -53,11 +53,13 @@ class SessionHop(Observable):
         if self.session._should_be_connected.get() is True and self.should_remove == False:
             if new_state not in [VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTING]:
                 self.last_connection_failed = True
-                self.selected_server.last_connection_failed = True
+                if self.selected_server is not None:
+                    self.selected_server.last_connection_failed = True
 
             if new_state in [VpnConnectionState.CONNECTED]:
                 self.last_connection_failed = False
-                self.selected_server.last_connection_failed = False
+                if self.selected_server is not None:
+                    self.selected_server.last_connection_failed = False
 
         self._logger.debug("Connection state changed for Hop %s, %s" % (self.servergroup.name, new_state))
         self.session.core.check_connection()

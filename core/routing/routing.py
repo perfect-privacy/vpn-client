@@ -91,18 +91,19 @@ class Routing(Observable):
             for i in [0, 64, 128, 192]:
                 target_routes.append(RouteV4(destination_ip="%s.0.0.0" % i, destination_mask="192.0.0.0", gateway=connected_hops[-1].connection.ipv4_remote_gateway,interface=connected_hops[-1].connection.interface))
 
+        dead_gateway = "10.255.255.255" if PLATFORM == PLATFORMS.windows else "127.0.0.23"
         if self._should_enable_deadrouting() is True:
-            interface = "1" if PLATFORM == PLATFORMS.windows else "lo"
-            target_routes.append(RouteV4(destination_ip=  "0.0.0.0", destination_mask="128.0.0.0", gateway="10.255.255.255", interface=interface, persist=True ))
-            target_routes.append(RouteV4(destination_ip="128.0.0.0", destination_mask="128.0.0.0", gateway="10.255.255.255", interface=interface, persist=True ))
+            interface = "1" if PLATFORM == PLATFORMS.windows else None
+            target_routes.append(RouteV4(destination_ip=  "0.0.0.0", destination_mask="128.0.0.0", gateway=dead_gateway, interface=interface, persist=True ))
+            target_routes.append(RouteV4(destination_ip="128.0.0.0", destination_mask="128.0.0.0", gateway=dead_gateway, interface=interface, persist=True ))
 
         for existing_route in self.routing_table_ipv4:
             if existing_route.destination_mask == "255.255.255.255" and existing_route.destination_ip in all_server_ips: # clean old routing entrys to server ips
                 if not self.route_ipv4_exists(target_routes, existing_route):
                     existing_route.delete()
                     continue
-            if existing_route.destination_ip.endswith(".0.0.0") and existing_route.destination_mask.endswith(".0.0.0") and existing_route.gateway.startswith("10."): # check our routes
-                if (existing_route.destination_ip.split(".")[0] in ["0", "64", "128", "192"] and existing_route.destination_mask == "192.0.0.0") or  ( existing_route.destination_ip.split(".")[0] in ["0", "128"] and  existing_route.destination_mask == "128.0.0.0" and existing_route.gateway == "10.255.255.255"):
+            if existing_route.destination_ip.endswith(".0.0.0") and existing_route.destination_mask.endswith(".0.0.0"): # check our routes
+                if (existing_route.destination_ip.split(".")[0] in ["0", "64", "128", "192"] and existing_route.destination_mask == "192.0.0.0") or  ( existing_route.destination_ip.split(".")[0] in ["0", "128"] and  existing_route.destination_mask == "128.0.0.0" and existing_route.gateway == dead_gateway):
                     if not self.route_ipv4_exists(target_routes, existing_route):
                         existing_route.delete()
                         continue
@@ -117,24 +118,20 @@ class Routing(Observable):
 
         if len(connected_hops) > 0:
             for i in ["2000", "2800", "3000", "3800"]:
-                target_routes.append(RouteV6(destination_net="%s::/5" % i, gateway="fe80::8", interface=connected_hops[-1].connection.interface))
+                gateway = "fe80::8" if PLATFORM == PLATFORMS.windows else None
+                target_routes.append(RouteV6(destination_net="%s::/5" % i, gateway=gateway, interface=connected_hops[-1].connection.interface))
 
         if self._should_enable_deadrouting() is True:
-            interface = "1" if PLATFORM == PLATFORMS.windows else "lo"
-            target_routes.append(RouteV6(destination_net="2000::/4", gateway="::", interface=interface, persist=True))
-            target_routes.append(RouteV6(destination_net="3000::/4", gateway="::", interface=interface, persist=True))
+            interface = "1" if PLATFORM == PLATFORMS.windows else "lo0"
+            gateway = "::" if PLATFORM == PLATFORMS.windows else None
+            target_routes.append(RouteV6(destination_net="2000::/4", gateway=gateway, interface=interface, persist=True))
+            target_routes.append(RouteV6(destination_net="3000::/4", gateway=gateway, interface=interface, persist=True))
 
         for existing_route in self.routing_table_ipv6:
-            if existing_route.destination_net in ["2000::/4", "3000::/4"]: # our deadrouting
+            if existing_route.destination_net in ["2000::/4", "3000::/4", "2000::/5", "2800::/5", "3000::/5", "3800::/5"]: # our deadrouting and default routes
                 if not self.route_ipv6_exists(target_routes, existing_route):
                     existing_route.delete()  # route does not exist as target
                     continue
-            if existing_route.gateway == "fe80::8": # check cascading routes
-                for i in ["2000", "2800", "3000", "3800"]:
-                    if existing_route.destination_net == "%s::/5" % i: # is our cascading route
-                        if not self.route_ipv6_exists(target_routes, existing_route):
-                            existing_route.delete() #route does not exist as target
-                            continue
 
         for target_route in target_routes:
             if not self.route_ipv6_exists(self.routing_table_ipv6, target_route):
@@ -169,7 +166,6 @@ class Routing(Observable):
             if hop.connection is None or hop.connection.state.get() != VpnConnectionState.CONNECTED or hop.connection.interface is None:
                 break  # not connected
             hops.append(hop)
-        print("Connected Hops", hops)
         return hops
 
     def get_active_hops(self):
@@ -212,7 +208,7 @@ class RoutingWindows(Routing):
             elif "." in route["NextHop"]:
                 if route["DestinationPrefix"] == "255.255.255.255/32" or route["DestinationPrefix"].startswith("127.") or route["DestinationPrefix"].startswith("192.168"):
                     continue
-                self. routing_table_ipv4.append(RouteV4(
+                self.routing_table_ipv4.append(RouteV4(
                     destination_ip   = "%s" % ipaddress.IPv4Network(route["DestinationPrefix"]).network_address,
                     destination_mask = "%s" % ipaddress.IPv4Network(route["DestinationPrefix"]).netmask,
                     gateway          = "%s" % route["NextHop"],
@@ -279,7 +275,9 @@ class RoutingWindows(Routing):
 
 class RoutingMacos(Routing):
     def receive_routing_table(self):
-        routes = []
+        self.routing_table_ipv4 = []
+        self.routing_table_ipv6 = []
+
         success, stdout, stderr = SubCommand().run("netstat", ["-rn", ])
         stdout = stdout.decode("UTF-8")
         while "  " in stdout:
@@ -287,32 +285,38 @@ class RoutingMacos(Routing):
         lines = stdout.split("\n")
         for line in lines:
             try:
-                if "::" in line:
-                    continue
                 parts = line.split(" ")
                 if len(parts) < 4:
                     continue
-                destination_ip = parts[0].strip()
-                if destination_ip.startswith("255.255.255.255") or destination_ip.startswith("127") or destination_ip.startswith("192.168"):
-                    continue
-                if destination_ip == "default":
-                    destination_ip = "0.0.0.0/0"
-                if "/" not in destination_ip:
-                    continue
-                destination_mask = ipaddress.IPv4Network(destination_ip).netmask
-                destination_ip = destination_ip.split("/")[0]
+                destination_net = parts[0].strip()
                 gateway = parts[1].strip()
-                if not self._is_ip(gateway):
-                    continue
                 flags = parts[2].strip()
                 interface = parts[3].strip()
-                routes.append(RouteV4(
-                    destination_ip=destination_ip,
-                    destination_mask=destination_mask,
-                    gateway=gateway,
-                    interface=interface
-                ))
-            except:
+
+                if "::" in line:
+                    destination_net = destination_net.replace("%%%s" % interface, "")
+                    gateway = gateway.replace("%%%s" % interface, "")
+                    self.routing_table_ipv6.append(RouteV6(
+                        destination_net=destination_net,
+                        gateway=gateway,
+                        interface=interface
+                    ))
+                elif "." in line:
+                    if destination_net == "default":
+                        destination_net = "0.0.0.0/0"
+                    if destination_net.startswith("255.255.255.255") or destination_net.startswith("127") or destination_net.startswith("192.168"):
+                        continue
+                    if "/" not in destination_net:
+                        continue
+                    ip, mask = destination_net.split("/")
+                    while ip.count(".") != 3:
+                        ip = "%s.0" % ip
+                    self.routing_table_ipv4.append(RouteV4(
+                        destination_ip=ip,
+                        destination_mask="%s"%ipaddress.IPv4Network("%s/%s" % (ip, mask)).netmask,
+                        gateway=gateway,
+                        interface=interface
+                    ))
+            except Exception as e:
                 pass
-        return routes
 

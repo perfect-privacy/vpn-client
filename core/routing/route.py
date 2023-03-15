@@ -1,8 +1,11 @@
 import ipaddress
 import logging
 
+from config.config import PLATFORM
+from config.constants import PLATFORMS
 from core.libs.subcommand import SubCommand
-from config.files import ROUTE, NETSH
+if PLATFORM == PLATFORMS.windows:
+    from config.files import ROUTE, NETSH
 
 class RouteV6():
     def __init__(self, destination_net, gateway= None, interface = None, persist = False):
@@ -21,14 +24,22 @@ class RouteV6():
 
 class RouteV6Macos(RouteV6):
     def delete(self):
-        if self.interface is None:
-            return
-        SubCommand().run("route", ["-n", "delete", "-inet6", self.destination_net, "-iface", self.interface])
+        cmd = ["-n", "delete", "-inet6", self.destination_net]
+        if self.interface is not None:
+            cmd.extend(["-iface", self.interface])
+        else:
+            if self.gateway is not None:
+                cmd.append(self.gateway)
+
+        SubCommand().run("route", cmd)
 
     def enable(self):
-        if self.interface is None:
-            return
-        SubCommand().run("route", ["-n", "add", "-inet6", self.destination_net,"-iface",  self.interface])
+        cmd =  ["-n", "add", "-inet6", self.destination_net]
+        if self.interface is not None:
+            cmd.extend(["-iface", self.interface])
+        ##if self.gateway is not None:
+        #    cmd.append(self.gateway)
+        SubCommand().run("route", cmd)
 
 class RouteV6Windows(RouteV6):
     def delete(self):
@@ -118,14 +129,20 @@ class RouteV4Windows(RouteV4):
 
 class RouteV4Macos(RouteV4):
     def delete(self):
-        cmd = ["-n", "delete", "-net", "%s/%s" % (self.destination_ip, ipaddress.IPv4Network('0.0.0.0/%s' % self.destination_mask).prefixlen)]
+        cmd = ["-n", "delete", "-net"]
+        #if self.interface is not None:
+        #    cmd.extend(["-ifscope", self.interface])
+        cmd.append("%s/%s" % (self.destination_ip, ipaddress.IPv4Network('0.0.0.0/%s' % self.destination_mask).prefixlen))
         if self.gateway is not None:
             cmd.append(self.gateway)
         SubCommand().run("route", cmd)
 
     def enable(self):
-        cmd = ["-n", "add", "-net", "%s/%s" % (self.destination_ip, ipaddress.IPv4Network('0.0.0.0/%s' % self.destination_mask).prefixlen)]
+        cmd = ["-n", "add", "-net"]
+        #if self.interface is not None:
+        #    cmd.extend(["-ifscope", self.interface])
+        cmd.append("%s/%s" % (self.destination_ip, ipaddress.IPv4Network('0.0.0.0/%s' % self.destination_mask).prefixlen))
         if self.gateway is not None:
             cmd.append(self.gateway)
-        SubCommand().run("route",)
+        SubCommand().run("route", cmd)
 

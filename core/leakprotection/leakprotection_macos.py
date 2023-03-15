@@ -58,13 +58,13 @@ class LeakProtection_macos(LeakProtection_Generic):
                 rules.append("block out inet to %s" % router_ip)
 
         # SNMP/UPNP
+        # SNMP/UPNP
         if self.core.settings.leakprotection.enable_snmp_upnp_protection.get() is True:
             for port in ["161:162", "1900"]:
                 for proto in ["TCP", "UDP"]:
-                    rules.append("block out inet proto %s port %s" % (proto, port))
+                    rules.append("block out inet  proto %s to 0.0.0.0/0 port %s" % (proto, port))
 
         rules_str = "\n".join(rules) + "\n"
-
         if rules_str != self.current_rules_str:
             self._logger.debug("Updating firewall rules")
             self.current_rules_str = rules_str
