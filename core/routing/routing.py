@@ -46,9 +46,7 @@ class Routing(Observable):
         self.__worker_thread.join()
 
     def reset(self):
-        self.receive_routing_table()
-        self._update_ipv4()
-        self._update_ipv6()
+        self._update()
 
     def _worker_thread(self):
         while self._is_running is True:
@@ -64,14 +62,24 @@ class Routing(Observable):
             self._lock.acquire()
             self._logger.debug("Checking and updating routing table")
             self.receive_routing_table()
-            self._update_ipv4()
-            self._update_ipv6()
+            v4t = threading.Thread(target=self._update_ipv4, daemon=True)
+            v6t = threading.Thread(target=self._update_ipv6, daemon=True)
+            v4t.start()
+            v6t.start()
+            v4t.join()
+            v6t.join()
         except:
-            ReporterInstance.report("update_routing_failed", traceback.format_exc())
+            ReporterInstance.report("routing_update_failed", traceback.format_exc())
         finally:
             self._lock.release()
 
     def _update_ipv4(self):
+        try:
+            self.__update_ipv4()
+        except:
+            ReporterInstance.report("routing_update_ipv4_failed", traceback.format_exc())
+
+    def __update_ipv4(self):
         target_routes = []
         all_server_ips = []
         default_gateway = None
@@ -121,6 +129,12 @@ class Routing(Observable):
                 target_route.enable()
 
     def _update_ipv6(self):
+        try:
+            self.__update_ipv6()
+        except:
+            ReporterInstance.report("routing_update_ipv6_failed", traceback.format_exc())
+
+    def __update_ipv6(self):
         target_routes = []
         connected_hops = self.get_connected_hops()
 
@@ -203,6 +217,8 @@ class RoutingWindows(Routing):
 
         for route in routing_table:
             if "::" in route["NextHop"]:
+                #if route["DestinationPrefix"] in ["fe80::/64", "ff00::/8"]:
+                #    continue
                 self.routing_table_ipv6.append(RouteV6(
                     destination_net = "%s" % route["DestinationPrefix"],
                     gateway         = "%s" % route["NextHop"],

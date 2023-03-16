@@ -271,23 +271,7 @@ class FirewallRuleBlockDefaultGateway(FirewallRule):
         self.remote_addresses = ["Defaultgateway"]
         super().__init__()
 
-class FirewallRuleBlockSnmpUpnp():
-    def __init__(self):
-        self.tcp_rule = _FirewallRuleBlockSnmpUpnp_TCP()
-        self.udp_rule = _FirewallRuleBlockSnmpUpnp_UDP()
-
-    def enable(self):
-        self.tcp_rule.enable()
-        self.udp_rule.enable()
-
-    def disable(self):
-        self.tcp_rule.disable()
-        self.udp_rule.disable()
-
-    def exists(self):
-        return self.tcp_rule.exists() and self.udp_rule.exists()
-
-class _FirewallRuleBlockSnmpUpnp_UDP(FirewallRule):
+class FirewallRuleBlockSnmpUpnp_UDP(FirewallRule):
     def __init__(self):
         self.name = "Perfect Privacy - Block SNMP/UDP"
         self.description = "Block outgoing SNMP/UDP requests to prevent network manipulations"
@@ -297,7 +281,7 @@ class _FirewallRuleBlockSnmpUpnp_UDP(FirewallRule):
         self.protocol = NET_FW_IP_PROTOCOL_UDP
         super().__init__()
 
-class _FirewallRuleBlockSnmpUpnp_TCP(FirewallRule):
+class FirewallRuleBlockSnmpUpnp_TCP(FirewallRule):
     def __init__(self):
         self.name = "Perfect Privacy - Block SNMP/TCP"
         self.description = "Block outgoing SNMP/TCP requests to prevent network manipulations"
@@ -378,22 +362,6 @@ class FirewallRuleBlockIpv6Dhcp(FirewallRule):
         self.local_ports = [546]
         super().__init__()
 
-class FirewallReset():
-    def run(self):
-        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow -Enabled True")
-
-        rules = getPowershellInstance().execute('Get-NetFirewallRule -DisplayName *perfect*', as_data=True)
-        if rules is None:
-            ReporterInstance.report("firewall_reset_load_failed","")
-            return
-        for rule in rules:
-            try:
-                name = rule["Name"].lower()
-                if "perfect" in name and "privacy" in name:
-                    getPowershellInstance().execute('Remove-NetFirewallRule -Name "%s"' % rule["name"], may_fail=True)
-            except:
-                pass
-
 
 # tcp port 1723
 
@@ -458,3 +426,8 @@ class FirewallRuleAllowIpSecGRE(FirewallRule):
         if changed is True or self.is_enabled is False:
             self.remote_addresses = [ip]
             super().enable() if self.is_enabled is False else self.update()
+
+class FirewallReset():
+    def run(self):
+        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow -Enabled True")
+        getPowershellInstance().execute('Remove-NetFirewallRule -Name "perfect*privacy*"', may_fail=True)

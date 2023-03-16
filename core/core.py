@@ -60,7 +60,7 @@ class Core(Observable):
         self.routing = Routing(self)
 
         self.settings.leakprotection.attach_observer(self.check_connection)
-        self._start_timers.append(Timer(4, self.check_connection))
+        self._start_timers.append(Timer(3, self.check_connection))
 
         self.configUpdater = ConfigUpdater(self)
         self.configUpdater.update_installed.attach_observer(self._on_config_update_installed)

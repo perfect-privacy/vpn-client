@@ -137,16 +137,15 @@ class OpenVPNConnection(VPNConnection):
             args.extend(["--tls-crypt", "ta.tls-crypt.key"])
             args.extend(["--tun-mtu-extra", "32"])
 
-        tun_mtu = 1500 -  ((self.hop_number-1) * 84)
-        args.extend(["--tun-mtu", "%s" % tun_mtu])
+        #tun_mtu = 1500 - ((self.hop_number-1) * 84)
+        args.extend(["--tun-mtu", "1500"])
 
         if openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:
             args.extend(["--tls-auth", "ta.tls-auth.%s.key" % self.servergroup.vpn_server_config.groupname, "1"])
             args.extend(["--compress"])
-            if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
-                mss_fix = 1300 if tun_mtu > 1300 else tun_mtu
-                args.extend(["--fragment", "%s" % mss_fix])
-                args.extend(["--mssfix"])
+        if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
+            args.extend(["--fragment", "1300"])
+            args.extend(["--mssfix", "1300"])
 
 
         if self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.wintun and PLATFORM == PLATFORMS.windows:

@@ -16,12 +16,14 @@ from .windows.firewallrules import \
     FirewallRuleBlockInternet, \
     FirewallRuleBlockWrongWay, \
     FirewallRuleBlockMsLeak, \
-    FirewallRuleBlockSnmpUpnp, \
+    FirewallRuleBlockSnmpUpnp_UDP, \
+    FirewallRuleBlockSnmpUpnp_TCP, \
     FirewallRuleBlockDefaultGateway, \
     FirewallRuleBlockDNS,\
     FirewallRuleBlockIpv6RouteAnnouncements,\
     FirewallRuleBlockIpv6Dhcp, \
     FirewallReset
+from ..libs.powershell import getPowershellInstance
 from ..libs.web.reporter import ReporterInstance
 
 
@@ -45,7 +47,8 @@ class LeakProtection_windows(LeakProtection_Generic):
         self.firewallRuleBlockInternet = FirewallRuleBlockInternet()
         self.firewallRuleBlockWrongWay = FirewallRuleBlockWrongWay()
         self.firewallRuleBlockMsLeak = FirewallRuleBlockMsLeak()
-        self.firewallRuleBlockSnmp = FirewallRuleBlockSnmpUpnp()
+        self.firewallRuleBlockSnmpTcp = FirewallRuleBlockSnmpUpnp_TCP()
+        self.firewallRuleBlockSnmpUdp = FirewallRuleBlockSnmpUpnp_UDP()
         self.firewallRuleBlockDefaultGateway = FirewallRuleBlockDefaultGateway()
         self.firewallRuleBlockDNS = FirewallRuleBlockDNS()
         self.firewallRuleBlockIpv6RouteAnnouncements = FirewallRuleBlockIpv6RouteAnnouncements()
@@ -64,7 +67,8 @@ class LeakProtection_windows(LeakProtection_Generic):
             self.firewallRuleBlockInternet,
             self.firewallRuleBlockWrongWay,
             self.firewallRuleBlockMsLeak,
-            self.firewallRuleBlockSnmp,
+            self.firewallRuleBlockSnmpTcp,
+            self.firewallRuleBlockSnmpUdp,
             self.firewallRuleBlockDefaultGateway,
             self.firewallRuleBlockDNS,
             self.firewallRuleBlockIpv6RouteAnnouncements,
@@ -133,9 +137,11 @@ class LeakProtection_windows(LeakProtection_Generic):
 
         # SNMP/UPNP
         if self.core.settings.leakprotection.enable_snmp_upnp_protection.get() is True:
-            self.firewallRuleBlockSnmp.enable()
+            self.firewallRuleBlockSnmpTcp.enable()
+            self.firewallRuleBlockSnmpUdp.enable()
         else:
-            self.firewallRuleBlockSnmp.disable()
+            self.firewallRuleBlockSnmpTcp.disable()
+            self.firewallRuleBlockSnmpUdp.disable()
 
         # BLOCK ROUTER
         if self.core.settings.leakprotection.block_access_to_local_router.get() is True:
@@ -164,8 +170,13 @@ class LeakProtection_windows(LeakProtection_Generic):
 
     def _disable(self):
         self.networkInterfaces = NetworkInterfaces(self.core)
-        #self.deadrouting.disable()
+
+        getPowershellInstance().execute('Remove-NetFirewallRule -Name "perfect*privacy*"', may_fail=True)
+
         for rule in self.firewallRules:
+            if hasattr(rule, "name") and rule.name.startswith("Perfect Privacy"):
+                rule.is_enabled = False
+                continue
             rule.disable()
         self.networkInterfaces.enableIpv6()
         self.networkInterfaces.disableDnsLeakProtection()
