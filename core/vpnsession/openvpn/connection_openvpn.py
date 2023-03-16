@@ -137,7 +137,6 @@ class OpenVPNConnection(VPNConnection):
             args.extend(["--tls-crypt", "ta.tls-crypt.key"])
             args.extend(["--tun-mtu-extra", "32"])
 
-        #tun_mtu = 1500 - ((self.hop_number-1) * 84)
         args.extend(["--tun-mtu", "1500"])
 
         if openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:

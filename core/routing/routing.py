@@ -105,10 +105,11 @@ class Routing(Observable):
                 else:
                     break  # not connected
 
-        connected_hops = self.get_connected_hops()
-        if len(connected_hops) > 0:
-            for destination in ["0.0.0.0/2", "64.0.0.0/2", "128.0.0.0/2", "192.0.0.0/2"]:
-                target_routes.append(RouteV4(destination_net=destination, gateway=connected_hops[-1].connection.ipv4_remote_gateway,interface=connected_hops[-1].connection.interface))
+            if len(self.core.session.hops) > 0:
+                highest_hop = self.core.session.hops[-1]
+                if highest_hop.connection is not None and highest_hop.connection.state.get() == VpnConnectionState.CONNECTED and highest_hop.connection.interface is not None:
+                    for destination in ["0.0.0.0/2", "64.0.0.0/2", "128.0.0.0/2", "192.0.0.0/2"]:
+                        target_routes.append(RouteV4(destination_net=destination, gateway=highest_hop.connection.ipv4_remote_gateway,interface=highest_hop.connection.interface))
 
         dead_gateway = "10.255.255.255" if PLATFORM == PLATFORMS.windows else "127.0.0.23"
         if self._should_enable_deadrouting() is True:
@@ -136,12 +137,12 @@ class Routing(Observable):
 
     def __update_ipv6(self):
         target_routes = []
-        connected_hops = self.get_connected_hops()
-
-        if len(connected_hops) > 0:
-            for i in ["2000", "2800", "3000", "3800"]:
-                gateway = "fe80::8" if PLATFORM == PLATFORMS.windows else None
-                target_routes.append(RouteV6(destination_net="%s::/5" % i, gateway=gateway, interface=connected_hops[-1].connection.interface))
+        if self.core is not None and len(self.core.session.hops) > 0:
+            highest_hop = self.core.session.hops[-1]
+            if highest_hop.connection is not None and highest_hop.connection.state.get() == VpnConnectionState.CONNECTED and highest_hop.connection.interface is not None:
+                for i in ["2000", "2800", "3000", "3800"]:
+                    gateway = "fe80::8" if PLATFORM == PLATFORMS.windows else None
+                    target_routes.append(RouteV6(destination_net="%s::/5" % i, gateway=gateway, interface=highest_hop.connection.interface))
 
         if self._should_enable_deadrouting() is True:
             interface = "1" if PLATFORM == PLATFORMS.windows else "lo0"
