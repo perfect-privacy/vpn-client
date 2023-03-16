@@ -46,8 +46,9 @@ class SessionHop(Observable):
         self.notify_observers()
 
     def _on_connection_state_changed(self, sender, new_state, **kwargs):
-        if self.session._should_be_connected.get() is False and new_state == VpnConnectionState.IDLE:
-            self.last_connection_failed = False
+        if new_state == VpnConnectionState.IDLE:
+            if self.session._should_be_connected.get() is False:
+                self.last_connection_failed = False
             self.after_disconnected()
 
         if self.session._should_be_connected.get() is True and self.should_remove == False:
@@ -231,12 +232,12 @@ class Session(Observable):
     def get_random_paths(self, hop_list, limit = 1):
         vpn_servers_per_hop = []
         for hop in hop_list:
-            if hop.connection is not None and hop.selected_server is not None:
-                vpn_servers_per_hop.append([hop.selected_server])
-            else:
+            if hop.connection is None or hop.connection.state.get() not in [VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTING]:
                 vpnservers = hop.servergroup.get_vpn_servers()
                 random.shuffle(vpnservers)
                 vpn_servers_per_hop.append(vpnservers)
+            else:
+                vpn_servers_per_hop.append([hop.selected_server])
 
         paths_good = []
         paths_all = []
