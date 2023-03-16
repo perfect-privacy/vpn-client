@@ -72,13 +72,9 @@ class LeakProtectionView(PyHtmlView):
                                 <div class="input"> {{ pyview.enable_deadrouting.render() }} </div>
                             </h3> 
                             <div>
-                                Deadrouting is a secondary routing-based protection.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                Deadrouting is a secondary routing-based protection layer.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                                 <div class="tooltip" style="display:none">
-                                    There is a potential issue with virtual Hyper-V networking used by Windows Subsystem for Linux 2 (WSL2) whereby data packets can bypass the host's firewall. 
-                                    This allows the virtual Hyper-V Ethernet adapter to send and receive all packets from the Linux guest without being checked by the Windows Firewall. 
-                                    In the lower layers of the Windows Filtering Platform (OSI layer 2), NATed packets are treated as normal Ethernet frames, 
-                                    which can also lead to a leak in Windows Sandbox or Docker if the guest uses Hyper-V for networking.
-                                    To address this issue, we can redirect the route where the leak may occur to a non-existent IP address, effectively blocking the leak.
+                                    Deadrouting adds a secondary security layer below the actual firewall that will capture all non VPN internet traffic that might escape the normal routing and firewalling.
                                 </div>
                             </div>
                         </section> 

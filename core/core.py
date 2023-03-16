@@ -94,6 +94,7 @@ class Core(Observable):
                     pass
             if PLATFORM == PLATFORMS.windows:
                 self.leakprotection.reset()
+
             self.settings.is_first_startup.set(False)
 
         self.userapi = UserAPI(self)

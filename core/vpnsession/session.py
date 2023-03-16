@@ -382,7 +382,7 @@ class Session(Observable):
 
             hop.connection.state.attach_observer(self._wait_for_state_change)
             started_waiting = time.time()
-            CONNECT_TIMEOUT = 60
+            CONNECT_TIMEOUT = 45
             while hop.connection.state.get() not in [VpnConnectionState.CONNECTED, VpnConnectionState.IDLE] and self._should_be_connected.get() == True:
                 if hop.should_remove is True:
                     break

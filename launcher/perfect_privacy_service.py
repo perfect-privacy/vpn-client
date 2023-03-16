@@ -1,6 +1,7 @@
 import os, sys, threading
 import traceback
 
+
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
 sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
@@ -58,7 +59,9 @@ if __name__ == "__main__":
             pass
         elif option == "uninstall":   # run silent uninstall, disable firewall, dns, network stuff we installed
             from core.leakprotection import LeakProtection
+            from core.routing import Routing
             LeakProtection(core=None).reset()
+            Routing(core=None).reset()
             if PLATFORM == PLATFORMS.windows:
                 from core.devicemanager import DeviceManager
                 DeviceManager(None).uninstall()

@@ -22,12 +22,6 @@ try:
 except:
     from signal import CTRL_C_EVENT as SIGKILL
 
-if PLATFORM == PLATFORMS.windows:
-    from .updown import UpDown_Windows as UpDown
-if PLATFORM == PLATFORMS.linux:
-    from .updown import UpDown_Linux as UpDown
-if PLATFORM == PLATFORMS.macos:
-    from .updown import UpDown_Macos as UpDown
 
 class OpenVPNConnection(VPNConnection):
     def __init__(self, identifier, core):
@@ -143,12 +137,17 @@ class OpenVPNConnection(VPNConnection):
             args.extend(["--tls-crypt", "ta.tls-crypt.key"])
             args.extend(["--tun-mtu-extra", "32"])
 
+        tun_mtu = 1500 -  ((self.hop_number-1) * 84)
+        args.extend(["--tun-mtu", "%s" % tun_mtu])
+
         if openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:
             args.extend(["--tls-auth", "ta.tls-auth.%s.key" % self.servergroup.vpn_server_config.groupname, "1"])
             args.extend(["--compress"])
             if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
-                args.extend(["--fragment", "1300"])
+                mss_fix = 1300 if tun_mtu > 1300 else tun_mtu
+                args.extend(["--fragment", "%s" % mss_fix])
                 args.extend(["--mssfix"])
+
 
         if self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.wintun and PLATFORM == PLATFORMS.windows:
             args.extend(["--windows-driver", "wintun"])
@@ -246,20 +245,14 @@ class OpenVPNConnection(VPNConnection):
         self._parser.on_device_change.detach_observer(self._on_device_change)
 
     def _on_openvpn_state_changed(self, sender, **kwargs):
-        """
-        :type sender: core.vpn.openvpn_management_interface_parser.OpenVPNState
-        """
         self._logger.debug("openvpn connection state changed")
         if sender.is_connecting:
             self.state.set(VpnConnectionState.CONNECTING, VpnConnectionState.CONNECTING)
         elif sender.is_connected:
-            #self.up_down_controller.up()
             self.state.set(VpnConnectionState.CONNECTED, VpnConnectionState.CONNECTED)
         elif sender.is_disconnecting:
             self.state.set(VpnConnectionState.DISCONNECTING, VpnConnectionState.DISCONNECTING)
         elif sender.is_disconnected:
-            #self.up_down_controller.down()
-            #self.core.ipcheck.check_now()
             self.state.set(VpnConnectionState.IDLE, VpnConnectionState.IDLE)
 
     def _on_invalid_credentials_detected(self, sender):

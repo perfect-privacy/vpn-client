@@ -2,11 +2,14 @@
 import ipaddress
 import logging
 import threading
+import traceback
+
 from pyhtmlgui import Observable
 from config.config import PLATFORM
 from config.constants import PLATFORMS, PROTECTION_SCOPES
 from core.libs.powershell import getPowershellInstance
 from core.libs.subcommand import SubCommand
+from core.libs.web.reporter import ReporterInstance
 from core.vpnsession.common import VpnConnectionState
 
 if PLATFORM == PLATFORMS.windows:
@@ -42,6 +45,11 @@ class Routing(Observable):
         self._wakeup_event.set()
         self.__worker_thread.join()
 
+    def reset(self):
+        self.receive_routing_table()
+        self._update_ipv4()
+        self._update_ipv6()
+
     def _worker_thread(self):
         while self._is_running is True:
             self._update()
@@ -58,6 +66,8 @@ class Routing(Observable):
             self.receive_routing_table()
             self._update_ipv4()
             self._update_ipv6()
+        except:
+            ReporterInstance.report("update_routing_failed", traceback.format_exc())
         finally:
             self._lock.release()
 
@@ -67,49 +77,47 @@ class Routing(Observable):
         default_gateway = None
         default_gateway_interface = None
 
+        if self.core is not None:
+            [all_server_ips.extend(item.vpn_server_config.all_ips) for _, item in self.core.vpnGroupPlanet.servers.items()]
 
-        [all_server_ips.extend(item.vpn_server_config.all_ips) for _, item in self.core.vpnGroupPlanet.servers.items()]
+            default_routes = [r for r in self.routing_table_ipv4 if r.destination_net == "0.0.0.0/0"]
+            if len(default_routes) > 0:
+                default_gateway = default_routes[0].gateway
+                default_gateway_interface = default_routes[0].interface
 
-        default_routes = [r for r in self.routing_table_ipv4 if r.destination_ip == "0.0.0.0" and r.destination_mask == "0.0.0.0"]
-        if len(default_routes) > 0:
-            default_gateway = default_routes[0].gateway
-            default_gateway_interface = default_routes[0].interface
-
-        # routing exception for vpn server ips
-        for index, hop in enumerate(self.core.session.hops):
-            if hop.connection is None or hop.connection.external_host_ip is None:
-                break
-            if index == 0:
-                target_routes.append(RouteV4(destination_ip=hop.connection.external_host_ip, destination_mask="255.255.255.255", gateway=default_gateway, interface=default_gateway_interface))  # route vpn connection around vpn route
-            elif self.core.session.hops[index - 1].connection.ipv4_remote_gateway != None:
-                target_routes.append(RouteV4(destination_ip=hop.connection.external_host_ip, destination_mask="255.255.255.255", gateway=self.core.session.hops[index - 1].connection.ipv4_remote_gateway, interface=self.core.session.hops[index-1].connection.interface))  # route vpn connection around vpn route
-            else:
-                break  # not connected
+            # routing exception for vpn server ips
+            for index, hop in enumerate(self.core.session.hops):
+                if hop.connection is None or hop.connection.external_host_ip is None:
+                    break
+                if index == 0:
+                    if default_gateway is not None:
+                        target_routes.append(RouteV4(destination_net="%s/32" % hop.connection.external_host_ip, gateway=default_gateway, interface=default_gateway_interface))  # route vpn connection around vpn route
+                elif self.core.session.hops[index - 1].connection.ipv4_remote_gateway != None:
+                    target_routes.append(RouteV4(destination_net="%s/32" % hop.connection.external_host_ip, gateway=self.core.session.hops[index - 1].connection.ipv4_remote_gateway, interface=self.core.session.hops[index-1].connection.interface))  # route vpn connection around vpn route
+                else:
+                    break  # not connected
 
         connected_hops = self.get_connected_hops()
         if len(connected_hops) > 0:
-            for i in [0, 64, 128, 192]:
-                target_routes.append(RouteV4(destination_ip="%s.0.0.0" % i, destination_mask="192.0.0.0", gateway=connected_hops[-1].connection.ipv4_remote_gateway,interface=connected_hops[-1].connection.interface))
+            for destination in ["0.0.0.0/2", "64.0.0.0/2", "128.0.0.0/2", "192.0.0.0/2"]:
+                target_routes.append(RouteV4(destination_net=destination, gateway=connected_hops[-1].connection.ipv4_remote_gateway,interface=connected_hops[-1].connection.interface))
 
         dead_gateway = "10.255.255.255" if PLATFORM == PLATFORMS.windows else "127.0.0.23"
         if self._should_enable_deadrouting() is True:
             interface = "1" if PLATFORM == PLATFORMS.windows else None
-            target_routes.append(RouteV4(destination_ip=  "0.0.0.0", destination_mask="128.0.0.0", gateway=dead_gateway, interface=interface, persist=True ))
-            target_routes.append(RouteV4(destination_ip="128.0.0.0", destination_mask="128.0.0.0", gateway=dead_gateway, interface=interface, persist=True ))
+            target_routes.append(RouteV4(destination_net=  "0.0.0.0/1", gateway=dead_gateway, interface=interface, persist=True ))
+            target_routes.append(RouteV4(destination_net="128.0.0.0/1", gateway=dead_gateway, interface=interface, persist=True ))
 
         for existing_route in self.routing_table_ipv4:
-            if existing_route.destination_mask == "255.255.255.255" and existing_route.destination_ip in all_server_ips: # clean old routing entrys to server ips
-                if not self.route_ipv4_exists(target_routes, existing_route):
+            if  ( existing_route.destination_net.split("/")[0] in all_server_ips) or \
+            ( existing_route.destination_net in ["0.0.0.0/1", "128.0.0.0/1"] and existing_route.gateway == dead_gateway ) or \
+            ( existing_route.destination_net in ["0.0.0.0/2", "64.0.0.0/2", "128.0.0.0/2", "192.0.0.0/2"] and existing_route.gateway.startswith("10.")):
+                if not self.route_exists(target_routes, existing_route):
                     existing_route.delete()
                     continue
-            if existing_route.destination_ip.endswith(".0.0.0") and existing_route.destination_mask.endswith(".0.0.0"): # check our routes
-                if (existing_route.destination_ip.split(".")[0] in ["0", "64", "128", "192"] and existing_route.destination_mask == "192.0.0.0") or  ( existing_route.destination_ip.split(".")[0] in ["0", "128"] and  existing_route.destination_mask == "128.0.0.0" and existing_route.gateway == dead_gateway):
-                    if not self.route_ipv4_exists(target_routes, existing_route):
-                        existing_route.delete()
-                        continue
-
+                    
         for target_route in target_routes:
-            if not self.route_ipv4_exists(self.routing_table_ipv4, target_route):
+            if not self.route_exists(self.routing_table_ipv4, target_route):
                 target_route.enable()
 
     def _update_ipv6(self):
@@ -123,30 +131,20 @@ class Routing(Observable):
 
         if self._should_enable_deadrouting() is True:
             interface = "1" if PLATFORM == PLATFORMS.windows else "lo0"
-            gateway = "::" if PLATFORM == PLATFORMS.windows else None
-            target_routes.append(RouteV6(destination_net="2000::/4", gateway=gateway, interface=interface, persist=True))
-            target_routes.append(RouteV6(destination_net="3000::/4", gateway=gateway, interface=interface, persist=True))
+            target_routes.append(RouteV6(destination_net="2000::/4", gateway=None, interface=interface, persist=True))
+            target_routes.append(RouteV6(destination_net="3000::/4", gateway=None, interface=interface, persist=True))
 
         for existing_route in self.routing_table_ipv6:
             if existing_route.destination_net in ["2000::/4", "3000::/4", "2000::/5", "2800::/5", "3000::/5", "3800::/5"]: # our deadrouting and default routes
-                if not self.route_ipv6_exists(target_routes, existing_route):
+                if not self.route_exists(target_routes, existing_route):
                     existing_route.delete()  # route does not exist as target
                     continue
 
         for target_route in target_routes:
-            if not self.route_ipv6_exists(self.routing_table_ipv6, target_route):
+            if not self.route_exists(self.routing_table_ipv6, target_route):
                 target_route.enable()
 
-    def route_ipv4_exists(self, routes, route):
-        for existing_route in routes:
-            if route.destination_ip == existing_route.destination_ip and \
-                route.destination_mask == existing_route.destination_mask and \
-                    (route.gateway is None or existing_route.gateway is None or
-                     route.gateway == existing_route.gateway) and ( route.interface is None or existing_route.interface is None or route.interface == existing_route.interface):
-                    return True
-        return False
-
-    def route_ipv6_exists(self, routes, route):
+    def route_exists(self, routes, route):
         for existing_route in routes:
             if route.destination_net == existing_route.destination_net and ( route.gateway is None or existing_route.gateway is None or route.gateway == existing_route.gateway) and ( route.interface is None or existing_route.interface is None or route.interface == existing_route.interface):
                 return True
@@ -161,6 +159,8 @@ class Routing(Observable):
         return False
 
     def get_connected_hops(self):
+        if self.core is None:
+            return []
         hops = []
         for index, hop in enumerate(self.core.session.hops):
             if hop.connection is None or hop.connection.state.get() != VpnConnectionState.CONNECTED or hop.connection.interface is None:
@@ -169,6 +169,8 @@ class Routing(Observable):
         return hops
 
     def get_active_hops(self):
+        if self.core is None:
+            return []
         hops = []
         for index, hop in enumerate(self.core.session.hops):
             if hop.connection is None or hop.connection.external_host_ip is None:
@@ -177,6 +179,8 @@ class Routing(Observable):
         return hops
 
     def _should_enable_deadrouting(self):
+        if self.core is None:
+            return False
         if self.core.settings.leakprotection.enable_deadrouting.get() is False:
             return False
         scope = self.core.settings.leakprotection.leakprotection_scope.get()
@@ -189,7 +193,6 @@ class Routing(Observable):
         if scope == PROTECTION_SCOPES.permanent:
             return True
         return False
-
 
 class RoutingWindows(Routing):
     def receive_routing_table(self):
@@ -209,10 +212,9 @@ class RoutingWindows(Routing):
                 if route["DestinationPrefix"] == "255.255.255.255/32" or route["DestinationPrefix"].startswith("127.") or route["DestinationPrefix"].startswith("192.168"):
                     continue
                 self.routing_table_ipv4.append(RouteV4(
-                    destination_ip   = "%s" % ipaddress.IPv4Network(route["DestinationPrefix"]).network_address,
-                    destination_mask = "%s" % ipaddress.IPv4Network(route["DestinationPrefix"]).netmask,
-                    gateway          = "%s" % route["NextHop"],
-                    interface        = "%s" % route["ifIndex"]
+                    destination_net = "%s" % route["DestinationPrefix"],
+                    gateway         = "%s" % route["NextHop"],
+                    interface       = "%s" % route["ifIndex"]
                 ))
 
     def receive_routing_table_fallback(self):
@@ -312,8 +314,7 @@ class RoutingMacos(Routing):
                     while ip.count(".") != 3:
                         ip = "%s.0" % ip
                     self.routing_table_ipv4.append(RouteV4(
-                        destination_ip=ip,
-                        destination_mask="%s"%ipaddress.IPv4Network("%s/%s" % (ip, mask)).netmask,
+                        destination_net= "%s/%s" % (ip, mask),
                         gateway=gateway,
                         interface=interface
                     ))

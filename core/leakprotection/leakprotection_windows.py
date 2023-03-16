@@ -171,10 +171,6 @@ class LeakProtection_windows(LeakProtection_Generic):
         self.networkInterfaces.disableDnsLeakProtection()
 
     def reset(self):
-        #try:
-        #    self.deadrouting.disable(force=True)
-        #except Exception as e:
-        #    ReporterInstance.report("firewall_reset_deadrouting_failed", traceback.format_exc())
         try:
             self.networkInterfaces = NetworkInterfaces(self.core)
             self.networkInterfaces.disableDnsLeakProtection()
