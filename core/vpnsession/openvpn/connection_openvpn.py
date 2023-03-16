@@ -143,10 +143,11 @@ class OpenVPNConnection(VPNConnection):
         if openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:
             args.extend(["--tls-auth", "ta.tls-auth.%s.key" % self.servergroup.vpn_server_config.groupname, "1"])
             args.extend(["--compress"])
-        if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
-            args.extend(["--fragment", "1300"])
-            args.extend(["--mssfix", "1300"])
+            if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
+                args.extend(["--fragment", "1300"])
 
+        if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
+            args.extend(["--mssfix", "1300"])
 
         if self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.wintun and PLATFORM == PLATFORMS.windows:
             args.extend(["--windows-driver", "wintun"])
