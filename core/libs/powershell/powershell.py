@@ -89,10 +89,17 @@ class Powershell():
         return b"".join(lines)
 
     def _read_thread(self, pipe, queue):
-        for line in iter(pipe.readline, b''):
-            line = line
-            queue.put(line)
-        pipe.close()
+        try:
+            pipe.close()
+            for line in iter(pipe.readline, b''):
+                line = line
+                queue.put(line)
+        except:
+            pass
+        self._logger.debug("Read thread exited")
+        if self._process is not None:
+            self._process.kill()
+        self._process = None
         self._stdout_read_tread = None
 
 powershellInstance = None

@@ -173,26 +173,6 @@ class Routing(Observable):
             pass
         return False
 
-    def get_connected_hops(self):
-        if self.core is None:
-            return []
-        hops = []
-        for index, hop in enumerate(self.core.session.hops):
-            if hop.connection is None or hop.connection.state.get() != VpnConnectionState.CONNECTED or hop.connection.interface is None:
-                break  # not connected
-            hops.append(hop)
-        return hops
-
-    def get_active_hops(self):
-        if self.core is None:
-            return []
-        hops = []
-        for index, hop in enumerate(self.core.session.hops):
-            if hop.connection is None or hop.connection.external_host_ip is None:
-                break  # not connected or connecting
-            hops.append(hop)
-        return hops
-
     def _should_enable_deadrouting(self):
         if self.core is None:
             return False
