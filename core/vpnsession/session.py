@@ -404,7 +404,7 @@ class Session(Observable):
                     break
                 self._logger.debug("waiting for state change")
                 time.sleep(3)
-                
+
             if hop.state.get() != VpnConnectionState.CONNECTED:
                 self._logger.error("Couldn't connect within {} seconds".format(CONNECT_TIMEOUT))
                 hop.disconnect()
