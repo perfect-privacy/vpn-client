@@ -263,12 +263,12 @@ class OpenVPNConnection(VPNConnection):
                     self._logger.error("sending SIGKILL to PID {}".format(self._parser.pid))
                     try:
                         os.kill(self._parser.pid, SIGKILL)
-                    except OSError:
+                    except:
                         self._logger.critical("killing zombie OpenVPN process with PID {} failed".format(self._parser.pid))
-                        raise VPNConnectionError()
+                        #raise VPNConnectionError()
                 else:
                     self._logger.critical("unable to kill zombie OpenVPN process: unknown PID")
-                    raise VPNConnectionError()
+                    #raise VPNConnectionError()
             else:
                 self._logger.debug("parser quit successfully")
         else:
