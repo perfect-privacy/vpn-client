@@ -90,10 +90,10 @@ class Powershell():
 
     def _read_thread(self, pipe, queue):
         try:
-            pipe.close()
             for line in iter(pipe.readline, b''):
                 line = line
                 queue.put(line)
+            pipe.close()
         except:
             pass
         self._logger.debug("Read thread exited")

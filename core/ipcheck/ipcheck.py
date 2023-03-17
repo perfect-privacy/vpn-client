@@ -71,7 +71,7 @@ class IpCheck(Observable):
                (self.result4.vpn_connected is True  and self.result6.vpn_connected is False)
 
     def _run_check(self):
-        for i in range(15):
+        for i in range(5):
             if self.core.allow_webrequests() is True:
                 break
             time.sleep(1)

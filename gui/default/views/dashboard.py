@@ -168,7 +168,7 @@ class HopListView(PyHtmlView):
             {% endif %}
             {% if pyview.can_add_server()  %}
                 <button style="float:right;margin-right:10px" onclick='pyview.parent.select_server_modal.show()'>Add Server</button>
-            {% endif %}  <!---  if pyview.core.session._should_be_connected.get() == false and ---->
+            {% endif %}  
         </div>
         <table style="width:100%">
             <thead>
