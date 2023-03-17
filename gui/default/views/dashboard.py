@@ -225,26 +225,25 @@ class HopListItemView(PyHtmlView):
                 {% endif %}                
             </td>
             <td>
-                {% if pyview.subject.connection != None and pyview.subject.connection.state.get() != "idle" %}
-                    {% if pyview.subject.should_remove %}
-                        removing
-                    {% else %} 
+                {% if pyview.subject.remove_after_disconnect %}
+                    Removing
+                {% else %} 
+                    {% if pyview.subject.state.get() != "idle" %}
                         {{ pyview.subject.connection.state.get() |title }}
+                    {% else %} 
+                        {% if pyview.subject.session._should_be_connected.get() == True %}
+                            {% if  pyview.subject.last_connection_failed == True %}
+                                <p style="margin-bottom:0px; font-size:1em;color:orange">Connection Failed</p>
+                                <p style="margin-bottom:0px; font-size:0.9em;color:orange">retrying in a few seconds</p>
+                            {% else %}  
+                                 Waiting for connection
+                            {% endif %}   
+                        {% endif %}  
                     {% endif %} 
                 {% endif %} 
-                {% if  pyview.subject.last_connection_failed == True  %}
-                    {% if pyview.subject.connection != None %}
-                        <p style="margin-bottom:0px; font-size:0.9em;color:orange">retrying failed connection</p>
-                    {% else %}
-                          <p style="margin-bottom:0px; font-size:1em;color:orange">Connection Failed</p>
-                          <p style="margin-bottom:0px; font-size:0.9em;color:orange">retrying in a few seconds</p>
-                    {% endif %}
-                {% endif %}       
             </td>
             <td>
-                {% if pyview.core.session._get_number_of_non_idle_connections() != 24  %}
-                    <button onclick='pyview.core.session.remove_hop_by_index( {{ pyview.element_index() }})' >remove</button>
-                {% endif %}
+                <button onclick='pyview.core.session.remove_hop_by_index( {{ pyview.element_index() }})' >remove</button>
             </td>
         </tr>
     '''

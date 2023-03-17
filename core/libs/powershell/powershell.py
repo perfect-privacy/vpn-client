@@ -32,7 +32,7 @@ class Powershell():
         except Exception as e:
             if may_fail is False:
                 try:
-                    result = result.decode("UTF-8")
+                    result = result.decode("UTF-8", errors="replace")
                 except:
                     pass
                 try:

@@ -16,13 +16,14 @@ class ManagementInterfaceParser(Thread):
     _READING_MODE_BULK_LOG = 1
     _READING_MODE_BULK_STATE = 2
 
-    def __init__(self, identifier, socket, username, password, proxy_username=None, proxy_password=None, management_password=""):
+    def __init__(self, connection, identifier, socket, username, password, proxy_username=None, proxy_password=None, management_password=""):
         """
         :type socket: socket.socket
         """
         super(ManagementInterfaceParser, self).__init__()
 
         self._logger = logging.getLogger(self.__class__.__name__ + " ({})".format(identifier))
+        self.connection = connection
         self._socket = socket
         self._username = username
         self._password = password
@@ -36,20 +37,11 @@ class ManagementInterfaceParser(Thread):
 
         self._reading_mode = self._READING_MODE_NORMAL
 
-        self.on_invalid_credentials_detected = Observable()
-        self.on_connection_closed = Observable()
-        self.on_ipv4_local_ip_change = Observable()
-        self.on_ipv4_local_netmask_change = Observable()
-        self.on_ipv4_remote_gateway_change = Observable()
-        self.on_ipv4_dns_servers_change = Observable()
-        self.on_ipv6_local_ip_change = Observable()
-        self.on_ipv6_local_netmask_change = Observable()
-        self.on_ipv6_remote_gateway_change = Observable()
-        self.on_device_change = Observable()
+        self.on_parser_closed = Observable()
         self._send_lock = RLock()
 
     def run(self):
-        self._logger.debug("starting to parse management interface")
+        self._logger.debug("Starting to parse management interface")
         self._send_command(self._management_password)
         try:
             for line in self._get_line_from_socket():
@@ -70,28 +62,24 @@ class ManagementInterfaceParser(Thread):
                 self._logger.debug("closing socket to management interface")
                 self._socket.close()
             except:
-                self._logger.debug("closing socket failed")
+                pass
 
         self.openvpn_state.set(OpenVPNState.OPENVPN_STATE_DISCONNECTED)
 
-        self._logger.debug("parsing management interface finished")
-        self.on_connection_closed.notify_observers()
+        self._logger.debug("Exit parser process")
+        self.on_parser_closed.notify_observers()
 
     def _next_init_step(self):
         if self._init_step == 0:
-            # get pid
-            self._send_command("pid")
+            self._send_command("pid") # get pid
         elif self._init_step == 1:
-            # log in real time and bulk-log all previous log entries
-            self._send_command("log on all")
+            self._send_command("log on all")  # log in real time and bulk-log all previous log entries
         elif self._init_step == 2:
             self._send_command("state on all")
         elif self._init_step == 3:
-            # don't hold on future restart
-            self._send_command("hold off")
+            self._send_command("hold off") # don't hold on future restart
         elif self._init_step == 4:
-            # let openvpn start its business
-            self._send_command("hold release")
+            self._send_command("hold release") # let openvpn start its business
         else:
             self._logger.error("initializing already done, still trying to initialize")
 
@@ -140,80 +128,51 @@ class ManagementInterfaceParser(Thread):
     def _process_line(self, line):
         line = line.strip()
         self._logger.debug(self._replace_secrets(line))
-        device = None
         try:
             if "Opened utun device " in line:
-                device = line.split("Opened utun device ")[1].split(" ")[0].strip()
+                self.connection.interface = line.split("Opened utun device ")[1].split(" ")[0].strip()
             elif "ARP Flush on interface [" in line:
-                device = line.split("ARP Flush on interface [")[1].split("]")[0].strip()
+                self.connection.interface = line.split("ARP Flush on interface [")[1].split("]")[0].strip()
             elif "interface ipv6 set address " in line:
-                device = line.split("interface ipv6 set address ")[1].split(" ")[0].strip()
+                self.connection.interface = line.split("interface ipv6 set address ")[1].split(" ")[0].strip()
             elif " MTU set to " in line:
-                device = line.split(" on interface ")[1].split(" ")[0].strip()
+                self.connection.interface = line.split(" on interface ")[1].split(" ")[0].strip()
         except:
             pass
 
-        if device is not None:
-            self._logger.debug("Selected tun device: \"%s\"" % device)
-            self.on_device_change.notify_observers(interface=device)
-
         if line.startswith(">HOLD:Waiting for hold release"):
             self._next_init_step()
-
         elif line.startswith("SUCCESS: pid="):
             self.pid = int(line.replace("SUCCESS: pid=", "").strip())
             self._next_init_step()
-
         elif line == "SUCCESS: real-time log notification set to ON":
             self._reading_mode = self._READING_MODE_BULK_LOG
-
         elif line == "SUCCESS: real-time state notification set to ON":
             self._reading_mode = self._READING_MODE_BULK_STATE
-
-        elif line == "END":
-            # we only read the log/state in bulk mode on initial "log/state on all" command
+        elif line == "END": # we only read the log/state in bulk mode on initial "log/state on all" command
             if self._reading_mode in [self._READING_MODE_BULK_LOG, self._READING_MODE_BULK_STATE]:
                 self._next_init_step()
-
-            # state: send state changed signal on last change only
-            if self._reading_mode == self._READING_MODE_BULK_STATE:
+            if self._reading_mode == self._READING_MODE_BULK_STATE: # state: send state changed signal on last change only
                 self.openvpn_state.notify_observers()
+            self._reading_mode = self._READING_MODE_NORMAL  # reset reading mode
 
-            # reset reading mode
-            self._reading_mode = self._READING_MODE_NORMAL
-
-        elif (line.startswith(">STATE:")
-                or self._reading_mode == self._READING_MODE_BULK_STATE):
-
+        elif (line.startswith(">STATE:") or self._reading_mode == self._READING_MODE_BULK_STATE):
             (timestamp, openvpn_state, description, tun_tap_ip, remote_ip) = line.replace(">STATE:", "", 1).split(",", 4)
-            # send state changed signal on last change only
-            send_signal = self._reading_mode != self._READING_MODE_BULK_STATE
-
             if (openvpn_state == OpenVPNState.OPENVPN_STATE_RECONNECTING and description == "auth-failure"):
-                # auth-failure: delete user/pass to ask for new one
-                self.openvpn_state.set(openvpn_state)
-                self._logger.debug("invalid credentials")
+                self.openvpn_state.set(openvpn_state)   # auth-failure: delete user/pass to ask for new one
+                self._logger.debug("Server rejected Username/Password")
                 self._username = None
                 self._password = None
-                self.on_invalid_credentials_detected.notify_observers()
             elif openvpn_state == OpenVPNState.OPENVPN_STATE_CONNECTED:
                 pass
             self.openvpn_state.set(openvpn_state)
 
         elif line.startswith(">LOG:") or self._reading_mode == self._READING_MODE_BULK_LOG:
-
             (timestamp, message_type, message) = line.replace(">LOG:", "", 1).split(",", 2)
-            d = datetime.fromtimestamp(int(timestamp))
-            formatted_d = d.strftime("%Y-%m-%d %H:%M:%S")
-            new_line = "[{}] {}".format(formatted_d, message)
-            #self._logger.info(new_line)
-
             if message == "MANAGEMENT: CMD 'state all'":
                 self._reading_mode = self._READING_MODE_BULK_STATE
-
             elif message == "MANAGEMENT: CMD 'hold off'":
                 self._next_init_step()
-
             elif "PUSH_REPLY" in message:
                 reply_message = ""
                 for reply_part in message.split("'"):
@@ -224,20 +183,14 @@ class ManagementInterfaceParser(Thread):
                 dns = []
                 for opt in reply_message.split(","):
                     if opt.startswith("ifconfig "):
-                        cmd,ipv4_local_ip,ipv4_local_netmask = opt.split(" ")
-                        self.on_ipv4_local_ip_change.notify_observers(address=ipv4_local_ip)
-                        self.on_ipv4_local_netmask_change.notify_observers(netmask=ipv4_local_netmask)
+                        cmd, self.connection.ipv4_local_ip, self.connection.ipv4_local_netmask = opt.split(" ")
                     if opt.startswith("route-gateway "):
-                        self.on_ipv4_remote_gateway_change.notify_observers(address=opt.replace("route-gateway ",""))
+                        self.connection.ipv4_remote_gateway = opt.replace("route-gateway ","")
                     if opt.startswith("ifconfig-ipv6 "):
-                        cmd, ipv6_local_ipNM, ipv6_remote_gateway = opt.split(" ")
-                        ipv6_local_ip, ipv6_local_netmask = ipv6_local_ipNM.split("/")
-                        self.on_ipv6_local_ip_change.notify_observers(address=ipv6_local_ip)
-                        self.on_ipv6_local_netmask_change.notify_observers(netmask=ipv6_local_netmask)
-                        self.on_ipv6_remote_gateway_change.notify_observers(address=ipv6_remote_gateway)
-
+                        cmd, ipv6_local_ipNM, self.connection.ipv6_remote_gateway = opt.split(" ")
+                        self.connection.ipv6_local_ip, self.connection.ipv6_local_netmask  = ipv6_local_ipNM.split("/")
                 if dns:
-                    self.on_ipv4_dns_servers_change.notify_observers(dns_servers=dns)
+                    self.ipv4_dns_servers = dns
 
         elif line == ">PASSWORD:Need 'Auth' username/password":
             self._send_command("username \"Auth\" {}".format(self._username))
@@ -255,7 +208,6 @@ class ManagementInterfaceParser(Thread):
             self._send_command("password \"SOCKS Proxy\" {}".format(self._proxy_password))
 
     def request_disconnect(self):
-        # request openvpn to shut down
         self._send_command("signal SIGTERM")
 
     def _replace_secrets(self, string):

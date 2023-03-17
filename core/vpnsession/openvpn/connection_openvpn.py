@@ -30,11 +30,12 @@ class OpenVPNConnection(VPNConnection):
         self._openvpn_process = None
         self._parser = None
 
-        self.servergroup = None
         self.hop_number = 0
         self.type = "openvpn"
+        self.openvpn_device_guid = None
         self.stealth_plugin = None
-
+        self.external_host_protocol = None
+        self.external_host_port = None
 
     def _connect(self, servergroup, hop_number):
 
@@ -49,11 +50,16 @@ class OpenVPNConnection(VPNConnection):
         if self.core.deviceManager is not None:
             if self.hop_number == 1:
                 self.core.deviceManager.update() # check tun/tap adapters
-            interface = self.core.deviceManager.get_device_by_hop(self.hop_number)
-            if interface is None:
+            interfaces = self.core.deviceManager.get_devices()
+            interfaces_in_use = [h.connection.openvpn_device_guid for h in self.core.session.hops if h.connection is not None ]
+            interfaces_avail = [i for i in interfaces if i.guid not in interfaces_in_use]
+            if len(interfaces_avail) == 0:
                 self._logger.error("starting OpenVPN process failed: no device found")
                 self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
                 raise VPNConnectionError()
+            else:
+                interface = interfaces_avail[0]
+                self.openvpn_device_guid = interface.guid
 
         openvpn_tls_method = self.core.settings.vpn.openvpn.tls_method.get()
         openvpn_protocol = self.core.settings.vpn.openvpn.protocol.get()
@@ -71,6 +77,13 @@ class OpenVPNConnection(VPNConnection):
             openvpn_port = self.core.settings.vpn.openvpn.port.get()
 
         if self.hop_number == 1:
+            if PLATFORM == PLATFORMS.macos:
+                os.system("killall pp.obfs4proxy pp.openvpn pp.stunnel")
+            if PLATFORM == PLATFORMS.windows:
+                os.system("TaskKill /IM pp.openvpn.exe /F")
+                os.system("TaskKill /IM pp.obfs4proxy.exe /F")
+                os.system("TaskKill /IM pp.tstunnel.exe /F")
+                os.system("TaskKill /IM pp.plink.exe /F")
             if self.core.settings.stealth.stealth_method.get() == STEALTH_METHODS.ssh:
                 self.stealth_plugin = StealthSSH(self.core, servergroup, servergroup.vpn_server_config.primary_ipv4, openvpn_port)
             elif self.core.settings.stealth.stealth_method.get() == STEALTH_METHODS.http:
@@ -94,22 +107,14 @@ class OpenVPNConnection(VPNConnection):
             self.external_host_port = self.stealth_plugin.external_host_port
         self.external_host_protocol = openvpn_protocol
 
-        if self.hop_number == 1:
-            if PLATFORM == PLATFORMS.macos:
-                os.system("killall pp.obfs4proxy pp.openvpn pp.stunnel")
-            if PLATFORM == PLATFORMS.windows:
-                os.system("TaskKill /IM pp.openvpn.exe /F")
-                os.system("TaskKill /IM pp.obfs4proxy.exe /F")
-                os.system("TaskKill /IM pp.tstunnel.exe /F")
-                os.system("TaskKill /IM pp.plink.exe /F")
-
         self.state.set(VpnConnectionState.CONNECTING, _("Connecting: Starting OpenVPN process"))
 
         if self.stealth_plugin is not None:
             time.sleep(2) # wait some time for firewall
             if self.stealth_plugin.start() is False:
                 self._logger.error("failed to start stealth")
-                self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
+                self._disconnect()
+                #self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
                 raise VPNConnectionError()
 
 
@@ -128,6 +133,7 @@ class OpenVPNConnection(VPNConnection):
             "--remote"    , openvpn_remote_host, str(openvpn_remote_port),
             "--cert"      , "cl.%s.crt" % self.servergroup.vpn_server_config.groupname,
             "--key"       , "cl.%s.key" % self.servergroup.vpn_server_config.groupname,
+            "--tun-mtu"   , "1500",
         ]
 
         if interface is not None:
@@ -136,10 +142,7 @@ class OpenVPNConnection(VPNConnection):
         if openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt:
             args.extend(["--tls-crypt", "ta.tls-crypt.key"])
             args.extend(["--tun-mtu-extra", "32"])
-
-        args.extend(["--tun-mtu", "1500"])
-
-        if openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:
+        elif openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:
             args.extend(["--tls-auth", "ta.tls-auth.%s.key" % self.servergroup.vpn_server_config.groupname, "1"])
             args.extend(["--compress"])
             if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
@@ -161,12 +164,14 @@ class OpenVPNConnection(VPNConnection):
         except OSError as e:  # ie. file not found
             self._logger.error("starting OpenVPN process failed")
             self._logger.debug(str(e))
-            self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
+            self._disconnect()
+            #self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
             raise VPNConnectionError()
         except CalledProcessError as e:  # return_code != 0
             self._logger.error("starting OpenVPN process failed: non-zero exit code {}".format(e.returncode))
             self._logger.debug(str(e))
-            self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
+            self._disconnect()
+            #self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
             raise VPNConnectionError()
 
         self._logger.debug("connecting to management interface")
@@ -175,11 +180,11 @@ class OpenVPNConnection(VPNConnection):
         number_of_attempts = 0
         while number_of_attempts <= 10:
             if self.core.session._should_be_connected is False:
-                self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
+                self._disconnect()
+                #self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
                 return
             try:
                 number_of_attempts += 1
-                self._logger.debug("attempt #{}".format(number_of_attempts))
                 management_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
                 management_socket.connect(("127.0.0.1", management_port))
                 self._logger.debug("attempt #{} succeeded".format(number_of_attempts))
@@ -189,11 +194,13 @@ class OpenVPNConnection(VPNConnection):
                 time.sleep(0.1 * number_of_attempts)
         else:
             self._logger.error("Couldn't connect to management interface: maximum number of retries exceeded")
-            self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
+            self._disconnect()
+            # self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
             raise VPNConnectionError()
 
         self._logger.debug("starting management interface parser")
         self._parser = ManagementInterfaceParser(
+            connection     = self,
             identifier     = self._identifier,
             socket         = management_socket,
             username       = self.core.settings.account.username.get(),
@@ -218,33 +225,15 @@ class OpenVPNConnection(VPNConnection):
     def _connect_parser_signals(self):
         self._logger.debug("connecting parser signals")
         self._parser.openvpn_state.attach_observer(self._on_openvpn_state_changed)
-        self._parser.on_invalid_credentials_detected.attach_observer(self._on_invalid_credentials_detected)
-        self._parser.on_connection_closed.attach_observer(self._on_parser_connection_closed)
-        self._parser.on_ipv4_local_ip_change.attach_observer(self._on_ipv4_local_ip_change)
-        self._parser.on_ipv4_local_netmask_change.attach_observer(self._on_ipv4_local_netmask_change)
-        self._parser.on_ipv4_remote_gateway_change.attach_observer(self._on_ipv4_remote_gateway_change)
-        self._parser.on_ipv4_dns_servers_change.attach_observer(self._on_ipv4_dns_servers_change)
-        self._parser.on_ipv6_local_ip_change.attach_observer(self._on_ipv6_local_ip_change)
-        self._parser.on_ipv6_local_netmask_change.attach_observer(self._on_ipv6_local_netmask_change)
-        self._parser.on_ipv6_remote_gateway_change.attach_observer(self._on_ipv6_remote_gateway_change)
-        self._parser.on_device_change.attach_observer(self._on_device_change)
+        self._parser.on_parser_closed.attach_observer(self._on_parser_closed)
 
     def _disconnect_parser_signals(self):
         self._logger.debug("disconnecting parser signals")
         self._parser.openvpn_state.attach_observer(self._on_openvpn_state_changed)
-        self._parser.on_invalid_credentials_detected.detach_observer(self._on_invalid_credentials_detected)
-        self._parser.on_connection_closed.detach_observer(self._on_parser_connection_closed)
-        self._parser.on_ipv4_local_ip_change.detach_observer(self._on_ipv4_local_ip_change)
-        self._parser.on_ipv4_local_netmask_change.detach_observer(self._on_ipv4_local_netmask_change)
-        self._parser.on_ipv4_remote_gateway_change.detach_observer(self._on_ipv4_remote_gateway_change)
-        self._parser.on_ipv4_dns_servers_change.detach_observer(self._on_ipv4_dns_servers_change)
-        self._parser.on_ipv6_local_ip_change.detach_observer(self._on_ipv6_local_ip_change)
-        self._parser.on_ipv6_local_netmask_change.detach_observer(self._on_ipv6_local_netmask_change)
-        self._parser.on_ipv6_remote_gateway_change.detach_observer(self._on_ipv6_remote_gateway_change)
-        self._parser.on_device_change.detach_observer(self._on_device_change)
+        self._parser.on_parser_closed.detach_observer(self._on_parser_closed)
 
     def _on_openvpn_state_changed(self, sender, **kwargs):
-        self._logger.debug("openvpn connection state changed")
+        self._logger.debug("openvpn connection state changed to %s", sender.get() )
         if sender.is_connecting:
             self.state.set(VpnConnectionState.CONNECTING, VpnConnectionState.CONNECTING)
         elif sender.is_connected:
@@ -252,48 +241,13 @@ class OpenVPNConnection(VPNConnection):
         elif sender.is_disconnecting:
             self.state.set(VpnConnectionState.DISCONNECTING, VpnConnectionState.DISCONNECTING)
         elif sender.is_disconnected:
-            self.state.set(VpnConnectionState.IDLE, VpnConnectionState.IDLE)
+            self._cleanup_processes()
 
-    def _on_invalid_credentials_detected(self, sender):
-        self.on_invalid_credentials_detected.notify_observers()
-
-    def _on_parser_connection_closed(self, sender):
+    def _on_parser_closed(self, sender):
         self._logger.debug("parser connection closed")
         self._disconnect_parser_signals()
-        if  self.stealth_plugin is not None:
-            self.stealth_plugin.stop()
-        self.stealth_plugin = None
-        self.state.set(VpnConnectionState.IDLE, _("Not connected"))
-
-
-    def _on_ipv4_local_ip_change(self, sender, address):
-        self.ipv4_local_ip = address
-
-    def _on_ipv4_local_netmask_change(self, sender, netmask):
-        self.ipv4_local_netmask = netmask
-
-    def _on_ipv4_remote_gateway_change(self, sender, address):
-        self.ipv4_remote_gateway = address
-
-    def _on_ipv4_dns_servers_change(self, sender, dns_servers):
-        self._logger.debug("got new DNS servers: {}".format(dns_servers))
-        self.ipv4_dns_servers = dns_servers
-        #self.on_dns_servers_changed.send(self, dns_servers=self.dns_servers)
-
-    def _on_ipv6_local_ip_change(self, sender, address):
-        self.ipv6_local_ip = address
-
-    def _on_ipv6_local_netmask_change(self, sender, netmask):
-        self.ipv6_local_netmask = netmask
-
-    def _on_ipv6_remote_gateway_change(self, sender, address):
-        self.ipv6_remote_gateway = address
-
-    def _on_remote_ip_available(self, sender, address):
-        self._remote_ip_address = address
-
-    def _on_device_change(self, sender, interface):
-        self.interface = interface
+        self._cleanup_processes()
+        self.state.set(VpnConnectionState.IDLE, VpnConnectionState.IDLE)
 
     def _disconnect(self):
         self._logger.debug("sending disconnect request to openvpn process")
@@ -320,6 +274,17 @@ class OpenVPNConnection(VPNConnection):
         else:
             self._logger.debug("there's no openvpn parser")
 
+        self._cleanup_processes()
+        if self._openvpn_process:
+            if self._openvpn_process.poll() is not None:
+                self._logger.debug("main OpenVPN process (PID {}) exited with return code {}".format( self._openvpn_process.pid, self._openvpn_process.returncode))
+            else:
+                self._logger.error("main OpenVPN process did not exit")
+        else:
+            self._logger.debug("there's no openvpn process")
+        self.state.set(VpnConnectionState.IDLE, _("Not connected"))
+
+    def _cleanup_processes(self):
         try:
             if self._openvpn_process and self._openvpn_process.poll() is None:
                 self._logger.debug("waiting for openvpn process to finish")
@@ -342,14 +307,7 @@ class OpenVPNConnection(VPNConnection):
         if  self.stealth_plugin is not None:
             self.stealth_plugin.stop()
 
-        if self._openvpn_process:
-            if self._openvpn_process.poll() is not None:
-                self._logger.debug("main OpenVPN process (PID {}) exited with return code {}".format( self._openvpn_process.pid, self._openvpn_process.returncode))
-            else:
-                self._logger.error("main OpenVPN process did not exit")
-        else:
-            self._logger.debug("there's no openvpn process")
-            self.state.set(VpnConnectionState.IDLE, _("Not connected"))
+
 
 
     def __repr__(self):

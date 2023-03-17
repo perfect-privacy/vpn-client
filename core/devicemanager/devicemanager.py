@@ -54,6 +54,23 @@ class DeviceManager(Observable):
     def _on_driver_changed(self,event):
         self.update_async()
 
+
+    def get_devices(self):
+        driver = self.core.settings.vpn.openvpn.driver.get()
+        if driver == OPENVPN_DRIVER.wintun:
+            try:
+                return self.wintun_devices
+            except:
+                pass
+            return None
+        else:
+            try:
+                return self.tapwindows_devices
+            except:
+                pass
+        return []
+
+
     def get_device_by_hop(self, hopnr):
         driver = self.core.settings.vpn.openvpn.driver.get()
         if driver == OPENVPN_DRIVER.wintun:

@@ -1,4 +1,5 @@
 import logging
+import threading
 from threading import RLock
 from .connection_state import VpnConnectionState
 from pyhtmlgui import Observable
@@ -7,11 +8,12 @@ class VPNConnection(Observable):
 
     def __init__(self, identifier, core):
         super().__init__()
-        self._logger = logging.getLogger(self.__class__.__name__ + " ({})".format(identifier))
         self._identifier = identifier
         self.core = core
+        self._logger = logging.getLogger(self.__class__.__name__ + " ({})".format(identifier))
         self.state = VpnConnectionState()
 
+        self.servergroup = None
         self.hop_number = None
         self.external_host_ip  = None
         self.interface = None
@@ -19,14 +21,14 @@ class VPNConnection(Observable):
         self.ipv4_local_ip       = None  # local vpn adapter ipv4
         self.ipv4_local_netmask  = None  # local vpn adapter netmask
         self.ipv4_remote_gateway = None  # vpn adapter gateway ipv4 (a 10.x.x.x ip on vpn server)
-        self.ipv4_dns_servers    = []    # dns servers pushed by openvpn server
+        self.ipv4_dns_servers    = []    # dns servers pushed by server
+
         self.ipv6_local_ip       = None  # local vpn adapter ipv6
         self.ipv6_local_netmask  = None  # local vpn adapter netmask
         self.ipv6_remote_gateway = None  # vpn adapter gateway ipv6 (a 10.x.x.x ip on vpn server)
 
 
         self._connect_disconnect_lock = RLock()
-        self.on_invalid_credentials_detected = Observable()
 
     def connect(self, servergroup, hop_number):
         self._logger.info("connecting VPN")
@@ -36,6 +38,16 @@ class VPNConnection(Observable):
                 raise VPNConnectionError()
             self.hop_number = hop_number
             self._connect(servergroup, hop_number)
+
+    def disconnect_async(self):
+        if self.state.get() == VpnConnectionState.IDLE:
+            self._logger.warning("disconnecting cancelled: VPN is already inactive")
+            return
+        elif self.state.get() == VpnConnectionState.DISCONNECTING:
+            self._logger.warning("disconnecting cancelled: VPN is already disconnecting")
+            return
+        t = threading.Thread(target=self.disconnect, daemon=True)
+        t.start()
 
     def disconnect(self):
         self._logger.info("disconnecting")
