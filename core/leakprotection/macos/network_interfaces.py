@@ -1,5 +1,10 @@
+import traceback
+
 from core.libs.subcommand import SubCommand
 import random
+
+from core.libs.web.reporter import ReporterInstance
+
 
 class NetworkInterface():
     def __init__(self, core, name, all_ipv4_dns_servers, all_ipv6_dns_servers):
@@ -9,11 +14,13 @@ class NetworkInterface():
         self.dns_servers_v6 = []
         self.all_ipv4_dns_servers = all_ipv4_dns_servers
         self.all_ipv6_dns_servers = all_ipv6_dns_servers
+        self.ipv6 = []
+        self.ipv4 = []
         self.dnsleakprotection_enabled = False
 
     def enableDnsLeakProtection(self):
         dnsservers = []
-        if self.core.settings.leakprotection.use_custom_dns_servers.get() is True:
+        if self.core is not None and self.core.settings.leakprotection.use_custom_dns_servers.get() is True:
             dnsservers = [self.core.settings.leakprotection.custom_dns_server_1.get(), self.core.settings.leakprotection.custom_dns_server_2.get()]
             dnsservers = [x.strip() for x in dnsservers if x.strip() != ""]
             dnsservers.sort()
@@ -44,12 +51,6 @@ class NetworkInterface():
             _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setdnsservers'   , self.name, "Empty"])
             _, _, _ = SubCommand().run('/usr/sbin/networksetup', args=['-setsearchdomains', self.name, "Empty"] )
 
-    def disableIpv6(self):
-        success, stdout, stderr = SubCommand().run("/usr/sbin/networksetup", args=["-setv6off", self.name])
-
-    def enableIpv6(self):
-        success, stdout, stderr = SubCommand().run("/usr/sbin/networksetup", args=["-setv6automatic", self.name])
-
     def __str__(self):
         data = []
         data.append("name: %s" % self.name)
@@ -72,6 +73,7 @@ class NetworkInterfaces():
             all_ipv4_dns_servers = []
             all_ipv6_dns_servers = []
 
+        # ifconfig
 
         self.networkinterfaces = []
         success, stdout, stderr = SubCommand().run("/usr/sbin/networksetup", args=["-listallnetworkservices"])
@@ -92,6 +94,23 @@ class NetworkInterfaces():
                         elif "." in line:
                             ni.dns_servers_v4.append(line.strip())
 
+    def disableIpv6(self):
+        success, stdout, stderr = SubCommand().run("ifconfig")
+        stdout = stdout.decode("utf-8").replace("\t", " ").replace("  ", " ")
+        while "  " in stdout:
+            stdout = stdout.replace("  ", " ")
+        interface = ""
+        for line in stdout.split("\n"):
+            try:
+                if line.startswith(" inet6 ") and interface != "":
+                    ipv6 = line.split("inet6 ")[1].split(" ")[0].split("%")[0]
+                    if ipv6.startswith("2") or ipv6.startswith("3"):
+                        SubCommand().run("ifconfig", args=[interface, "inet6", "delete", ipv6])
+                elif not line.startswith(" ") and ": " in line:
+                    interface = line.split(": ")[0].strip()
+            except Exception as e:
+                ReporterInstance.report("disable_ipv6_failed", traceback.format_exc())
+
     def enableDnsLeakProtection(self):
         for interface in self.networkinterfaces:
             interface.enableDnsLeakProtection()
@@ -99,11 +118,5 @@ class NetworkInterfaces():
     def disableDnsLeakProtection(self):
         for interface in self.networkinterfaces:
             interface.disableDnsLeakProtection()
-
-    def disableIpv6(self):
-        for interface in self.networkinterfaces:
-            interface.disableIpv6()
-
     def enableIpv6(self):
-        for interface in self.networkinterfaces:
-            interface.enableIpv6()
+        pass # do nothing, ipv6 will come back if anouncements are no longer blocked

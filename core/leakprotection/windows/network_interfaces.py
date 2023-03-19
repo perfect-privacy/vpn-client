@@ -36,7 +36,10 @@ class NetworkInterface():
         new_dnsservers_v4 = []
         new_dnsservers_v6 = []
         if self.ipenabled is True:
-            interfaces = [h.connection.interface for h in self.core.session.hops if h.connection is not None and h.connection.interface is not None]
+            if self.core is not None:
+                interfaces = [h.connection.interface for h in self.core.session.hops if h.connection is not None and h.connection.interface is not None]
+            else:
+                interfaces = []
             if self.interfaceIndex in interfaces:
                 if self.core.settings.leakprotection.use_custom_dns_servers.get() is True:
                     dnsservers = [self.core.settings.leakprotection.custom_dns_server_1.get(), self.core.settings.leakprotection.custom_dns_server_2.get()]

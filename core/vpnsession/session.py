@@ -91,7 +91,7 @@ class SessionHop(Observable):
             if self.selected_server is not None:
                 self.selected_server.last_connection_failed = False
 
-        self._logger.debug("Connection state changed for Hop %s, %s" % (self.servergroup.name, new_state))
+        self._logger.debug("Connection state changed for Hop %s, %s, %s" % (self.hopnumber, self.servergroup.name, new_state))
         self.session.core.check_connection()
         self.notify_observers()
 
@@ -124,9 +124,7 @@ class Session(Observable):
             self._should_be_connected.set(True)
 
         self.state = SessionState()
-        self.state.attach_observer(self._on_state_changed)
 
-        self.last_state_change_time = None
         self._number_of_connected_clients = 0
 
         if self._hops_stored.get() is not None:
@@ -138,10 +136,6 @@ class Session(Observable):
         self._hops_stored.set(",".join([hop.servergroup.identifier for hop in self.hops]))
 
         self._controller_thread = Thread(target=self._long_running_controller_thread, daemon=True)
-
-    def _on_state_changed(self, sender, new_state, **kwargs):
-        self._logger.debug("connection controller state changed: {}".format(new_state))
-        self.last_state_change_time = datetime.now()
 
     def _on_hop_changed(self, sender, **kwargs):
         if sender.remove_after_disconnect is True and sender.state.get() == VpnConnectionState.IDLE:
@@ -176,16 +170,13 @@ class Session(Observable):
                     else:
                         self._logger.error("couldn't exit controller: there are still connections alive")
 
-
                 if self._should_be_connected.get() == True and self._running:
 
                     if self._get_number_of_connected_vpn_connections() != len(self.hops):
-                        self._logger.info("connecting")
-
                         if self._get_number_of_non_idle_connections() == 0:
-                            self.state.set(SessionState.CONNECTING,"Connecting to %s" % ",".join([hop.servergroup.name for hop in self.hops]))
+                            self.state.set(SessionState.CONNECTING,"Connecting to %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
                         else:
-                            self.state.set(SessionState.CONNECTING,"Reconnecting to %s" % ",".join([hop.servergroup.name for hop in self.hops]))
+                            self.state.set(SessionState.CONNECTING,"Reconnecting to %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
 
                         if len(self.hops) > 0:
                             try:
@@ -193,23 +184,21 @@ class Session(Observable):
                             except Exception as e:
                                 self._logger.debug(traceback.format_exc())
                                 self._logger.error("unable to create the cascade: {}".format(e))
-                                self.state.set(SessionState.CONNECTING, "Unable to connect %s" % ",".join([hop.servergroup.name for hop in self.hops]))
+                                self.state.set(SessionState.CONNECTING, "Unable to connect %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
                             else:
                                 try:
-                                    self._logger.debug("connecting all")
+                                    self._logger.debug("Connecting all")
                                     self._connect_all()
-                                    self._logger.debug("all connected")
+                                    self._logger.debug("All hops connected")
                                 except VPNConnectionError:
-                                    self._logger.info("connecting failed, retrying in a few moments")
+                                    self._logger.info("Connecting failed, retrying in a few moments")
                                     self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
                                 except:
-                                    self._logger.info("connecting failed, retrying in a few moments")
-                                    self._logger.debug(traceback.format_exc())
+                                    self._logger.debug("Connecting failed, retrying in a few moments %s" % traceback.format_exc())
                                     self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
                                     self._disconnect_all()
                                 else:
-                                    self._logger.info("all connected")
-                                    self.state.set(SessionState.CONNECTED, "Connection established to %s" % ",".join([hop.servergroup.name for hop in self.hops]))
+                                    self.state.set(SessionState.CONNECTED, "Connection established to %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
 
                         else:
                             self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
@@ -221,8 +210,8 @@ class Session(Observable):
 
                 else:
                     if self._get_number_of_non_idle_connections() != 0:
-                        self._logger.info("disconnecting")
-                        self.state.set(SessionState.DISCONNECTING, "Disconnecting from %s" % ",".join([hop.servergroup.name for hop in self.hops]))
+                        self._logger.info("Disconnecting")
+                        self.state.set(SessionState.DISCONNECTING, "Disconnecting from %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
                         self._disconnect_all()
                         if self._get_number_of_non_idle_connections() == 0:
                             self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
@@ -231,14 +220,13 @@ class Session(Observable):
                         self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
 
             except Exception as e:
-                self._logger.error("unexpected exception: {}".format(e))
-                self._logger.debug(traceback.format_exc())
+                self._logger.error("Unexpected exception: %s" % traceback.format_exc())
 
             if self._running is True:
                 self._controller_thread_wakeup_event.wait(timeout=5)
                 self._controller_thread_wakeup_event.clear()
 
-        self._logger.debug("stopped")
+        self._logger.debug("ControllerThread exited")
 
     def get_random_paths(self, hop_list, limit = 1):
         vpn_servers_per_hop = []
@@ -278,7 +266,7 @@ class Session(Observable):
     def _update_low_level_cascade(self):
         paths = self.get_random_paths(self.hops,limit=1)
         if not paths:
-            raise Exception("couldn't find a valid cascade for the selected locations")
+            raise Exception("Couldn't find a valid cascade for the selected locations")
         path = random.choice(paths)
         self._logger.debug("Selected path %s" % path)
         i = 0
@@ -332,16 +320,17 @@ class Session(Observable):
             del self.hops[index]
             self._hops_stored.set(",".join([hop.servergroup.identifier for hop in self.hops]))
             self.notify_observers()
-
-        if len(self.hops)-1 == 0 and self._should_be_connected.get() is True:
-            self._should_be_connected.set(False)
+            if len(self.hops) == 0 and self._should_be_connected.get() is True:
+                self._should_be_connected.set(False)
+        else:
+            if len(self.hops)-1 == 0 and self._should_be_connected.get() is True:
+                self._should_be_connected.set(False)
 
         for hop in self.hops[index:]:
             try:
                 hop.disconnect(asyncr=True)
             except:
                 pass
-
         self._controller_thread_wakeup_event.set()
 
     def _get_number_of_non_idle_connections(self):
@@ -351,7 +340,7 @@ class Session(Observable):
         return len([hop for hop in self.hops if hop.state.get() ==  VpnConnectionState.CONNECTED ])
 
     def _disconnect_all(self):
-        self._logger.debug("disconnecting all")
+        self._logger.debug("Disconnecting all hops")
         for hop in reversed(self.hops):
             try:
                 hop.disconnect(asyncr=True)
@@ -379,7 +368,7 @@ class Session(Observable):
                 self._logger.debug("Hop #{} ({}) is already connected".format(hop_number, hop.selected_server.name))
                 continue
 
-            self._logger.debug("connecting to hop #{} ({})".format(hop_number, hop.selected_server.name))
+            self._logger.debug("Connecting to hop #{} ({})".format(hop_number, hop.selected_server.name))
 
             if hop_number > 1:  # wait on lower hops to get stable
                 time.sleep(3)
@@ -402,7 +391,7 @@ class Session(Observable):
                     break
                 if time.time() - started_waiting >= CONNECT_TIMEOUT:
                     break
-                self._logger.debug("waiting for state change")
+                self._logger.debug("Waiting for connection state change")
                 time.sleep(3)
 
             if hop.state.get() != VpnConnectionState.CONNECTED:
@@ -430,16 +419,16 @@ class Session(Observable):
         self._controller_thread.start()
 
     def quit(self):
-        self._logger.debug("quit")
+        self._logger.debug("Exiting session")
         self._running = False
         #self.disconnect() # don't call disconnect here, disconnect is for user button and sets self._should_be_connected to false,
         #we don't want that on quit, only us user explicitly reqested a disconnect, firewall and other stuff use _should_be_connected to determine what they should do
 
         self._controller_thread_wakeup_event.set()
 
-        self._logger.debug("waiting for controller thread to shut down")
+        self._logger.debug("Waiting for controller thread to shut down")
         self._controller_thread.join(20)
         if self._controller_thread.is_alive():
-            self._logger.error("controller thread didn't shut down within 20 seconds")
+            self._logger.error("Controller thread didn't shut down within 20 seconds")
         else:
-            self._logger.debug("controller thread did shut down successfully")
+            self._logger.debug("Controller thread did shut down successfully")

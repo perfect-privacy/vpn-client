@@ -10,7 +10,7 @@ class RemoteProperty(Observable):
     def set(self, value):
         if self.value != value:
             self.value = value
-            self.queue.put({self.key: self.value})
+            self.queue.update({self.key: self.value})
             self.notify_observers()
 
     def get(self):

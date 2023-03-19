@@ -125,7 +125,7 @@ class PortForwardingView(PyHtmlView):
                         <div class="row">
                             <div class="col-9">1-to-1 Port Forwarding</div>
                             <div class="col-3">
-                                <button onclick='pyview.subject.userapi.customPortForwardings.add_one_to_one($("#select_servergroup").val() )'> add </button>
+                                <button onclick='pyview.subject.userapi.customPortForwardings.add_one_to_one($("#select_servergroup_input").val() )'> add </button>
                             </div>
                         </div>
                     {% endif %}

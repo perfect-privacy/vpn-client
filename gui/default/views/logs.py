@@ -6,11 +6,9 @@ import re
 class LogsView(PyHtmlView):
     TEMPLATE_STR = '''
         <div class="inner">
-            <button style="float:right" onclick='pyview.copy_to_clipboard()'>To Clipboard</button>
-            <button style="float:right" onclick='pyview.clear_log()'>Clear</button>
-            <h1 style="float:left">
-                Internal Log
-            </h1>           
+            <button style="float:right" onclick='pyview.copy_to_clipboard()'> To Clipboard </button>
+            <button style="float:right" onclick='pyview.clear_log()'> Clear </button>
+            <h1 style="float:left"> Internal Log </h1>           
             <input id="filter_str" type="text" onkeyup="pyview.set_filter(document.getElementById('filter_str').value)" value="{{filter_str}}" placeholder="filter"> </input>
             <div  style="max-height: 100vh;overflow: auto;margin-bottom: 30px;">
                 {{ pyview.log.render() }}
@@ -19,10 +17,6 @@ class LogsView(PyHtmlView):
     '''
 
     def __init__(self, subject, parent):
-        """
-        :type subject: core.Core
-        :type parent: gui.default.components.mainview.MainView
-        """
         super(LogsView, self).__init__(subject, parent)
         self.log = ObservableListView(subject.global_logger.logs, self, filter_function=lambda x:self._filter(x), item_class=LogListItem)
         self.filter_str = ""

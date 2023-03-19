@@ -19,7 +19,8 @@ from .windows.firewallrules import \
     FirewallRuleBlockSnmpUpnp_UDP, \
     FirewallRuleBlockSnmpUpnp_TCP, \
     FirewallRuleBlockDefaultGateway, \
-    FirewallRuleBlockDNS,\
+    FirewallRuleBlockDNS_TCP,\
+    FirewallRuleBlockDNS_UDP,\
     FirewallRuleBlockIpv6RouteAnnouncements,\
     FirewallRuleBlockIpv6Dhcp, \
     FirewallReset
@@ -50,7 +51,8 @@ class LeakProtection_windows(LeakProtection_Generic):
         self.firewallRuleBlockSnmpTcp = FirewallRuleBlockSnmpUpnp_TCP()
         self.firewallRuleBlockSnmpUdp = FirewallRuleBlockSnmpUpnp_UDP()
         self.firewallRuleBlockDefaultGateway = FirewallRuleBlockDefaultGateway()
-        self.firewallRuleBlockDNS = FirewallRuleBlockDNS()
+        self.firewallRuleBlockDNS_TCP = FirewallRuleBlockDNS_TCP()
+        self.firewallRuleBlockDNS_UDP = FirewallRuleBlockDNS_UDP()
         self.firewallRuleBlockIpv6RouteAnnouncements = FirewallRuleBlockIpv6RouteAnnouncements()
         self.firewallRuleBlockIpv6Dhcp = FirewallRuleBlockIpv6Dhcp()
         self.firewallReset = FirewallReset()
@@ -70,7 +72,8 @@ class LeakProtection_windows(LeakProtection_Generic):
             self.firewallRuleBlockSnmpTcp,
             self.firewallRuleBlockSnmpUdp,
             self.firewallRuleBlockDefaultGateway,
-            self.firewallRuleBlockDNS,
+            self.firewallRuleBlockDNS_TCP,
+            self.firewallRuleBlockDNS_UDP,
             self.firewallRuleBlockIpv6RouteAnnouncements,
             self.firewallRuleBlockIpv6Dhcp,
         ]
@@ -164,9 +167,12 @@ class LeakProtection_windows(LeakProtection_Generic):
         # DNS leak protection
         if self.core.settings.leakprotection.enable_dnsleak_protection.get() is True:
             self.networkInterfaces.enableDnsLeakProtection()
+            self.firewallRuleBlockDNS_TCP.enable()
+            self.firewallRuleBlockDNS_UDP.enable()
         else:
             self.networkInterfaces.disableDnsLeakProtection()
-
+            self.firewallRuleBlockDNS_TCP.disable()
+            self.firewallRuleBlockDNS_UDP.disable()
 
     def _disable(self):
         self.networkInterfaces = NetworkInterfaces(self.core)

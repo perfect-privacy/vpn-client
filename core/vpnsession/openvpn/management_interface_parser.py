@@ -66,8 +66,8 @@ class ManagementInterfaceParser(Thread):
 
         self.openvpn_state.set(OpenVPNState.OPENVPN_STATE_DISCONNECTED)
 
-        self._logger.debug("Exit parser process")
         self.on_parser_closed.notify_observers()
+        self._logger.debug("Exited parser process")
 
     def _next_init_step(self):
         if self._init_step == 0:

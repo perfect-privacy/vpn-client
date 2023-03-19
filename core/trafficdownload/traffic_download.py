@@ -32,8 +32,8 @@ class TrafficDownloadState():
 
 class TrafficDownload(Observable):
 
-    def __init__(self, core, min_check_interval_seconds=20,
-                 max_check_interval_seconds=60*60,
+    def __init__(self, core, min_check_interval_seconds=30,
+                 max_check_interval_seconds=2*60*60,
                  err_check_interval_seconds=10*60):
         self._logger = logging.getLogger(self.__class__.__name__)
         self.core = core
@@ -60,7 +60,7 @@ class TrafficDownload(Observable):
     def _download(self):
 
         if self.state != TrafficDownloadState.IDLE:
-            self._logger.debug("can not start traffic download: not idle")
+            self._logger.debug("Can not start traffic download: not idle")
             return
         if  self.core.allow_webrequests() is False:
             return
@@ -90,14 +90,12 @@ class TrafficDownload(Observable):
 
 
     def enable(self):
-        self._logger.debug("enabling")
         self._timer.interval = self._min_check_interval_seconds
         self._timer.enable()
         self.next_check = math.floor(self._timer.last_call_timestamp + self._timer.interval)
         self.notify_observers()
 
     def disable(self):
-        self._logger.debug("disabling")
         self._timer.disable()
         self.next_check = None
         self.notify_observers()

@@ -134,7 +134,7 @@ class FirewallRuleAllowNetworkingLan(FirewallRule):
         self.description = self.name
         self.action = NET_FW_ACTION_ALLOW
         self.direction = NET_FW_RULE_DIR_OUT
-        self.remote_addresses = ["10.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12","192.168.0.0/16"]
+        self.remote_addresses = ["10.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12","192.168.0.0/16", "fe80::/64", "ff01::/16", "ff02::/16"]
         super().__init__()
 
 class FirewallRuleAllowFromVpnLocalIps(FirewallRule):
@@ -291,47 +291,27 @@ class FirewallRuleBlockSnmpUpnp_TCP(FirewallRule):
         self.protocol = NET_FW_IP_PROTOCOL_TCP
         super().__init__()
 
-class FirewallRuleBlockDNS(): # currently not in use
+class FirewallRuleBlockDNS_UDP(FirewallRule):
     def __init__(self):
-        self.tcp_rule = _FirewallRuleBlockDNS_TCP()
-        self.udp_rule = _FirewallRuleBlockDNS_UDP()
-
-    def enable(self, ips):
-        self.tcp_rule.enable(ips)
-        self.udp_rule.enable(ips)
-
-    def disable(self):
-        self.tcp_rule.disable()
-        self.udp_rule.disable()
-
-    def exists(self):
-        return self.tcp_rule.exists() and self.udp_rule.exists()
-
-class _FirewallRuleBlockDNS_UDP(FirewallRule):
-    def __init__(self):
-        self.name = "Perfect Privacy - Block unknown DNS servers, UDP"
+        self.name = "Perfect Privacy - Block local DNS servers, UDP"
         self.description = self.name
         self.action = NET_FW_ACTION_BLOCK
         self.direction = NET_FW_RULE_DIR_OUT
         self.remote_ports = ["53"]
         self.protocol = NET_FW_IP_PROTOCOL_UDP
+        self.remote_addresses = ["10.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12","192.168.0.0/16", "fe80::/64", "ff01::/16", "ff02::/16"]
         super().__init__()
 
-    def enable(self, ips):
-        self.remote_addresses = ips
-
-class _FirewallRuleBlockDNS_TCP(FirewallRule):
+class FirewallRuleBlockDNS_TCP(FirewallRule):
     def __init__(self):
-        self.name = "Perfect Privacy - Block unknown DNS servers, TCP"
+        self.name = "Perfect Privacy - Block local DNS servers, TCP"
         self.description = self.name
         self.action = NET_FW_ACTION_BLOCK
         self.direction = NET_FW_RULE_DIR_OUT
         self.remote_ports = ["53"]
         self.protocol = NET_FW_IP_PROTOCOL_TCP
+        self.remote_addresses = ["10.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12","192.168.0.0/16", "fe80::/64", "ff01::/16", "ff02::/16"]
         super().__init__()
-
-    def enable(self, ips):
-        self.remote_addresses = ips
 
 class FirewallRuleBlockIpv6RouteAnnouncements(FirewallRule):
     def __init__(self):
@@ -362,8 +342,6 @@ class FirewallRuleBlockIpv6Dhcp(FirewallRule):
         self.local_ports = [546]
         super().__init__()
 
-
-# tcp port 1723
 
 class FirewallRuleAllowIpSecUDP(FirewallRule):
     def __init__(self):
