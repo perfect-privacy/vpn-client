@@ -1,4 +1,5 @@
 import logging
+import threading
 from threading import RLock, Thread, Event
 from datetime import datetime, timedelta
 import json
@@ -25,6 +26,76 @@ class UserAPIError(Exception):
 PortForwarding = namedtuple("PortForwarding", "pf_id, server_group_name, src_port, dest_port, valid_until")
 
 
+
+class RequestQueue():
+    def __init__(self):
+        self.requests = []
+        self._lock = threading.Lock()
+        self._wakeup_event = threading.Event()
+        self.is_active = True
+
+    def close(self):
+        self.is_active = False
+        self._wakeup_event.set()
+
+    def get(self, timeout=None):
+        self._wakeup_event.wait(timeout)
+        self._wakeup_event.clear()
+        if self.is_active is False:
+            return None
+        self._lock.acquire()
+        try:
+            r = {}
+            for request in self.requests[:]:
+                for key in [k for k in request.keys()]:
+                    if key not in r:
+                        r[key] = request[key]
+                        del request[key]
+                    else:
+                        break
+                if len(request.keys()) == 0:
+                    self.requests.remove(request)
+            if len(self.requests) > 0:
+                self._wakeup_event.set()
+        finally:
+            self._lock.release()
+        return r
+
+    def cancel(self, key_value_dict):
+        self._lock.acquire()
+        try:
+            for key in key_value_dict:
+                exiting_requests = [r for r in self.requests if key in r]
+                for exiting_request in exiting_requests:
+                    if exiting_request[key] == key_value_dict[key]:
+                        self.requests.remove(exiting_request)
+        finally:
+            self._lock.release()
+        self._wakeup_event.set()
+
+    def put(self, key_value_dict):
+        self._lock.acquire()
+        try:
+            self.requests.append(key_value_dict)
+        finally:
+            self._lock.release()
+        self._wakeup_event.set()
+
+    def update(self, key_value_dict):
+        self._lock.acquire()
+        try:
+            for key in key_value_dict:
+                exiting_requests = [r for r in self.requests if key in r]
+                if len(exiting_requests) > 0:
+                    for exiting_request in exiting_requests:
+                        exiting_request[key] = key_value_dict[key]
+                else:
+                    self.requests.append({key: key_value_dict[key]})
+        finally:
+            self._lock.release()
+        self._wakeup_event.set()
+
+
 class UserAPI(Observable):
 
     def __init__(self, core):
@@ -42,7 +113,7 @@ class UserAPI(Observable):
         self._server_groups = ObservableList()
         self._server_groups_last_checked = 0
 
-        self.request_queue = queue.Queue()
+        self.request_queue = RequestQueue()
         self.trackstop = TrackStop(self.request_queue)
         self.customPortForwardings = CustomPortForwardings(self.request_queue)
         self.valid_until   = RemoteProperty("validUntil", self.request_queue,readonly=True,)
@@ -69,17 +140,20 @@ class UserAPI(Observable):
         self.request_update()
 
     def shutdown(self):
-        self.request_queue.put(None)
+        self.request_queue.close()
         self._worker_thread_running = False
         self._worker_thread.join(timeout=10)
         if self._worker_thread.is_alive():
-            self._logger.error("unable to shut down worker thread")
+            self._logger.error("Unable to shut down worker thread")
 
     def request_update(self):
         self.request_queue.put({})
 
     def _worker(self):
         while self._worker_thread_running:
+            while self.core.allow_webrequests() is False and self._worker_thread_running is True:
+                time.sleep(2)
+
             request = self.request_queue.get()
             if request is None:
                 break
@@ -87,6 +161,7 @@ class UserAPI(Observable):
                 if item is False: request[key] = 0
                 if item is True: request[key] = 1
             try:
+                #self._logger.debug("Requesting from API: %s" % request)
                 payload, response = self._request_api(request)
                 self._handle_api_response(payload, response)
             except UserAPIError as e:
@@ -99,7 +174,7 @@ class UserAPI(Observable):
         password = self.unvalidated_password if self.unvalidated_password != "" else self.core.settings.account.password.get()
 
         if username is None or username == "" or password is None or password == "":
-            self._logger.debug("credentials not set. ")
+            self._logger.debug("Credentials not set. ")
             self.credentials_valid.set(None)
             raise UserAPIError()
 
@@ -154,28 +229,46 @@ class UserAPI(Observable):
         self._response_get_server_groups(request, response)
         self._actual_values = response
 
-        if "customPorts" in response:
+        all_requested = False
+        if len(request.keys()) == 2: # only username and password send
+            all_requested = True
+
+        if "customPorts" in response and ("setPortForwarding" in request or "deletePortForwarding" in request or all_requested is True):
             self.customPortForwardings.update(response["customPorts"])
+
         if "trackstop" in response:
-            self.trackstop.update(response["trackstop"])
+            if "blockkids" in request or all_requested is True:
+                self.trackstop.block_kids.update(response["trackstop"]["kids"])
+            if "blockads" in request or all_requested is True:
+                self.trackstop.block_social.update(response["trackstop"]["ads"])
+            if "blockfraud" in request or all_requested is True:
+                self.trackstop.block_fraud.update(response["trackstop"]["fraud"])
+            if "blockfakenews" in request or all_requested is True:
+                self.trackstop.block_fakenews.update(response["trackstop"]["fakenews"])
+            if "blockfacebook" in request or all_requested is True:
+                self.trackstop.block_facebook.update(response["trackstop"]["facebook"])
+            if "blockgoogle" in request or all_requested is True:
+                self.trackstop.block_google.update(response["trackstop"]["google"])
+            if "blocksocial" in request or all_requested is True:
+                self.trackstop.block_social.update(response["trackstop"]["social"])
 
         if "validUntil" in response:
             self.valid_until.update(response["validUntil"])
         if "emailAddress" in response:
             self.email_address.update(response["emailAddress"])
 
-        if "randomExit" in response:
+        if "randomExit" in response and ("randomExit" in request or all_requested is True):
             self.random_exit_ip.update(response["randomExit"])
-        if "neuroRouting" in response:
+        if "neuroRouting" in response and ("neuroRouting" in request or all_requested is True):
             self.neuro_routing.update(response["neuroRouting"])
-        if "defaultPortForwarding" in response:
+        if "defaultPortForwarding" in response and ("defaultPortForwarding" in request or all_requested is True):
             self.default_port_forwarding.update(response["defaultPortForwarding"])
 
-        if "autorenew_pf" in response:
+        if "autorenew_pf" in response and ("autorenew_pf" in request or all_requested is True):
             self.auto_renew_port_forwarding.update(response["autorenew_pf"])
-        if "emailPortForwarding" in response:
+        if "emailPortForwarding" in response and ("emailPortForwarding" in request or all_requested is True):
             self.email_port_forwarding_updates.update(response["emailPortForwarding"])
-        if "pgpOnly" in response:
+        if "pgpOnly" in response and ("pgpOnly" in request or all_requested is True):
             self.gpg_mail_only.update(response["pgpOnly"])
 
         if self.unvalidated_password != "" and self.unvalidated_username != "":

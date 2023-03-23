@@ -212,7 +212,7 @@ class Core(Observable):
                     </plist>
                 '''
                 with open("/Library/LaunchAgents/perfect-privacy.plist", "w") as f:
-                    f.write(s.replace("\n                    ",""))
+                    f.write(s.replace("\n                    ","\n"))
                 os.system('launchctl bootstrap system "/Library/LaunchAgents/perfect-privacy.plist"')
 
     def _on_credentials_updated(self, sender):

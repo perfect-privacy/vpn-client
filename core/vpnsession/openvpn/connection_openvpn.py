@@ -161,27 +161,17 @@ class OpenVPNConnection(VPNConnection):
 
         try:
             self._openvpn_process = subprocess.Popen(args, start_new_session=True)
-        except OSError as e:  # ie. file not found
-            self._logger.error("starting OpenVPN process failed")
-            self._logger.debug(str(e))
+        except Exception as e:
+            self._logger.error("Starting OpenVPN process failed: %s" % str(e))
             self._disconnect()
-            #self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
-            raise VPNConnectionError()
-        except CalledProcessError as e:  # return_code != 0
-            self._logger.error("starting OpenVPN process failed: non-zero exit code {}".format(e.returncode))
-            self._logger.debug(str(e))
-            self._disconnect()
-            #self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
             raise VPNConnectionError()
 
-        self._logger.debug("connecting to management interface")
         self.state.set(VpnConnectionState.CONNECTING, _("Connecting: Connecting to management interface"))
 
         number_of_attempts = 0
         while number_of_attempts <= 10:
             if self.core.session._should_be_connected is False:
                 self._disconnect()
-                #self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
                 return
             try:
                 number_of_attempts += 1
@@ -195,10 +185,8 @@ class OpenVPNConnection(VPNConnection):
         else:
             self._logger.error("Couldn't connect to management interface: maximum number of retries exceeded")
             self._disconnect()
-            # self.state.set(VpnConnectionState.IDLE, _("Connecting failed"))
             raise VPNConnectionError()
 
-        self._logger.debug("starting management interface parser")
         self._parser = ManagementInterfaceParser(
             connection     = self,
             identifier     = self._identifier,
@@ -223,17 +211,15 @@ class OpenVPNConnection(VPNConnection):
         return port
 
     def _connect_parser_signals(self):
-        self._logger.debug("connecting parser signals")
         self._parser.openvpn_state.attach_observer(self._on_openvpn_state_changed)
         self._parser.on_parser_closed.attach_observer(self._on_parser_closed)
 
     def _disconnect_parser_signals(self):
-        self._logger.debug("disconnecting parser signals")
         self._parser.openvpn_state.attach_observer(self._on_openvpn_state_changed)
         self._parser.on_parser_closed.detach_observer(self._on_parser_closed)
 
     def _on_openvpn_state_changed(self, sender, **kwargs):
-        self._logger.debug("openvpn connection state changed to %s", sender.get() )
+        self._logger.debug("State changed to '%s'", sender.get() )
         if sender.is_connecting:
             self.state.set(VpnConnectionState.CONNECTING, VpnConnectionState.CONNECTING)
         elif sender.is_connected:
@@ -244,71 +230,53 @@ class OpenVPNConnection(VPNConnection):
             self._cleanup_processes()
 
     def _on_parser_closed(self, sender):
-        self._logger.debug("parser connection closed")
+        self._logger.debug("Management Interface Parser closed")
         self._disconnect_parser_signals()
         self._cleanup_processes()
         self.state.set(VpnConnectionState.IDLE, VpnConnectionState.IDLE)
 
     def _disconnect(self):
-        self._logger.debug("sending disconnect request to openvpn process")
 
         if self._parser:
             self._parser.request_disconnect()
 
-            self._logger.debug("waiting for parser to finish")
+            self._logger.debug("Waiting for management interface parser to finish")
             self._parser.join(10)
-            if self._parser.is_alive():
-                self._logger.error("OpenVPN process didn't shut down within 10 sec")
-                if self._parser.pid is not None:
-                    self._logger.error("sending SIGKILL to PID {}".format(self._parser.pid))
-                    try:
-                        os.kill(self._parser.pid, SIGKILL)
-                    except:
-                        self._logger.critical("killing zombie OpenVPN process with PID {} failed".format(self._parser.pid))
-                        #raise VPNConnectionError()
-                else:
-                    self._logger.critical("unable to kill zombie OpenVPN process: unknown PID")
-                    #raise VPNConnectionError()
+            if self._parser.is_alive() and self._parser.pid is not None:
+                self._logger.error("OpenVPN process didn't shut down within 10 sec, killing")
+                try:
+                    os.kill(self._parser.pid, SIGKILL)
+                except:
+                    self._logger.critical("Killing zombie OpenVPN process with PID {} failed".format(self._parser.pid))
             else:
-                self._logger.debug("parser quit successfully")
-        else:
-            self._logger.debug("there's no openvpn parser")
+                self._logger.debug("Management interface parser quit successfully")
 
         self._cleanup_processes()
-        if self._openvpn_process:
-            if self._openvpn_process.poll() is not None:
-                self._logger.debug("main OpenVPN process (PID {}) exited with return code {}".format( self._openvpn_process.pid, self._openvpn_process.returncode))
-            else:
-                self._logger.error("main OpenVPN process did not exit")
-        else:
-            self._logger.debug("there's no openvpn process")
+        if self._openvpn_process and self._openvpn_process.poll() is None:
+            self._logger.error("Main OpenVPN process did not exit, this may be a problem")
         self.state.set(VpnConnectionState.IDLE, _("Not connected"))
 
     def _cleanup_processes(self):
         try:
             if self._openvpn_process and self._openvpn_process.poll() is None:
-                self._logger.debug("waiting for openvpn process to finish")
+                self._logger.debug("Waiting for OpenVPN process to finish")
                 self._openvpn_process.wait(5)
                 if self._openvpn_process.poll() is None:
-                    self._logger.info("main OpenVPN process is still running. terminating.")
+                    self._logger.info("Main OpenVPN process is still running. terminating.")
                     self._openvpn_process.terminate()
                     time.sleep(5)
                     if self._openvpn_process.poll() is None:
-                        self._logger.error("main OpenVPN process didn't terminate within 5 seconds. sending SIGKILL")
+                        self._logger.error("Main OpenVPN process didn't terminate within 5 seconds. sending SIGKILL")
                         os.kill(self._openvpn_process.pid, SIGKILL)
                         self._openvpn_process.kill()
                         time.sleep(5)
                         if self._openvpn_process.poll() is None:
-                            self._logger.critical("main OpenVPN process (PID {}) didn't quit 5 seconds after sending SIGKILL. Please restart your computer.".format(self._openvpn_process.pid))
-                            raise VPNConnectionError()
+                            self._logger.critical("Main OpenVPN process (PID {}) didn't quit 5 seconds after sending SIGKILL. Please restart your computer.".format(self._openvpn_process.pid))
         except Exception as e:
             self._logger.debug(traceback.format_exc())
 
         if  self.stealth_plugin is not None:
             self.stealth_plugin.stop()
-
-
-
 
     def __repr__(self):
         return "OpenVPNConnection identifier='{}', state='{}'".format( str(self._identifier), self.state.get())

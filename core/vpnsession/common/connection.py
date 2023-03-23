@@ -32,10 +32,10 @@ class VPNConnection(Observable):
 
     def connect(self, servergroup, hop_number):
         self._logger.info("connecting VPN")
+        if self.state.get() != VpnConnectionState.IDLE:
+            self._logger.warning("connecting cancelled: VPN is already active")
+            raise VPNConnectionError()
         with self._connect_disconnect_lock:
-            if self.state.get() != VpnConnectionState.IDLE:
-                self._logger.warning("connecting cancelled: VPN is already active")
-                raise VPNConnectionError()
             self.hop_number = hop_number
             self._connect(servergroup, hop_number)
 
@@ -50,14 +50,14 @@ class VPNConnection(Observable):
         t.start()
 
     def disconnect(self):
+        if self.state.get() == VpnConnectionState.IDLE:
+            self._logger.warning("disconnecting cancelled: VPN is already inactive")
+            return
+        elif self.state.get() == VpnConnectionState.DISCONNECTING:
+            self._logger.warning("disconnecting cancelled: VPN is already disconnecting")
+            return
         self._logger.info("disconnecting")
         with self._connect_disconnect_lock:
-            if self.state.get() == VpnConnectionState.IDLE:
-                self._logger.warning("disconnecting cancelled: VPN is already inactive")
-                return
-            elif self.state.get() == VpnConnectionState.DISCONNECTING:
-                self._logger.warning("disconnecting cancelled: VPN is already disconnecting")
-                return
             self._disconnect()
 
     def _connect(self, servergroup, hop_number):

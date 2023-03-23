@@ -52,19 +52,7 @@ class LeakProtectionView(PyHtmlView):
                 <span>You can also use the following specific settings to protect against leaks. </span>
                 <br>
                 <h3>Details</h3>
-                <div class="boxes">
-                    <section>
-                        <h3>
-                            Block access to local router
-                            <div class="input"> {{ pyview.block_access_to_local_router.render() }} </div>
-                        </h3>
-                        <div>
-                            Prevent programs from determining your external IP address from your local Router&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
-                            <div class="tooltip" style="display:none">
-                                This setting prevents programs from determining your external IP address through SMTP and XSS, which is possible with some routers. Please note that access to network printers or hard drives connected to the router may also be blocked by the firewall
-                            </div>
-                        </div>
-                    </section>
+                <div class="boxes">                    
                     {% if pyview.subject.settings.interface_level.get()  == "expert" %}
                         <section> 
                             <h3>
@@ -72,15 +60,57 @@ class LeakProtectionView(PyHtmlView):
                                 <div class="input"> {{ pyview.enable_deadrouting.render() }} </div>
                             </h3> 
                             <div>
-                                Deadrouting is a secondary routing-based protection layer.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                Deadrouting is a secondary routing-based protection layer in addition to the normal firewall.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
                                 <div class="tooltip" style="display:none">
                                     Deadrouting adds a secondary security layer below the actual firewall that will capture all non VPN internet traffic that might escape the normal routing and firewalling.
                                 </div>
                             </div>
                         </section> 
                         
+                        <section>
+                            <h3>
+                                Prevent Local IPv6 Exposure
+                                <div class="input"> {{ pyview.enable_ipv6_leak_protection.render() }} </div>                            
+                            </h3> 
+                            <div>
+                                Prevent local apps from guessing parts of your public IPv6 address.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                <div class="tooltip" style="display:none">
+                                    Depending on your network configuration, your local IPv6 may have the same prefix as your public Ipv6. 
+                                    This might allow local software like your browser or filesharing app to guess large parts of your public IP, even if no traffic actually leaks around the VPN. 
+                                    This protection will remove all public prefixed IPv6 from network interfaces and block IPv6 DHCP to prevent a new address from being assigned.
+                                </div>
+                            </div>
+                        </section> 
+                        
+                        <section>                         
+                            <h3>
+                                SNMP/UPnP Leak Protection
+                                <div class="input"> {{ pyview.enable_snmp_upnp_protection.render() }} </div>
+                            </h3> 
+                            <div>
+                                Block SNMP/UPnP Ports.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                <div class="tooltip" style="display:none">
+                                    Enabling this feature will prevent programs on your computer from accessing other devices via SNMP and UPnP protocols. 
+                                    This prevents potentially sensitive information, such as your public IP address, from being revealed to programs on your computer from other devices in your network.  
+                                    However, please note that blocking access to these protocols may also prevent certain programs or services from functioning properly.
+                                </div>
+                            </div>
+                        </section> 
+                          
+                        <section>
+                            <h3>
+                                Block access to local router
+                                <div class="input"> {{ pyview.block_access_to_local_router.render() }} </div>
+                            </h3>
+                            <div>
+                                Prevent programs from determining your external IP address from your local Router&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                <div class="tooltip" style="display:none">
+                                    This setting prevents programs from determining your external IP address through SMTP and XSS, which is possible with some routers. Please note that access to network printers or hard drives connected to the router may also be blocked by the firewall
+                                </div>
+                            </div>
+                        </section>
+                        
                         {% if pyview.PLATFORM == pyview.PLATFORMS.windows %}
-
                             <section>
                                 <h3>
                                     Enable MS leak protection
@@ -109,72 +139,42 @@ class LeakProtectionView(PyHtmlView):
                                 </div>
                             </section>          
                         {% endif %}  
-   
-                    {% endif %}		
-                
-                    {% if pyview.subject.settings.interface_level.get()  == "expert" %}
-                        <section>                         
-                            <h3>
-                                SNMP/UPnP Leak Protection
-                                <div class="input"> {{ pyview.enable_snmp_upnp_protection.render() }} </div>
-                            </h3> 
-                            <div>
-                                Block SNMP/UPnP Ports.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
-                                <div class="tooltip" style="display:none">
-                                    Enabling this feature will prevent programs on your computer from accessing other devices via SNMP and UPnP protocols. 
-                                    This prevents potentially sensitive information, such as your public IP address, from being revealed to programs on your computer from other devices in your network.  
-                                    However, please note that blocking access to these protocols may also prevent certain programs or services from functioning properly.
-                                </div>
-                            </div>
-                        </section>              
+ 
                         <section>
                             <h3>
-                                Prevent IPv6 Leak
-                                <div class="input"> {{ pyview.enable_ipv6_leak_protection.render() }} </div>                            
-                            </h3> 
-                            <div>
-                                Prevent the leak of your public IP address assigned by your ISP through your local IPv6 address.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
-                                <div class="tooltip" style="display:none">
-                                    If your ISP provides an IPv6 address, it is possible that it will assign your computer a local IPv6 address that includes your public IP address assigned by the ISP. 
-                                    Enable this option to prevent this type of leak.
-                                </div>
-                            </div>
-                        </section> 
-                    {% endif %}		
-                
-                    <section>
-                        <h3>
-                            Prevent DNS Leak
-                            <div class="input"> {{ pyview.enable_dnsleak_protection.render() }} </div>
-                        </h3>
-                        <div>
-                            Ensure that you are using the VPN tunnel for Domain Name Service (DNS) requests.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
-                            <div class="tooltip" style="display:none">
-                                DNS translates the domain name of a website into IP addresses, which is necessary to establish a connection to the server hosting the web page or service. 
-                                A DNS leak occurs when you are using your provider's DNS server instead of the VPN tunnel.
-                            </div>
-                        </div>
-                    </section>
-                
-                    {% if pyview.subject.settings.leakprotection.enable_dnsleak_protection.get() == true and pyview.subject.settings.interface_level.get()  == "expert" %}             
-                        <section>
-                            <h3>
-                                Custom DNS Servers
-                                <div class="input"> {{ pyview.use_custom_dns_servers.render() }} </div>
+                                Prevent DNS Leaks
+                                <div class="input"> {{ pyview.enable_dnsleak_protection.render() }} </div>
                             </h3>
                             <div>
-                                You may want to use your own DNS servers instead of automatically selected Perfect Privacy Servers. 
+                                Ensure that you are using the VPN tunnel for Domain Name Service (DNS) requests.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                                <div class="tooltip" style="display:none">
+                                    DNS translates the domain name of a website into IP addresses, which is necessary to establish a connection to the server hosting the web page or service. 
+                                    A DNS leak occurs when you are using your provider's DNS server instead of the VPN tunnel or use a DNS server in your local network, bypassing the VPN.
+                                </div>
                             </div>
-                            {% if pyview.subject.settings.leakprotection.use_custom_dns_servers.get() == true %}
-                                <div style="width:45%;float:left;margin:10px;">
-                                    {{pyview.custom_dns_server_1.render()}}
-                                </div>
-                                <div style="width:45%;float:left;margin:10px;">
-                                    {{pyview.custom_dns_server_2.render()}}
-                                </div>
-                            {% endif %}
                         </section>
-                    {% endif %}
+                    
+                        {% if pyview.subject.settings.leakprotection.enable_dnsleak_protection.get() == true and pyview.subject.settings.interface_level.get()  == "expert" %}             
+                            <section>
+                                <h3>
+                                    Custom DNS Servers
+                                    <div class="input"> {{ pyview.use_custom_dns_servers.render() }} </div>
+                                </h3>
+                                <div>
+                                    You may want to use your own DNS servers instead of automatically selected Perfect Privacy Servers. 
+                                </div>
+                                {% if pyview.subject.settings.leakprotection.use_custom_dns_servers.get() == true %}
+                                    <div style="width:45%;float:left;margin:10px;">
+                                        {{pyview.custom_dns_server_1.render()}}
+                                    </div>
+                                    <div style="width:45%;float:left;margin:10px;">
+                                        {{pyview.custom_dns_server_2.render()}}
+                                    </div>
+                                {% endif %}
+                            </section>
+                        {% endif %}
+                        
+                    {% endif %}		
                 </div>
             {% endif %}
         {% endif %}
