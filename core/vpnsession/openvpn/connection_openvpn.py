@@ -140,10 +140,10 @@ class OpenVPNConnection(VPNConnection):
             args.extend(["--dev-node", "{%s}" % interface.guid])
 
         if openvpn_tls_method == OPENVPN_TLS_METHOD.tls_crypt:
-            args.extend(["--tls-crypt", "ta.tls-crypt.key"])
+            args.extend(["--tls-crypt", os.path.join("configs", "ta.tls-crypt.key")])
             args.extend(["--tun-mtu-extra", "32"])
         elif openvpn_tls_method == OPENVPN_TLS_METHOD.tls_auth:
-            args.extend(["--tls-auth", "ta.tls-auth.%s.key" % self.servergroup.vpn_server_config.groupname, "1"])
+            args.extend(["--tls-auth", os.path.join("configs", "ta.tls-auth.%s.key" % self.servergroup.vpn_server_config.groupname), "1"])
             args.extend(["--compress"])
             if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
                 args.extend(["--fragment", "1300"])

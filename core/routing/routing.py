@@ -147,7 +147,7 @@ class Routing(Observable):
                     target_routes.append(RouteV6(destination_net="%s::/5" % i, gateway=gateway, interface=highest_hop.connection.interface))
 
         if self._should_enable_deadrouting() is True:
-            interface = "1" if PLATFORM == PLATFORMS.windows else "lo0"
+            interface = "1" if PLATFORM == PLATFORMS.windows else "lo0" if PLATFORM == PLATFORMS.macos else "lo"
             target_routes.append(RouteV6(destination_net="2000::/4", gateway=None, interface=interface, persist=True))
             target_routes.append(RouteV6(destination_net="3000::/4", gateway=None, interface=interface, persist=True))
 

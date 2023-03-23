@@ -53,10 +53,10 @@ class LeakProtection_linux(LeakProtection_Generic):
 
         # SNMP/UPNP
         if self.core.settings.leakprotection.enable_snmp_upnp_protection.get() is True:
-            for port in ["161:162", "1900"]:
+            for port in ["161", "162", "1900"]:
                 for proto in ["tcp", "udp"]:
-                    rules.append("iptables  -A perfect-privacy -p %s --dport %s -j DROP" % (port, proto))
-                    rules.append("ip6tables -A perfect-privacy -p %s --dport %s -j DROP" % (port, proto))
+                    rules.append("iptables  -A perfect-privacy -p %s --dport %s -j DROP" % (proto, port))
+                    rules.append("ip6tables -A perfect-privacy -p %s --dport %s -j DROP" % (proto, port))
 
         # Allow local lan
         rules.append('iptables -A perfect-privacy -d 224.0.0.251 --dport 5353 -j ACCEPT')
