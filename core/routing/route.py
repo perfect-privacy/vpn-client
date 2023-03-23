@@ -71,22 +71,22 @@ class RouteV6Windows(Route):
 
 class RouteV4Macos(Route):
     def delete(self):
-        cmd = ["-n", "delete", "-net"]
+        args = ["-n", "delete", "-net"]
         #if self.interface is not None:
-        #    cmd.extend(["-ifscope", self.interface])
-        cmd.append(self.destination_net)
+        #    args.extend(["-ifscope", self.interface])
+        args.append(self.destination_net)
         if self.gateway is not None:
-            cmd.append(self.gateway)
-        SubCommand().run("route", cmd)
+            args.append(self.gateway)
+        SubCommand().run("route", args)
 
     def enable(self):
-        cmd = ["-n", "add", "-net"]
+        args = ["-n", "add", "-net"]
         #if self.interface is not None:
-        #    cmd.extend(["-ifscope", self.interface])
-        cmd.append(self.destination_net)
+        #    args.extend(["-ifscope", self.interface])
+        args.append(self.destination_net)
         if self.gateway is not None:
-            cmd.append(self.gateway)
-        SubCommand().run("route", cmd)
+            args.append(self.gateway)
+        SubCommand().run("route", args)
 
 class RouteV6Macos(Route):
     def delete(self):
@@ -106,3 +106,38 @@ class RouteV6Macos(Route):
         ##if self.gateway is not None:
         #    cmd.append(self.gateway)
         SubCommand().run("route", cmd)
+
+class RouteV4Linux(Route):
+    def delete(self):
+        args = ["route", "delete", self.destination_net]
+        if self.gateway is not None:
+            args.extend(["via", self.gateway])
+        if self.interface is not None:
+            args.extend(["dev", self.interface])
+        SubCommand().run("ip", args)
+
+    def enable(self):
+        args = ["route", "add", self.destination_net]
+        if self.gateway is not None:
+            args.extend(["via", self.gateway])
+        if self.interface is not None:
+            args.extend(["dev", self.interface])
+        SubCommand().run("ip", args)
+
+
+class RouteV6Linux(Route):
+    def delete(self):
+        args = ["-6", "route", "delete", self.destination_net]
+        if self.gateway is not None:
+            args.extend(["via", self.gateway])
+        if self.interface is not None:
+            args.extend(["dev", self.interface])
+        SubCommand().run("ip", args)
+
+    def enable(self):
+        args = ["-6", "route", "add", self.destination_net]
+        if self.gateway is not None:
+            args.extend(["via", self.gateway])
+        if self.interface is not None:
+            args.extend(["dev", self.interface])
+        SubCommand().run("ip", args)

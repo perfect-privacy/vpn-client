@@ -18,7 +18,9 @@ if PLATFORM == PLATFORMS.windows:
 if PLATFORM == PLATFORMS.macos:
     from core.routing.route import RouteV4Macos as RouteV4
     from core.routing.route import RouteV6Macos as RouteV6
-
+if PLATFORM == PLATFORMS.linux:
+    from core.routing.route import RouteV4Linux as RouteV4
+    from core.routing.route import RouteV6Linux as RouteV6
 
 class Routing(Observable):
     def __init__(self, core):
@@ -214,63 +216,6 @@ class RoutingWindows(Routing):
                     interface       = "%s" % route["ifIndex"]
                 ))
 
-    def receive_routing_table_fallback(self):
-        self.routing_table_ipv4 = []
-        self.routing_table_ipv6 = []
-
-        success, stdout, stderr = SubCommand().run("route", ["print"])
-        for line in stdout.split(b"\n"):
-            if not b"::" in line and not b"." in line:
-                continue
-            while b"  " in line:
-                line = line.replace(b"  ", b" ")
-            if b"::" in line:
-                try:
-                    parts = line.strip().split(b" ")
-                    if len(parts) != 4:
-                        continue
-                    interface = parts[0].strip().decode("UTF-8")
-                    metric =  parts[1].strip().decode("UTF-8")
-                    destination_net = parts[2].strip().decode("UTF-8")
-                    try:
-                        gateway = parts[3].strip().decode("UTF-8")
-                    except:
-                        continue
-                    if not self._is_ip(gateway):
-                        continue
-                    self.routing_table_ipv6.append(RouteV6(
-                        destination_net=destination_net,
-                        gateway=gateway,
-                        interface=interface
-                    ))
-                except:
-                    pass
-            elif b"." in line:
-                try:
-                    parts = b' '.join(line.split()).strip().split(b" ")
-                    if len(parts) != 5:
-                        continue
-                    destination_ip = parts[0].strip().decode("UTF-8")
-                    if destination_ip == "255.255.255.255" or destination_ip.startswith("127.") or destination_ip.startswith("192.168"):
-                        continue
-                    destination_mask = parts[1].strip().decode("UTF-8")
-                    try:
-                        gateway = parts[2].strip().decode("UTF-8")
-                    except:
-                        continue
-                    if not self._is_ip(gateway):
-                        continue
-                    #interface = parts[4].strip().decode("UTF-8") # is interface ip, so dont use, we need interface id
-                    #metric = parts[4].strip().decode("UTF-8")
-                    self.routing_table_ipv4.append(RouteV4(
-                        destination_ip=destination_ip,
-                        destination_mask=destination_mask,
-                        gateway=gateway,
-                        interface=None
-                    ))
-                except:
-                    pass
-
 
 class RoutingMacos(Routing):
     def receive_routing_table(self):
@@ -311,10 +256,61 @@ class RoutingMacos(Routing):
                     while ip.count(".") != 3:
                         ip = "%s.0" % ip
                     self.routing_table_ipv4.append(RouteV4(
-                        destination_net= "%s/%s" % (ip, mask),
+                        destination_net="%s/%s" % (ip, mask),
                         gateway=gateway,
                         interface=interface
                     ))
             except Exception as e:
                 pass
 
+
+class RoutingLinux(Routing):
+    def receive_routing_table(self):
+        self.routing_table_ipv4 = []
+        self.routing_table_ipv6 = []
+
+        success, stdout, stderr = SubCommand().run("ip", ["route", ])
+        stdout = stdout.decode("UTF-8")
+        while "  " in stdout:
+            stdout = stdout.replace("  ", " ")
+        lines = stdout.split("\n")
+        for line in lines:
+            try:
+                destination_net = line.split(" ")[0].strip()
+                if destination_net == "default":
+                    destination_net = "0.0.0.0/0"
+                gateway = None
+                interface = None
+                if "via " in line:
+                    gateway = line.split("via ")[1].split(" ")[0].strip()
+                if "dev " in line:
+                    interface = line.split("dev ")[1].split(" ")[0].strip()
+                self.routing_table_ipv4.append(RouteV4(
+                    destination_net=destination_net,
+                    gateway=gateway,
+                    interface=interface
+                ))
+            except Exception as e:
+                pass
+
+        success, stdout, stderr = SubCommand().run("ip", ["-6", "route", ])
+        stdout = stdout.decode("UTF-8")
+        while "  " in stdout:
+            stdout = stdout.replace("  ", " ")
+        lines = stdout.split("\n")
+        for line in lines:
+            try:
+                destination_net = line.split(" ")[0].strip()
+                gateway = None
+                interface = None
+                if "via " in line:
+                    gateway = line.split("via ")[1].split(" ")[0].strip()
+                if "dev " in line:
+                    interface = line.split("dev ")[1].split(" ")[0].strip()
+                self.routing_table_ipv6.append(RouteV6(
+                    destination_net=destination_net,
+                    gateway=gateway,
+                    interface=interface
+                ))
+            except Exception as e:
+                pass
