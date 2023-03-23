@@ -16,7 +16,7 @@ class LeakProtection_linux(LeakProtection_Generic):
         super().__init__(core=core)
 
     def _enable(self):
-        local_ipv4_ranges = ["10.0.0.0/8", "192.168.0.0/16", "172.16.0.0/12", "169.254.0.0/16", ]
+        local_ipv4_ranges = ["10.0.0.0/8", "127.0.0.0/8", "192.168.0.0/16", "172.16.0.0/12", "169.254.0.0/16", ]
         local_ipv6_ranges = ["fe80::/64", "ff01::/16", "ff02::/16"]
 
         rules = []
@@ -59,7 +59,8 @@ class LeakProtection_linux(LeakProtection_Generic):
                     rules.append("ip6tables -A perfect-privacy -p %s --dport %s -j DROP" % (proto, port))
 
         # Allow local lan
-        rules.append('iptables -A perfect-privacy -d 224.0.0.251 --dport 5353 -j ACCEPT')
+        rules.append('iptables -A perfect-privacy -d 224.0.0.251 -p TCP --dport 5353 -j ACCEPT')
+        rules.append('iptables -A perfect-privacy -d 224.0.0.251 -p UDP --dport 5353 -j ACCEPT')
         for local_ipv4_range in local_ipv4_ranges:
             rules.append('iptables -A perfect-privacy -s %s -j ACCEPT' % local_ipv4_range)
         for local_ipv6_range in local_ipv6_ranges:

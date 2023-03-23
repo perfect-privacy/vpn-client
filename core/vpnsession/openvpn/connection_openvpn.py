@@ -133,6 +133,7 @@ class OpenVPNConnection(VPNConnection):
             "--remote"    , openvpn_remote_host, str(openvpn_remote_port),
             "--cert"      , os.path.join("configs", "cl.%s.crt" % self.servergroup.vpn_server_config.groupname),
             "--key"       , os.path.join("configs", "cl.%s.key" % self.servergroup.vpn_server_config.groupname),
+            "--ca"        , os.path.join("configs", "ca.openvpn.crt"),
             "--tun-mtu"   , "1500",
         ]
 
