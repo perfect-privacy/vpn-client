@@ -1,6 +1,7 @@
 import os, sys
 import subprocess
 import time
+import webbrowser
 
 from core.libs.web.reporter import ReporterInstance
 
@@ -115,6 +116,7 @@ class MainApp():
         self.window.addJavascriptFunction("exit_app_for_update", self.exit_and_update)
         self.window.addJavascriptFunction("copy_to_clipboard", PyHtmlQtApp.clipboard().setText)
         self.window.addJavascriptFunction("fix_service_as_admin", self.fix_service_as_admin)
+        self.window.addJavascriptFunction("open_url", self.open_url)
 
         self.tray = PyHtmlQtTray(self.app, url="http://127.0.0.1:%s/tray?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[300,400], icon_path = self.icon_path, keep_connected_on_close=True)
         self.animatedTrayIcon = AnimatedTrayIcon(self.tray)
@@ -137,6 +139,10 @@ class MainApp():
             self.tray.on_left_clicked.attach_observer(self.window.show)
         self.window._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self.tray._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+
+
+    def open_url(self, url):
+        webbrowser.open(url)
 
     def run(self):
         if self.minimized is True:

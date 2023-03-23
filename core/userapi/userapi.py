@@ -116,7 +116,7 @@ class UserAPI(Observable):
         self.request_queue = RequestQueue()
         self.trackstop = TrackStop(self.request_queue)
         self.customPortForwardings = CustomPortForwardings(self.request_queue)
-        self.valid_until   = RemoteProperty("validUntil", self.request_queue,readonly=True,)
+        self.valid_until   = PermanentProperty(self.__class__.__name__ + ".validUntil", default_value=None)
         self.email_address = RemoteProperty("emailAddress", self.request_queue,readonly=True)
 
         self.random_exit_ip = RemoteProperty("randomExit", self.request_queue)
@@ -133,6 +133,13 @@ class UserAPI(Observable):
 
         self.unvalidated_username = ""
         self.unvalidated_password = ""
+
+    @property
+    def valid_until_days(self):
+        if self.valid_until.get() is None:
+            return None
+        delta =  datetime.strptime(self.valid_until.get(), '%Y-%m-%d %H:%M:%S') - datetime.now()
+        return delta.days
 
     def new_credentials(self, username, password):
         self.unvalidated_username = username
@@ -253,7 +260,7 @@ class UserAPI(Observable):
                 self.trackstop.block_social.update(response["trackstop"]["social"])
 
         if "validUntil" in response:
-            self.valid_until.update(response["validUntil"])
+            self.valid_until.set(response["validUntil"])
         if "emailAddress" in response:
             self.email_address.update(response["emailAddress"])
 

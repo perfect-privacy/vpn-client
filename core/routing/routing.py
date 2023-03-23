@@ -191,6 +191,7 @@ class Routing(Observable):
             return True
         return False
 
+
 class RoutingWindows(Routing):
     def receive_routing_table(self):
         self.routing_table_ipv4 = []
@@ -279,6 +280,8 @@ class RoutingLinux(Routing):
                 destination_net = line.split(" ")[0].strip()
                 if destination_net == "default":
                     destination_net = "0.0.0.0/0"
+                if "/" not in destination_net:
+                    destination_net = "%s/32" % destination_net
                 gateway = None
                 interface = None
                 if "via " in line:

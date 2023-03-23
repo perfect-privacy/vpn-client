@@ -19,6 +19,16 @@ class DashboardView(PyHtmlView):
                     <i class="fa fa-sign-out" style="font-size:1.5em;" onclick="pyview.confirm_logout_modal.show()"></i>
                 {% endif %}
             </div>
+            {% if pyview.subject.userapi.valid_until_days != None and pyview.subject.userapi.valid_until_days < 23 %}
+                <div style="width: fit-content; position: absolute; top: 3em; right: 3em;color:{% if pyview.subject.userapi.valid_until_days < 5 %}red{% else %}orange{% endif %}">
+                    {% if pyview.subject.userapi.valid_until_days < 0 %}
+                        Your account has expired
+                    {% else %}
+                        Your account will expire in {{pyview.subject.userapi.valid_until_days}} day{% if pyview.subject.userapi.valid_until_days > 1 %}s{% endif %}
+                    {% endif %}
+                    , <a href="" onclick="pyhtmlapp.open_url('https://www.perfect-privacy.com/order')">click here to extend!</a>
+                </div>
+            {% endif %}
         </div>
         
         <div class="inner">
@@ -72,6 +82,7 @@ class DashboardView(PyHtmlView):
         self.defaultPortforwardingView = DefaultPortforwardingView(subject, self)
         self.vpnStatusView = VpnStatusView(subject, self)
         self.add_observable(subject.userapi.credentials_valid)
+        self.add_observable(subject.userapi.valid_until)
         self._bg_thread = threading.Thread(target=self.bg_thread, daemon=True)
         self._bg_thread.start()
 

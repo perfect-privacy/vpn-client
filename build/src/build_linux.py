@@ -1,6 +1,5 @@
-import os, sys
+import os
 import shutil
-import glob
 from .build_common import BuildCommon
 
 class BuildLinux(BuildCommon):

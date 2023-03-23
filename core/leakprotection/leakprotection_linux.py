@@ -84,6 +84,7 @@ class LeakProtection_linux(LeakProtection_Generic):
             uniq_name = "perfect-privacy-%s" % int(time.time())
             for rule in rules:
                 os.system(rule.replace("perfect-privacy", uniq_name))
+            self._logger.debug("%s Firewall rules updated" % len(rules))
             os.system('iptables  -I OUTPUT 1 -j %s' % uniq_name)
             os.system('ip6tables -I OUTPUT 1 -j %s' % uniq_name)
             self.current_rules_str = rules_str
@@ -143,8 +144,6 @@ class LeakProtection_linux(LeakProtection_Generic):
                     interface = line.split(": ")[1].split(":")[0].strip()
             except Exception as e:
                 ReporterInstance.report("disable_ipv6_failed", traceback.format_exc())
-
-
 
     def _get_router_ips(self):
         success, stdout, stderr = SubCommand().run("ip", args=["route", ])
