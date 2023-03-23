@@ -137,6 +137,8 @@ class ManagementInterfaceParser(Thread):
                 self.connection.interface = line.split("interface ipv6 set address ")[1].split(" ")[0].strip()
             elif " MTU set to " in line:
                 self.connection.interface = line.split(" on interface ")[1].split(" ")[0].strip()
+            elif "TUN/TAP device " in line:
+                self.connection.interface = line.split("TUN/TAP device ")[1].split(" opened")[0].strip()
         except:
             pass
 

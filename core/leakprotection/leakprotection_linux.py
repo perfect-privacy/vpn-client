@@ -121,8 +121,8 @@ class LeakProtection_linux(LeakProtection_Generic):
                 os.system('%s --flush %s' % (iptables, existing_chain))
                 os.system('%s -X %s' % (iptables, existing_chain))
 
-        self.networkInterfaces = NetworkInterfaces(self.core)
-        self.networkInterfaces.disableDnsLeakProtection()
+        #self.networkInterfaces = NetworkInterfaces(self.core)
+        #self.networkInterfaces.disableDnsLeakProtection()
 
     def reset(self):
         self._disable()
