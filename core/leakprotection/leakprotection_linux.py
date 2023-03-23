@@ -8,7 +8,7 @@ from .macos.network_interfaces import NetworkInterfaces
 from ..libs.subcommand import SubCommand
 from ..libs.web.reporter import ReporterInstance
 
-class LeakProtection_macos(LeakProtection_Generic):
+class LeakProtection_linux(LeakProtection_Generic):
     def __init__(self, core=None):
         self.core = core
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -105,7 +105,7 @@ class LeakProtection_macos(LeakProtection_Generic):
         #    self.networkInterfaces.disableDnsLeakProtection()
 
     def _get_existing_chains(self, iptables):
-        success, stdout, stderr = SubCommand().run([iptables, "-S", "OUTPUT"])
+        success, stdout, stderr = SubCommand().run(iptables, args=["-S", "OUTPUT"])
         lines = stdout.decode("utf-8").split("\n")
         uniq_names = set()
         for line in lines:
@@ -127,7 +127,7 @@ class LeakProtection_macos(LeakProtection_Generic):
         self._disable()
 
     def _disableIpv6(self):
-        success, stdout, stderr = SubCommand().run(["ip", "address"])
+        success, stdout, stderr = SubCommand().run("ip", args=["address"])
         stdout = stdout.decode("utf-8").replace("\t", " ").replace("  ", " ")
         while "  " in stdout:
             stdout = stdout.replace("  ", " ")
@@ -146,7 +146,7 @@ class LeakProtection_macos(LeakProtection_Generic):
 
 
     def _get_router_ips(self):
-        success, stdout, stderr = SubCommand().run("ip", ["route", ])
+        success, stdout, stderr = SubCommand().run("ip", args=["route", ])
         stdout = stdout.decode("UTF-8")
         while "  " in stdout:
             stdout = stdout.replace("  ", " ")
