@@ -305,7 +305,6 @@ class VpnGroupPlanet(VpnGroup):
                     self.servers.update(city.servers)
 
     def add_bandwidth_data(self, data):
-        #{ 'miami.perfect-privacy.com': {'bandwidth_out': 105196, 'bandwidth_max': 1000000, 'timestamp': 1604155926, 'bandwidth_in': 103683}, }
         for _, server in self.servers.items():
             key = server.vpn_server_config.url
             if key not in data and "1." in key:
@@ -327,15 +326,14 @@ class VpnGroupPlanet(VpnGroup):
     def load_configs_json(self):
         try:
             servers_data = json.loads(open(os.path.join(CONFIG_DIR, "servers.json"),"r").read())
-        except:
-            self._logger.debug("Failed to load config file")
+        except Exception as e:
+            self._logger.error("Failed to load config file: %s" % e)
             servers_data = []
 
         for server_data in servers_data:
             vpn_server_config = VPNServerConfig()
             vpn_server_config.load(server_data)
             self.add_config(vpn_server_config)
-        #print("%s Configs loaded" % len(servers_data))
 
     def __repr__(self, prefix=""):
         s = prefix + 'VPN Planet "%s", %s Zones \n' % (self.name, self.subitems.__len__())

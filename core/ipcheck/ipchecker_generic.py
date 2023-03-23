@@ -100,18 +100,18 @@ class GenericIPChecker(object):
         :rtype: requests.Response
         """
         if url is None:
-            self._logger.debug("no URL specified")
+            self._logger.debug("No URL specified")
             raise RuntimeError()
         try:
             response = WebRequest().get(url=url, timeout=3)
         except request_exceptions.ConnectionError:
             #self._logger.error("network problem " + url)
-            raise ApiNetworkError(_("network problem"))
+            raise ApiNetworkError(_("Network problem"))
         except request_exceptions.HTTPError:
-            self._logger.error("invalid HTTP response "  + url)
+            self._logger.error("Invalid HTTP response "  + url)
             raise ApiMalfunctionError(_("invalid HTTP response"))
         except request_exceptions.Timeout:
-            self._logger.error("request timeout "  + url)
+            self._logger.error("Request timeout "  + url)
             raise ApiNetworkError(_("request timeout"))
         except request_exceptions.TooManyRedirects:
             self._logger.error("too many redirects " + url)

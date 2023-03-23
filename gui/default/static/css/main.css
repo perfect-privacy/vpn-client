@@ -368,6 +368,8 @@
 
 	body {
 		line-height: 1;
+        overscroll-behavior-y: none;
+        overscroll-behavior-x: none;
 	}
 
 	ol, ul {

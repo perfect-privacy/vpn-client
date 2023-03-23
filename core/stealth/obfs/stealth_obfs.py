@@ -5,6 +5,7 @@ from threading import Thread
 import time
 import os
 
+from core.libs.subcommand import MySubProcess
 from core.stealth.common.stealth_common import StealthCommon
 from core.stealth.common.stealth_state import StealthState
 from config.constants import STEALTH_PORTS, OPENVPN_TLS_METHOD
@@ -16,7 +17,7 @@ class StealthObfs(StealthCommon):
 
         self._obfs_local_port = None  # parsed from output after launch
         self._process = None
-
+        self.pt_state_file = None
         self.openvpn_arguments = [   ]
         self.remote_host = self._servergroup.vpn_server_config.obfs3_ip  # the ip or host the openvpn process actually connects to
         self.remote_port = self._core.settings.stealth.stealth_port.get()
@@ -29,63 +30,61 @@ class StealthObfs(StealthCommon):
 
         self.external_host_ip = self.remote_host
         self.external_host_port = self.remote_port
-
+        self.should_be_active = False
 
     def start(self):
-        pt_state = os.path.join(tempfile.gettempdir(),"pt_state")
-        env = os.environ.copy()
-        env.update({
-            "TOR_PT_STATE_LOCATION"        : pt_state,
+        self.should_be_active = True
+        self.pt_state_file = os.path.join(tempfile.gettempdir(),"pt_state")
+        env = {
+            "TOR_PT_STATE_LOCATION"        : self.pt_state_file,
             "TOR_PT_MANAGED_TRANSPORT_VER" : "1",
             "TOR_PT_EXIT_ON_STDIN_CLOSE"   : "1",
             "TOR_PT_CLIENT_TRANSPORTS"     : "obfs3",
-        })
-        self._logger.info("obfs:" + OBFS )
-        self._process = subprocess.Popen([OBFS], stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE, env=env)
-        self._stdout_read_tread = Thread(target=self._read_stdout_thread, daemon=True)
-        self._stdout_read_tread.start()
-        self._stderr_read_tread = Thread(target=self._read_stderr_thread, daemon=True)
-        self._stderr_read_tread.start()
+        }
+        self._process = MySubProcess(OBFS, [], env)
+        self._process.on_output_event.attach_observer(self._on_process_output)
+        self._process.on_exited_event.attach_observer(self._on_process_exited)
+        self._process.start()
 
         for i in range(10):
-            if self._obfs_local_port is not None or self._stdout_read_tread is None:
+            if self._obfs_local_port is not None:
                 break
-            self._logger.info("waiting for obfs to connect")
+            if self._process is None or self._process.check_exited() is True:
+                self._logger.error("Failed to start process")
+                break
+            if self.should_be_active is False:
+                break
+            self._logger.info("Waiting for obfs to connect")
             time.sleep(1.5)
-        self.openvpn_arguments = [
-            "--socks-proxy", "127.0.0.1", self._obfs_local_port
-        ]
-        return self._obfs_local_port != None
+        if  self._obfs_local_port != None:
+            self.openvpn_arguments = ["--socks-proxy", "127.0.0.1", self._obfs_local_port]
+            return True
+        return False
 
-    def _read_stdout_thread(self):
-        for line in iter(self._process.stdout.readline, b''):
-            self._logger.info("stdout:" + line.decode("UTF-8"))
-            if line.find(b"CMETHOD ") > -1:
-                parts = line.split(b' ')
-                if (parts[1].decode("UTF-8") == "obfs3"):
-                    self._obfs_local_port = "%s" % int(parts[3].split(b':')[1].decode("UTF-8"))
-        try:
-            self._process.stdout.close()
-        except:
-            pass
-        self._stdout_read_tread = None
+    def _on_process_output(self, _, source, data):
+        self._logger.debug("%s: %s" % (source, data.decode("utf-8")))
+        if source == "stdout":
+            try:
+                if data.find(b"CMETHOD ") > -1:
+                    parts = data.split(b' ')
+                    if (parts[1].decode("UTF-8") == "obfs3"):
+                        self._obfs_local_port = "%s" % int(parts[3].split(b':')[1].decode("UTF-8"))
+                        self._logger.debug("Local port found: %s" % self._obfs_local_port)
+            except:
+                pass
 
-    def _read_stderr_thread(self):
-        for line in iter(self._process.stderr.readline, b''):
-            self._logger.info("stderr:" + line.decode("UTF-8"))
-        try:
-            self._process.stderr.close()
-        except:
-            pass
-        self._stderr_read_tread = None
+    def _on_process_exited(self):
+        if self.pt_state_file is not None and os.path.exists(self.pt_state_file):
+            try:
+                os.remove(self.pt_state_file)
+            except:
+                pass
+        if self._process is not None:
+            self._process.on_exited_event.detach_observer(self._on_process_exited)
+            self._process.on_output_event.detach_observer(self._on_process_output)
+            self._process = None
 
     def stop(self):
-        try:
-            self._process.stdin.close()
-        except:
-            pass
-        try:
-            self._process.kill()
-        except:
-            pass
-        self._process = None
+        self.should_be_active = False
+        if self._process is not None:
+            self._process.stop()

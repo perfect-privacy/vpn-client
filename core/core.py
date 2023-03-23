@@ -239,22 +239,22 @@ class Core(Observable):
 
             try:
                 self.session.quit()
-                self._logger.debug("session shut down")
+                self._logger.debug("Session shut down")
             except Exception as e:
-                self._logger.error("unable to shut down session: {}".format(str(e)))
+                self._logger.error("Unable to shut down session: {}".format(str(e)))
 
             time.sleep(2)# give async leak protection and others some time
 
             try:
                 self.leakprotection.shutdown()
             except Exception as e:
-                self._logger.error("unable to shut down leak protection: {}".format(str(e)))
+                self._logger.error("Unable to shut down leak protection: {}".format(str(e)))
 
         except Exception as e:
-            self._logger.error("shutting down gracefully failed: {}".format(str(e)))
+            self._logger.error("Shutting down gracefully failed: {}".format(str(e)))
         finally:
             self.on_exited.notify_observers()
-        self._logger.info("shutdown finished")
+        self._logger.info("Shutdown finished")
 
     def check_send_usage_stats(self):
         while True:

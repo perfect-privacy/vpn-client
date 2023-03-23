@@ -4,6 +4,8 @@ import tempfile
 from threading import Thread
 import time
 import os
+
+from core.libs.subcommand import MySubProcess
 from core.stealth.common.stealth_common import StealthCommon
 from core.stealth.common.stealth_state import StealthState
 from config.constants import STEALTH_PORTS, OPENVPN_TLS_METHOD
@@ -37,8 +39,10 @@ class StealthStunnel(StealthCommon):
         self.remote_port = self._stunnel_local_port
         self.external_host_ip = self._stunnel_host
         self.external_host_port = self._stunnel_port
+        self.should_be_active = False
 
     def start(self):
+        self.should_be_active = True
         f, self.configfile = tempfile.mkstemp(prefix="configfile")
         config = "client = yes\n"
         config += "[stealth]\n"
@@ -47,45 +51,31 @@ class StealthStunnel(StealthCommon):
         config += "connect = %s:%s\n" % (self._stunnel_host, self._stunnel_port)
         with os.fdopen(f, "w") as f:
             f.write("".join(config))
-        self._process = subprocess.Popen([STUNNEL, self.configfile], stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
-        self._stdout_read_tread = Thread(target=self._read_stdout_thread, daemon=True)
-        self._stdout_read_tread.start()
-        self._stderr_read_tread = Thread(target=self._read_stderr_thread, daemon=True)
-        self._stderr_read_tread.start()
+        self._process = MySubProcess(STUNNEL, [self.configfile])
+        self._process.on_output_event.attach_observer(self._on_process_output)
+        self._process.on_exited_event.attach_observer(self._on_process_exited)
+        self._process.start()
         time.sleep(2)
+        if self._process is None:
+            return False
         return True
 
+    def _on_process_output(self, _, source, data):
+        self._logger.debug("%s: %s" % (source, data.decode("utf-8")))
 
-    def _read_stdout_thread(self):
-        for line in iter(self._process.stdout.readline, b''):
-            self._logger.debug("stdout:" + line.decode("UTF-8"))
-        try:
-            self._process.stdout.close()
-        except:
-            pass
-        self._stdout_read_tread = None
-        if os.path.exists(self.configfile):
-            os.remove(self.configfile)
-
-    def _read_stderr_thread(self):
-        for line in iter(self._process.stderr.readline, b''):
-            self._logger.debug("stderr:" + line.decode("UTF-8"))
-        try:
-            self._process.stderr.close()
-        except:
-            pass
-        self._stderr_read_tread = None
+    def _on_process_exited(self):
+        if self.configfile is not None and os.path.exists(self.configfile):
+            try:
+                os.remove(self.configfile)
+            except:
+                pass
+        if self._process is not None:
+            self._process.on_exited_event.detach_observer(self._on_process_exited)
+            self._process.on_output_event.detach_observer(self._on_process_output)
+            self._process = None
 
     def stop(self):
-        try:
-            self._process.stdin.close()
-        except:
-            pass
-        try:
-            self._process.kill()
-        except:
-            pass
-        if os.path.exists(self.configfile):
-            os.remove(self.configfile)
-        self._process = None
+        self.should_be_active = False
+        if self._process is not None:
+            self._process.stop()

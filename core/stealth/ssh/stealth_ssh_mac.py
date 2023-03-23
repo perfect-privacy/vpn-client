@@ -195,7 +195,7 @@ class StealthSSHMacos(StealthSSHCommon):
             args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             env=env, universal_newlines=True, start_new_session=True, bufsize=0)
 
-        self._logger.info("started SSH process with PID {}".format(self._ssh_process.pid))
+        self._logger.info("Started SSH process with PID {}".format(self._ssh_process.pid))
 
         try:
             for line in self._get_line_from_ssh_process():

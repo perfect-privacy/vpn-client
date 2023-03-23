@@ -178,9 +178,6 @@ class Driver_generic(Observable):
         return []
 
     def _delete_driver(self, oemname):
-        if oemname not in  [x.name for x in self.installed_drivers]:
-            raise Exception("No such driver installed, %s is unknown" % oemname)
-
         for instanceid in self._enum_devices():
             self._remove_device(instanceid)
 

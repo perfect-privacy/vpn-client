@@ -94,8 +94,8 @@ class FirewallRuleOutgoingProfileDefaultBlock():
         if self.is_enabled.get() is True:
             return
         self._logger.info("%s activating" % self.__class__.__name__)
-        if self.default_profiles.get() is None:
-            self.default_profiles.set(getPowershellInstance().execute("Get-NetFirewallProfile", as_data = True))
+        #if self.default_profiles.get() is None:
+        #    self.default_profiles.set(getPowershellInstance().execute("Get-NetFirewallProfile", as_data = True))
         getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Block -Enabled True")
         self.is_enabled.set(True)
 
@@ -106,7 +106,7 @@ class FirewallRuleOutgoingProfileDefaultBlock():
             self._logger.info("%s disabling" % self.__class__.__name__)
             #for profile in self.default_profiles.get(): # this would be better, for user whos default profile is not "allow", but this results in many more problems
             #    getPowershellInstance().execute("Set-NetFirewallProfile -Profile %s -DefaultOutboundAction %s" % (profile["Profile"],  profile["DefaultOutboundAction"]))
-            self.default_profiles.set(None)
+            #self.default_profiles.set(None)
             getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
 
         self.is_enabled.set(False)

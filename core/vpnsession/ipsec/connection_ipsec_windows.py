@@ -35,7 +35,7 @@ class IpsecConnection(VPNConnection):
 
     def _disconnect(self):
         self.is_active = False
-        self._logger.debug("sending disconnect request to ipsec process")
+        self._logger.debug("Sending disconnect request to ipsec process")
         self._disconnect_device()
         self._remove_device()
         self._read_state()

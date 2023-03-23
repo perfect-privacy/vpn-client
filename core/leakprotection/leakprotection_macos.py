@@ -65,6 +65,7 @@ class LeakProtection_macos(LeakProtection_Generic):
             rules.append("block out inet6 proto UDP       to   any port 547")
             rules.append("block in  inet6 proto UDP       from any port 546")
 
+        # block local dns servers
         if self.core.settings.leakprotection.enable_dnsleak_protection.get() is True:
             for local_ipv4_range in local_ipv4_ranges:
                 rules.append("block out inet  proto UDP to %s port 53" % local_ipv4_range)

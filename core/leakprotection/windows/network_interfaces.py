@@ -12,7 +12,6 @@ class NetworkInterface():
         self.core = core
         self.interfaceIndex = None
         self.dhcpenabled = False
-        self.servicename = None
         self.ipenabled = None
         self.dns_servers_v4 = []  # currently set, read from system
         self.dns_servers_v6 = []
@@ -85,7 +84,6 @@ class NetworkInterface():
         data.append("dhcpenabled: %s" % self.dhcpenabled)
         data.append("ipv6: %s" % self.ipv6)
         data.append("ipv4: %s" % self.ipv4)
-        data.append("servicename: %s" % self.servicename)
         data.append("ipenabled: %s" % self.ipenabled)
         data.append("dns_servers_v4: %s" % self.dns_servers_v4)
         data.append("dns_servers_v6: %s" % self.dns_servers_v6)
@@ -130,7 +128,7 @@ class NetworkInterfaces():
             except Exception as e:
                 ReporterInstance.report("get_dns_failed", traceback.format_exc())
 
-        networkdatas = getPowershellInstance().execute("Get-CimInstance -Class Win32_NetworkAdapterConfiguration | Select-Object -Property InterfaceIndex,DHCPEnabled,ServiceName,IPEnabled,IPAddress,IPSubnet", as_data = True )
+        networkdatas = getPowershellInstance().execute("Get-CimInstance -Class Win32_NetworkAdapterConfiguration | Select-Object -Property InterfaceIndex,DHCPEnabled,IPEnabled,IPAddress,IPSubnet", as_data = True )
         if networkdatas is None:
             ReporterInstance.report("failed_to_load_network_devices_part2", "")
             return
@@ -141,7 +139,6 @@ class NetworkInterfaces():
                     continue
                 ni = self.networkinterfaces[ networkdata["InterfaceIndex"]]
                 ni.dhcpenabled = networkdata["DHCPEnabled"]
-                ni.servicename = networkdata["ServiceName"]
                 ni.ipenabled   = networkdata["IPEnabled"]
                 ni.ipv4 = []
                 ni.ipv6 = []

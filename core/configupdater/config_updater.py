@@ -10,6 +10,8 @@ from config.urls import CONFIG_UPDATE_URL
 from core.libs.web import WebRequest
 from core.libs.web import SecureDownload
 from core.libs.update import GenericUpdater
+from core.libs.web.reporter import ReporterInstance
+
 
 class ConfigUpdater(GenericUpdater):
     def __init__(self, core,
@@ -63,11 +65,11 @@ class ConfigUpdater(GenericUpdater):
             self._auto_update_timer.interval = self._max_check_interval_seconds
             self.last_successful_check.set( math.floor(now))
 
-            self._logger.debug("successfully checked for updates")
+            self._logger.debug("Successfully checked for updates")
         except Exception as e:
             self.last_failed_check.set(math.floor(now))
             self._logger.debug(traceback.format_exc())
-            self._logger.debug(   "error while checking for updates, retry in {} seconds".format(self._err_check_interval_seconds))
+            self._logger.debug("Error while checking for updates, retry in {} seconds".format(self._err_check_interval_seconds))
             self._auto_update_timer.interval = self._err_check_interval_seconds
         self.next_check = math.floor(self._auto_update_timer.last_call_timestamp + self._auto_update_timer.interval)
         self.state.set(UpdaterState.UPDATER_STATE_IDLE)
@@ -96,24 +98,40 @@ class ConfigUpdater(GenericUpdater):
         try:
             if os.path.exists(CONFIG_UPDATE_DIR):
                 shutil.rmtree(CONFIG_UPDATE_DIR)
-                os.mkdir(CONFIG_UPDATE_DIR)
+            os.mkdir(CONFIG_UPDATE_DIR)
 
             zipfile = os.path.join(CONFIG_UPDATE_DIR, "update.zip")
-            open(zipfile,"wb").write(zipfile_content)
+            with open(zipfile,"wb") as f:
+                f.write(zipfile_content)
 
-            self._logger.debug("unpacking zip file")
             self.__unzip(zipfile, CONFIG_UPDATE_DIR)
             os.remove(zipfile)
 
-            self._logger.debug("removing deprecated config files")
-            if os.path.exists(CONFIG_DIR):
-                shutil.rmtree(CONFIG_DIR)
+            if os.path.exists("%s_old" % CONFIG_DIR):
+                self._logger.debug("Removing old config files")
+                shutil.rmtree("%s_old" % CONFIG_DIR, ignore_errors=True)
 
-            self._logger.debug("moving unzipped config files into place")
-            shutil.move(CONFIG_UPDATE_DIR, CONFIG_DIR)
+            if os.path.exists(os.path.join(CONFIG_UPDATE_DIR, "servers.json")):
+                shutil.move(CONFIG_DIR, "%s_old" % CONFIG_DIR)
+                shutil.move(CONFIG_UPDATE_DIR, CONFIG_DIR)
+            else:
+                ReporterInstance.report("failed_unpack_configupdate", "")
+                self._logger.error("Unpacked config did not contain servers.json")
+
+            if not os.path.exists(os.path.join(CONFIG_DIR, "servers.json")):
+                ReporterInstance.report("failed_move_configupdate", "")
+                if os.path.exists(CONFIG_DIR):
+                    shutil.rmtree(CONFIG_DIR, ignore_errors=True)
+                shutil.move("%s_old" % CONFIG_DIR, CONFIG_DIR )
+
+            if os.path.exists("%s_old" % CONFIG_DIR):
+                self._logger.debug("Removing old config files")
+                shutil.rmtree("%s_old" % CONFIG_DIR, ignore_errors=True)
+
             self.version_local = open(os.path.join(CONFIG_DIR, "version"), "r").read()
 
         except Exception as e:
+            ReporterInstance.report("install_config_update_failed", traceback.format_exc())
             raise e
         finally:
             if os.path.exists(CONFIG_UPDATE_DIR):

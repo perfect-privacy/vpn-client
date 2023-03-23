@@ -170,55 +170,57 @@ class Session(Observable):
                     else:
                         self._logger.error("couldn't exit controller: there are still connections alive")
 
-                if self._should_be_connected.get() == True and self._running:
+                if self._get_number_of_working_vpn_connections() == 0:
+                    if self._should_be_connected.get() == True and self._running:
 
-                    if self._get_number_of_connected_vpn_connections() != len(self.hops):
-                        if self._get_number_of_non_idle_connections() == 0:
-                            self.state.set(SessionState.CONNECTING,"Connecting to %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
-                        else:
-                            self.state.set(SessionState.CONNECTING,"Reconnecting to %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
-
-                        if len(self.hops) > 0:
-                            try:
-                                self._update_low_level_cascade()
-                            except Exception as e:
-                                self._logger.debug(traceback.format_exc())
-                                self._logger.error("unable to create the cascade: {}".format(e))
-                                self.state.set(SessionState.CONNECTING, "Unable to connect %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
+                        if self._get_number_of_connected_vpn_connections() != len(self.hops):
+                            if self._get_number_of_non_idle_connections() == 0:
+                                self.state.set(SessionState.CONNECTING,"Connecting to %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
                             else:
+                                self.state.set(SessionState.CONNECTING,"Reconnecting to %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
+
+                            if len(self.hops) > 0:
                                 try:
-                                    self._logger.debug("Connecting all")
-                                    self._connect_all()
-                                    self._logger.debug("All hops connected")
-                                except VPNConnectionError:
-                                    self._logger.info("Connecting failed, retrying in a few moments")
-                                    self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
-                                except:
-                                    self._logger.debug("Connecting failed, retrying in a few moments %s" % traceback.format_exc())
-                                    self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
-                                    self._disconnect_all()
+                                    self._update_low_level_cascade()
+                                except Exception as e:
+                                    self._logger.debug(traceback.format_exc())
+                                    self._logger.error("unable to create the cascade: {}".format(e))
+                                    self.state.set(SessionState.CONNECTING, "Unable to connect %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
                                 else:
-                                    self.state.set(SessionState.CONNECTED, "Connection established to %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
+                                    try:
+                                        self._logger.debug("Connecting all")
+                                        self._connect_all()
+                                        self._logger.debug("All hops connected")
+                                    except VPNConnectionError:
+                                        self._logger.info("Connecting failed, retrying in a few moments")
+                                        self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
+                                    except:
+                                        self._logger.debug("Connecting failed, retrying in a few moments %s" % traceback.format_exc())
+                                        self.state.set(self.state.get(), "Connecting failed. Retrying in a few moments.")
+                                        self._disconnect_all()
+                                    else:
+                                        self.state.set(SessionState.CONNECTED, "Connection established to %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
 
+                            else:
+                                self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
                         else:
-                            self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
+                            if len(self.hops) > 0:
+                                if len([hop for hop in self.hops if hop.state.get() == VpnConnectionState.CONNECTED]) == len(self.hops):
+                                    if self.state.get() != SessionState.CONNECTED:
+                                        self.state.set(SessionState.CONNECTED, "Connection established to %s" % ",".join([hop.servergroup.name for hop in self.hops]))
+
                     else:
-                        if len(self.hops) > 0:
-                            if len([hop for hop in self.hops if hop.state.get() == VpnConnectionState.CONNECTED]) == len(self.hops):
-                                if self.state.get() != SessionState.CONNECTED:
-                                    self.state.set(SessionState.CONNECTED, "Connection established to %s" % ",".join([hop.servergroup.name for hop in self.hops]))
-
-                else:
-                    if self._get_number_of_non_idle_connections() != 0:
-                        self._logger.info("Disconnecting")
-                        self.state.set(SessionState.DISCONNECTING, "Disconnecting from %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
-                        self._disconnect_all()
-                        if self._get_number_of_non_idle_connections() == 0:
+                        if self._get_number_of_non_idle_connections() != 0:
+                            self._logger.info("Disconnecting")
+                            self.state.set(SessionState.DISCONNECTING, "Disconnecting from %s" % ", ".join([hop.servergroup.name for hop in self.hops]))
+                            self._disconnect_all()
+                            if self._get_number_of_non_idle_connections() == 0:
+                                self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
+                        elif self.state != SessionState.IDLE and self._get_number_of_non_idle_connections() == 0:
+                            #self._logger.info("all connections are already disconnected")
                             self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
-                    elif self.state != SessionState.IDLE and self._get_number_of_non_idle_connections() == 0:
-                        #self._logger.info("all connections are already disconnected")
-                        self.state.set(SessionState.IDLE, "VPN Idle %s" % ",".join([hop.servergroup.name for hop in self.hops]))
-
+                else:
+                    self._logger.debug("Waiting for non idle connections to finish")
             except Exception as e:
                 self._logger.error("Unexpected exception: %s" % traceback.format_exc())
 
@@ -338,6 +340,9 @@ class Session(Observable):
 
     def _get_number_of_connected_vpn_connections(self):
         return len([hop for hop in self.hops if hop.state.get() ==  VpnConnectionState.CONNECTED ])
+
+    def _get_number_of_working_vpn_connections(self):
+        return len([hop for hop in self.hops if hop.state.get() in[VpnConnectionState.CONNECTING, VpnConnectionState.DISCONNECTING]])
 
     def _disconnect_all(self):
         self._logger.debug("Disconnecting all hops")

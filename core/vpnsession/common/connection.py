@@ -31,32 +31,33 @@ class VPNConnection(Observable):
         self._connect_disconnect_lock = RLock()
 
     def connect(self, servergroup, hop_number):
-        self._logger.info("connecting VPN")
+
         if self.state.get() != VpnConnectionState.IDLE:
-            self._logger.warning("connecting cancelled: VPN is already active")
+            self._logger.warning("Connecting cancelled: VPN is already active")
             raise VPNConnectionError()
         with self._connect_disconnect_lock:
             self.hop_number = hop_number
+            self._logger.info("Connecting Hop %s, %s" % (hop_number, servergroup))
             self._connect(servergroup, hop_number)
 
     def disconnect_async(self):
         if self.state.get() == VpnConnectionState.IDLE:
-            self._logger.warning("disconnecting cancelled: VPN is already inactive")
+            self._logger.warning("Disconnecting cancelled: VPN is already inactive")
             return
         elif self.state.get() == VpnConnectionState.DISCONNECTING:
-            self._logger.warning("disconnecting cancelled: VPN is already disconnecting")
+            self._logger.warning("Disconnecting cancelled: VPN is already disconnecting")
             return
         t = threading.Thread(target=self.disconnect, daemon=True)
         t.start()
 
     def disconnect(self):
         if self.state.get() == VpnConnectionState.IDLE:
-            self._logger.warning("disconnecting cancelled: VPN is already inactive")
+            self._logger.warning("Disconnecting cancelled: VPN is already inactive")
             return
         elif self.state.get() == VpnConnectionState.DISCONNECTING:
-            self._logger.warning("disconnecting cancelled: VPN is already disconnecting")
+            self._logger.warning("Disconnecting cancelled: VPN is already disconnecting")
             return
-        self._logger.info("disconnecting")
+        self._logger.info("Disconnecting Hop %s, %s" % (self.hop_number, self.servergroup))
         with self._connect_disconnect_lock:
             self._disconnect()
 

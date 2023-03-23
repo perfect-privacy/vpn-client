@@ -161,7 +161,8 @@ class LeakProtectionView(PyHtmlView):
                                     <div class="input"> {{ pyview.use_custom_dns_servers.render() }} </div>
                                 </h3>
                                 <div>
-                                    You may want to use your own DNS servers instead of automatically selected Perfect Privacy Servers. 
+                                    You may want to use your own Nameservers instead of automatically selected Perfect Privacy Servers. 
+                                    Note that setting custom nameservers interfers with TrackStop. TrackStop might not work, or you custom servers might not be used.  
                                 </div>
                                 {% if pyview.subject.settings.leakprotection.use_custom_dns_servers.get() == true %}
                                     <div style="width:45%;float:left;margin:10px;">

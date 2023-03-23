@@ -196,19 +196,19 @@ class UserAPI(Observable):
 
             response = WebRequest().post(url=self.base_url, data=payload_tuples)
         except requests.exceptions.ConnectionError:
-            self._logger.error("network problem")
+            self._logger.error("Network problem")
             raise UserAPIError()
         except requests.exceptions.HTTPError:
-            self._logger.error("invalid HTTP response")
+            self._logger.error("Invalid HTTP response")
             raise UserAPIError()
         except requests.exceptions.Timeout:
-            self._logger.error("request timeout")
+            self._logger.error("Request timeout")
             raise UserAPIError()
         except requests.exceptions.TooManyRedirects:
-            self._logger.error("too many redirects")
+            self._logger.error("Too many redirects")
             raise UserAPIError()
         except requests.exceptions.RequestException:
-            self._logger.error("undefined network error")
+            self._logger.error("Undefined network error")
             raise UserAPIError()
 
         if response.status_code != 200:
@@ -240,7 +240,7 @@ class UserAPI(Observable):
             if "blockkids" in request or all_requested is True:
                 self.trackstop.block_kids.update(response["trackstop"]["kids"])
             if "blockads" in request or all_requested is True:
-                self.trackstop.block_social.update(response["trackstop"]["ads"])
+                self.trackstop.block_ads.update(response["trackstop"]["ads"])
             if "blockfraud" in request or all_requested is True:
                 self.trackstop.block_fraud.update(response["trackstop"]["fraud"])
             if "blockfakenews" in request or all_requested is True:
@@ -286,31 +286,31 @@ class UserAPI(Observable):
         if "error" in response_dict:
             if response_dict["error"] == "errorUsernamePassword":
                 self.credentials_valid.set(False, force_notify = True)
-                self._logger.warning("login failed")
+                self._logger.warning("Login failed")
                 raise UserAPIError()
             elif response_dict["error"] == "errorInvalidchars":
                 self.credentials_valid.set(False, force_notify = True)
-                self._logger.warning("login failed: invalid chars in username")
+                self._logger.warning("Login failed: invalid chars in username")
                 raise UserAPIError()
             elif response_dict["error"] == "errorExpired":
                 self.account_expired = True
-                self._logger.warning("account expired")
+                self._logger.warning("Account expired")
                 raise UserAPIError()
             elif response_dict["error"] == "errorDisabled":
-                self._logger.warning("account disabled")
+                self._logger.warning("Account disabled")
                 self.account_disabled = True
                 raise UserAPIError()
             elif response_dict["error"] == "errorApiCallLimit":
                 self._logger.warning("API call limit exceeded")
                 raise UserAPIError()
             else:
-                self._logger.error("unknown error: '%s'", response_dict["error"])
+                self._logger.error("Unknown error: '%s'", response_dict["error"])
                 raise UserAPIError()
 
     def _response_get_server_groups(self, payload, response_dict):
         if "serverGroups" not in response_dict:
             if "getServerGroups" in payload:
-                self._logger.error("despite requested, API didn't return server groups")
+                self._logger.error("Despite requested, API didn't return server groups")
             return
         self._server_groups.clear()
         self._server_groups.extend( response_dict["serverGroups"])
