@@ -30,7 +30,7 @@ class OpenVPNConnection(VPNConnection):
 
         self._openvpn_process = None
         self._parser = None
-
+        self.management_interface_connected = False
         self.hop_number = 0
         self.type = "openvpn"
         self.openvpn_device_guid = None
@@ -39,7 +39,7 @@ class OpenVPNConnection(VPNConnection):
         self.external_host_port = None
 
     def _connect(self, servergroup, hop_number):
-
+        self.management_interface_connected = False
         self.servergroup = servergroup
         self.hop_number = hop_number
 
@@ -165,6 +165,7 @@ class OpenVPNConnection(VPNConnection):
             self._openvpn_process.on_output_event.attach_observer(self._on_openvpn_process_output)
             self._openvpn_process.on_exited_event.attach_observer(self._on_openvpn_process_exited)
             self._openvpn_process.start()
+            time.sleep(0.5)
         except Exception as e:
             self._logger.error("Starting OpenVPN failed: %s" % str(e))
             self._disconnect()
@@ -173,6 +174,7 @@ class OpenVPNConnection(VPNConnection):
         self.state.set(VpnConnectionState.CONNECTING, _("Connecting: Connecting to management interface"))
 
         number_of_attempts = 0
+
         while number_of_attempts <= 10:
             if self.core.session._should_be_connected is False:
                 self._disconnect()
@@ -182,6 +184,7 @@ class OpenVPNConnection(VPNConnection):
                 management_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
                 management_socket.connect(("127.0.0.1", management_port))
                 self._logger.debug("Attempt #{} succeeded".format(number_of_attempts))
+                self.management_interface_connected = True
                 break
             except socket.error:
                 self._logger.debug("Attempt #{} failed".format(number_of_attempts))
@@ -214,6 +217,8 @@ class OpenVPNConnection(VPNConnection):
 
     def _on_openvpn_process_output(self, _, source, data):
         if source == "stderr":
+            self._logger.debug("OpenVPN %s: %s" % (source, data.decode("utf-8")))
+        elif source == "stdout" and self.management_interface_connected == False:
             self._logger.debug("OpenVPN %s: %s" % (source, data.decode("utf-8")))
 
     @staticmethod

@@ -1,4 +1,5 @@
 import logging
+import random
 import subprocess
 import time
 import traceback
@@ -7,6 +8,9 @@ from .leakprotection_generic import LeakProtection_Generic
 from .macos.network_interfaces import NetworkInterfaces
 from ..libs.subcommand import SubCommand
 from ..libs.web.reporter import ReporterInstance
+
+
+
 
 class LeakProtection_linux(LeakProtection_Generic):
     def __init__(self, core=None):
@@ -72,7 +76,7 @@ class LeakProtection_linux(LeakProtection_Generic):
                 if hop.connection is not None and hop.connection.external_host_ip is not None:
                     rules.append("iptables -A perfect-privacy -p %s --dport %s -d %s -j ACCEPT" % (hop.connection.external_host_protocol, hop.connection.external_host_port, hop.connection.external_host_ip))
             highest_hops = self.core.session.hops[-1]
-            if highest_hops.connection is not None and highest_hops.connection.external_host_ip is not None:
+            if highest_hops.connection is not None and highest_hops.connection.ipv4_local_ip is not None:
                 rules.append("iptables -A perfect-privacy -s %s -j ACCEPT" % (highest_hops.connection.ipv4_local_ip))
 
         # Drop everything else
@@ -99,12 +103,10 @@ class LeakProtection_linux(LeakProtection_Generic):
         if self.core.settings.leakprotection.enable_ipv6_leak_protection.get() is True:
             self._disableIpv6()
 
-        #self.networkInterfaces = NetworkInterfaces(self.core)
-        # DNS leak protection
-        #if self.core.settings.leakprotection.enable_dnsleak_protection.get():
-        #    self.networkInterfaces.enableDnsLeakProtection()
-        #else:
-        #    self.networkInterfaces.disableDnsLeakProtection()
+        if self.core.settings.leakprotection.enable_dnsleak_protection.get():
+            self.enable_dns_leak_protection()
+        else:
+            self.disable_dns_leak_protection()
 
     def _get_existing_chains(self, iptables):
         success, stdout, stderr = SubCommand().run(iptables, args=["-S", "OUTPUT"])
@@ -121,10 +123,7 @@ class LeakProtection_linux(LeakProtection_Generic):
                 os.system('%s -D OUTPUT -j %s' % (iptables, existing_chain))
                 os.system('%s --flush %s' % (iptables, existing_chain))
                 os.system('%s -X %s' % (iptables, existing_chain))
-
-        #self.networkInterfaces = NetworkInterfaces(self.core)
-        #self.networkInterfaces.disableDnsLeakProtection()
-
+        self.disable_dns_leak_protection()
     def reset(self):
         self._disable()
 
@@ -151,6 +150,7 @@ class LeakProtection_linux(LeakProtection_Generic):
         while "  " in stdout:
             stdout = stdout.replace("  ", " ")
         lines = stdout.split("\n")
+        gateways = []
         for line in lines:
             try:
                 destination_net = line.split(" ")[0].strip()
@@ -160,8 +160,46 @@ class LeakProtection_linux(LeakProtection_Generic):
                 if "via " in line:
                     gateway = line.split("via ")[1].split(" ")[0].strip()
                 if destination_net == "0.0.0.0/0" and gateway is not None:
-                   yield gateway
+                   gateways.append(gateway)
             except Exception as e:
                 pass
+        return gateways
 
+    def enable_dns_leak_protection(self):
+        if self.core is not None:
+            all_ipv4_dns_servers = [item.vpn_server_config.dns_ipv4 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv4 != "" and item.vpn_server_config.bandwidth_mbps > 500 and item.is_online is True]
+            all_ipv6_dns_servers = [item.vpn_server_config.dns_ipv6 for _, item in self.core.vpnGroupPlanet.servers.items() if item.vpn_server_config.dns_ipv6 != "" and item.vpn_server_config.bandwidth_mbps > 500 and item.is_online is True]
+        else:
+            all_ipv4_dns_servers = []
+            all_ipv6_dns_servers = []
 
+        self.current_dns_servers = []
+        current_resolv_conf = open("/etc/resolv.conf", "r").read()
+        if "Perfect Privacy resolv.conf" in current_resolv_conf:
+            self.current_dns_servers = [line.split(" ")[1] for line in current_resolv_conf.split("\n") if "nameserver " in line]
+
+        dnsservers = []
+        if self.core.settings.leakprotection.use_custom_dns_servers.get() is True:
+            dnsservers = [self.core.settings.leakprotection.custom_dns_server_1.get(),self.core.settings.leakprotection.custom_dns_server_2.get()]
+            dnsservers = [x.strip() for x in dnsservers if x.strip() != ""]
+            dnsservers.sort()
+            if len(dnsservers) > 0:
+                if dnsservers == sorted( self.current_dns_servers):
+                    return
+        if len(dnsservers) == 0:
+            if len(self.current_dns_servers) > 0 and set( self.current_dns_servers).issubset(all_ipv4_dns_servers + all_ipv6_dns_servers):
+                return
+            dnsservers = [random.choice(all_ipv4_dns_servers), random.choice(all_ipv4_dns_servers),random.choice(all_ipv6_dns_servers), random.choice(all_ipv6_dns_servers)]
+
+        if not "Perfect Privacy resolv.conf" in current_resolv_conf:
+            os.system("mv /etc/resolv.conf /etc/resolv.conf.pp.original")
+        with open("/etc/resolv.conf","w") as f:
+            f.write("# Perfect Privacy resolv.conf, do not edit manually.\n\n")
+            for dnsserver in dnsservers:
+                f.write("nameserver %s\n" % dnsserver)
+
+    def disable_dns_leak_protection(self):
+        current_resolv_conf = open("/etc/resolv.conf", "r").read()
+        if "Perfect Privacy resolv.conf" in current_resolv_conf:
+            if os.path.exists("/etc/resolv.conf.pp.original"):
+                os.system("rm /etc/resolv.conf ; mv /etc/resolv.conf.pp.original /etc/resolv.conf")
