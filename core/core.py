@@ -206,7 +206,7 @@ class Core(Observable):
                         <true/>
                         <key>ProgramArguments</key>
                         <array>
-                            <string>/Applications/Perfect\ Privacy.app/Contents/MacOS/perfect-privacy</string>
+                            <string>/Applications/Perfect Privacy.app/Contents/MacOS/perfect-privacy</string>
                         </array>
                     </dict>
                     </plist>
