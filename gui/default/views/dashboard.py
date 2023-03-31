@@ -9,6 +9,7 @@ from .modals.select_server import SelectServerModalView
 
 class DashboardView(PyHtmlView):
     TEMPLATE_STR = '''
+
         <div class="head" style="height: 10vh;width: 100%;">
             <img src="/static/img/logo_dark.png" style="width: fit-content; position: absolute; top: 1em; left: 2em;">
             <div style="width: fit-content; position: absolute; top: 1.5em; right: 3em;">
@@ -101,6 +102,15 @@ class DashboardView(PyHtmlView):
 class VpnStatusView(PyHtmlView):
     DOM_ELEMENT_EXTRAS = "style='width:100%;text-align:center;'"
     TEMPLATE_STR = '''    
+        <script>
+            {% if pyview.subject.session.state.get() == "idle" %}
+                pyhtmlapp.set_icon_state("disconnected")
+            {% elif pyview.subject.session.state.get() == "connected" and pyview.subject.ipcheck.vpn_connected == true %}
+                pyhtmlapp.set_icon_state("connected")
+            {% else %}
+                pyhtmlapp.set_icon_state("working")
+            {% endif %}
+        </script>
         {% if pyview.subject.session.state.get() == "idle" %}
              <h3 class="status_red">VPN Not Connected</h3>
         {% elif pyview.subject.session.state.get() == "connecting" %}
