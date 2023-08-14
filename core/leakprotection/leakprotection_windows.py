@@ -88,14 +88,16 @@ class LeakProtection_windows(LeakProtection_Generic):
             lowest_hop = self.core.session.hops[0]
             if lowest_hop.connection is not None and lowest_hop.connection.external_host_ip is not None:
                 external_host_ip = lowest_hop.connection.external_host_ip
+                external_host_port = lowest_hop.connection.external_host_port
+                external_host_protocol = lowest_hop.connection.external_host_protocol
                 if lowest_hop.connection.type == "ipsec":
-                    self.firewallRuleAllowIpSec.enable(lowest_hop.connection.external_host_ip)
-                    self.firewallRuleAllowIpSecUDP.enable(lowest_hop.connection.external_host_ip)
-                    self.firewallRuleAllowIpSecTCP.enable(lowest_hop.connection.external_host_ip)
-                    self.firewallRuleAllowIpSecGRE.enable(lowest_hop.connection.external_host_ip)
+                    self.firewallRuleAllowIpSec.enable(external_host_ip)
+                    self.firewallRuleAllowIpSecUDP.enable(external_host_ip)
+                    self.firewallRuleAllowIpSecTCP.enable(external_host_ip)
+                    self.firewallRuleAllowIpSecGRE.enable(external_host_ip)
                     self.firewallRuleAllowConnectionToServer.disable()
                 else:
-                    self.firewallRuleAllowConnectionToServer.enable(lowest_hop.connection.external_host_ip, lowest_hop.connection.external_host_port, lowest_hop.connection.external_host_protocol)
+                    self.firewallRuleAllowConnectionToServer.enable(external_host_ip, external_host_port, external_host_protocol)
                     self.firewallRuleAllowIpSec.disable()
                     self.firewallRuleAllowIpSecUDP.disable()
                     self.firewallRuleAllowIpSecTCP.disable()

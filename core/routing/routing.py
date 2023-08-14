@@ -198,7 +198,8 @@ class RoutingWindows(Routing):
         self.routing_table_ipv6 = []
 
         routing_table = getPowershellInstance().execute("Get-NetRoute | Select-Object -Property ifIndex,DestinationPrefix,NextHop", as_data=True)
-
+        if routing_table is None:
+            return
         for route in routing_table:
             if "::" in route["NextHop"]:
                 #if route["DestinationPrefix"] in ["fe80::/64", "ff00::/8"]:
@@ -216,6 +217,65 @@ class RoutingWindows(Routing):
                     gateway         = "%s" % route["NextHop"],
                     interface       = "%s" % route["ifIndex"]
                 ))
+
+    def receive_routing_table_fallback(self):
+        self.routing_table_ipv4 = []
+        self.routing_table_ipv6 = []
+
+        success, stdout, stderr = SubCommand().run("route", ["print"])
+        for line in stdout.split(b"\n"):
+            if not b"::" in line and not b"." in line:
+                continue
+            while b"  " in line:
+                line = line.replace(b"  ", b" ")
+
+            if b"::" in line:  # IPV66
+                try:
+                    parts = line.strip().split(b" ")
+                    if len(parts) != 4:
+                        continue
+                    interface = parts[0].strip().decode("UTF-8")
+                    metric =  parts[1].strip().decode("UTF-8")
+                    destination_net = parts[2].strip().decode("UTF-8")
+                    try:
+                        gateway = parts[3].strip().decode("UTF-8")
+                    except:
+                        continue
+                    if not self._is_ip(gateway):
+                        continue
+                    self.routing_table_ipv6.append(RouteV6(
+                        destination_net=destination_net,
+                        gateway=gateway,
+                        interface=interface
+                    ))
+                except:
+                    pass
+            elif b"." in line:  # IPv4
+                try:
+                    parts = b' '.join(line.split()).strip().split(b" ")
+                    if len(parts) != 5:
+                        continue
+                    destination_ip = parts[0].strip().decode("UTF-8")
+                    if destination_ip == "255.255.255.255" or destination_ip.startswith("127.") or destination_ip.startswith("192.168"):
+                        continue
+                    destination_mask = parts[1].strip().decode("UTF-8")
+                    try:
+                        gateway = parts[2].strip().decode("UTF-8")
+                    except:
+                        continue
+                    if not self._is_ip(gateway):
+                        continue
+                    #interface = parts[4].strip().decode("UTF-8") # is interface ip, so dont use, we need interface id
+                    #metric = parts[4].strip().decode("UTF-8")
+                    self.routing_table_ipv4.append(RouteV4(
+                        destination_ip=destination_ip,
+                        destination_mask=destination_mask,
+                        gateway=gateway,
+                        interface=None
+                    ))
+                except:
+                    pass
+
 
 
 class RoutingMacos(Routing):

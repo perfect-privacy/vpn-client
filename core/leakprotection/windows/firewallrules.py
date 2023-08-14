@@ -167,8 +167,11 @@ class FirewallRuleBlockInternet(FirewallRule):
     def enable(self, remote_ipv4s, local_ipv4s):
         local_ipv4_boundarys = ["0.0.0.0", "223.255.255.255"]
         for local_ipv4 in set(local_ipv4s):
-            local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) - 1))
-            local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) + 1))
+            try:
+                local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) - 1))
+                local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) + 1))
+            except:
+                pass
         local_ipv4_boundarys.sort(key=lambda x:self.ip2int(x))
 
         localAddresses = []
@@ -182,8 +185,11 @@ class FirewallRuleBlockInternet(FirewallRule):
            "172.32.0.0","192.167.255.255","192.169.0.0","223.255.255.255"
         ]
         for remote_ipv4 in remote_ipv4s:
-            internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) - 1))
-            internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) + 1))
+            try:
+                internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) - 1))
+                internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) + 1))
+            except:
+                pass
         internet_ipv4_boundarys.sort(key=lambda x:self.ip2int(x))
 
         remoteAddresses = []

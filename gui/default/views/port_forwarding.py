@@ -5,7 +5,7 @@ from gui.common.components import CheckboxComponent
 
 class ServerGroupView(PyHtmlView):
     TEMPLATE_STR = '''
-    <label for="select_servergroup"> </label>
+        <label for="select_servergroup"> </label>
         <div id="select_servergroup" class="nice-select" onclick="if(!this.classList.contains('open')){this.classList.toggle('open');this.children[0].focus();}">
             <input id="select_servergroup_input" value="{{pyview.get_current_valueid()}}" style="position:fixed;left:-9999px;"  onfocusout="setTimeout(function(){ document.getElementById('select_servergroup').classList.remove('open') }, 200);"></input>
             <div class="current">{{pyview.get_current_valuestr() }}</div>
@@ -16,6 +16,7 @@ class ServerGroupView(PyHtmlView):
             </ul>
         </div>   
     '''
+
     def __init__(self, subject, parent, **kwargs):
         super().__init__(subject, parent, **kwargs)
         self.add_observable(self.subject._server_groups)

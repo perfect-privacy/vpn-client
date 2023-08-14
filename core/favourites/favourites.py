@@ -11,13 +11,13 @@ class Favourites(Observable):
         self.favourites = ObservableDict()
         for identifier in self._identifiers_list:
             systems = self._core.vpnGroupPlanet.search_by_identifier(identifier)
-            if len(systems) > 0:
+            if systems is not None and len(systems) > 0:
                 self.favourites[identifier] = systems
 
     def add(self, identifier):
         if identifier not in self._identifiers_list:
             systems = self._core.vpnGroupPlanet.search_by_identifier(identifier)
-            if len(systems) > 0:
+            if systems is not None and len(systems) > 0:
                 self._identifiers_list.append(identifier)
                 self._identifiers_str.set(json.dumps(self._identifiers_list))
                 self.favourites[identifier] = systems
