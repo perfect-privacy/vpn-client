@@ -67,7 +67,10 @@ if __name__ == "__main__":
                 DeviceManager(None).uninstall()
                 shortcut_path = os.path.join("c:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp", "Perfect Privacy.lnk")
                 if os.path.exists(shortcut_path):
-                    os.remove(shortcut_path)
+                    try:
+                        os.remove(shortcut_path)
+                    except:
+                        pass
         else:
             if PLATFORM == PLATFORMS.macos:
                 from launcher.services.macos_service import MacOS_Service

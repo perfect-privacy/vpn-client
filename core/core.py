@@ -187,7 +187,10 @@ class Core(Observable):
                 shortcut = shell.CreateShortCut(shortcut_path)
                 shortcut.IconLocation = str(os.path.join(APP_DIR, "gui", "default", "static", "icons", "pp_icon.ico"))
                 shortcut.Targetpath = os.path.join(APP_DIR, "perfect-privacy.exe")
-                shortcut.save()
+                try:
+                    shortcut.save()
+                except:
+                    pass
 
         elif PLATFORM == PLATFORMS.macos:
             if self.settings.startup.start_on_boot.get() == False:

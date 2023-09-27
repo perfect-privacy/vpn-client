@@ -36,6 +36,11 @@ class Powershell():
                     result = result.decode("UTF-8", errors="replace")
                 except:
                     pass
+                if "A system shutdown is in progress" in result:
+                    return None
+                if "Der Computer wird" in result and "heruntergefahren" in result:
+                    return None
+
                 try:
                     result = json.dumps(result)
                 except:
@@ -69,8 +74,10 @@ class Powershell():
         self._process.stdin.write(b'Write-Host __STARTMARKER-%s__ ; ' % uniq_id)
         self._process.stdin.write(b'' + command + b" ; ")
         self._process.stdin.write(b'Write-Host __ENDMARKER-%s__ \n' % uniq_id)
-        self._process.stdin.flush()
-
+        try:
+            self._process.stdin.flush()
+        except:
+            pass
         lines = []
         startfound = False
         while True:
