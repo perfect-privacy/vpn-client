@@ -171,14 +171,14 @@ class DaemonManager(object):
 
     def _daemonize(self):
         """
-        This forks the current process into a daemon.
-        The stdin, stdout, and stderr arguments are file names that
-        will be opened and be used to replace the standard file descriptors
-        in sys.stdin, sys.stdout, and sys.stderr.
-        These arguments are optional and default to /dev/null.
-        Note that stderr is opened unbuffered, so
-        if it shares a file with stdout then interleaved output
-        may not appear in the order that you expect.
+        Dadurch wird der aktuelle Prozess in einen Daemon umgewandelt.
+        Die Argumente stdin, stdout und stderr sind Dateinamen, die
+        wird geöffnet und als Ersatz für die Standard-Dateideskriptoren verwendet
+        in sys.stdin, sys.stdout und sys.stderr.
+        Diese Argumente sind optional und stehen standardmäßig auf /dev/null.
+        Beachte, dass stderr ungepuffert geöffnet wird, also
+        wenn es eine Datei mit stdout teilt, dann interleaved output
+        erscheinen vielleicht nicht in der Reihenfolge, die du erwartest.
         """
         # Do first fork
         try:
@@ -229,19 +229,19 @@ def parse_arguments(start, stop, restart):
     parser = argparse.ArgumentParser()
 
     sp = parser.add_subparsers()
-    sp_start = sp.add_parser('start', help='Starts the daemon')
+    sp_start = sp.add_parser('start', help='Startet den Daemon')
     sp_start.set_defaults(func=start)
 
-    sp_stop = sp.add_parser('stop', help='Stops the daemon')
+    sp_stop = sp.add_parser('stop', help='Stoppt den Daemon')
     sp_stop.set_defaults(func=stop)
 
-    sp_restart = sp.add_parser('restart', help='Restarts the daemon')
+    sp_restart = sp.add_parser('restart', help='Startet den Daemon neu')
     sp_restart.set_defaults(func=restart)
 
-    parser.add_argument("-v",  "--verbose",    action="count",      help="increase output verbosity", default=0)
-    parser.add_argument("-q",  "--quiet",      action="store_true", help="don't print any output")
-    parser.add_argument("-nd", "--no-daemon",  action="store_true", help="don't run as background process")
-    parser.add_argument("-nr", "--no-root",    action="store_true", help="allow running as non-root")
+    parser.add_argument("-v",  "--verbose",    action="count",      help="Ausführlichkeit der Ausgabe erhöhen", default=0)
+    parser.add_argument("-q",  "--quiet",      action="store_true", help="keine Ausgabe ausgeben")
+    parser.add_argument("-nd", "--no-daemon",  action="store_true", help="nicht als Hintergrundprozess laufen lassen")
+    parser.add_argument("-nr", "--no-root",    action="store_true", help="als Nicht-Root laufen lassen")
     return parser.parse_args()
 
 class LinuxDaemon():
