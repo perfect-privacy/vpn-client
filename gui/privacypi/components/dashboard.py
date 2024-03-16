@@ -15,7 +15,7 @@ class Dashboard(PyHtmlView):
                             {{ hop.servergroup }}, {{ hop.selected_server }}, {{ hop.connection }}
                             
                             {% if pyview.subject.session._get_number_of_non_idle_connections() == 0  %}
-                                <button   onclick='pyhtmlgui.call(pyview.subject.session.remove_hop_by_index, {{ loop.index0 }})' >remove</button>
+                                <button   onclick='pyhtmlgui.call(pyview.subject.session.remove_hop_by_index, {{ loop.index0 }})' >entfernen</button>
                             {% endif %}
                             {% if hop.connection != None %}
                                     {{ hop.connection.selected_server }}
@@ -34,27 +34,27 @@ class Dashboard(PyHtmlView):
         <div class="row h-1of6 p-6of6 bottom_row">
             <div class="col-4 bottom_tile" onclick='pyhtmlgui.call(pyview.open_settings)'>
                 <div class="bottom_tile-body">
-                    <h3 class="verticalcenter">Settings <img class="bottom_row_icons" src="/static/img/footer/more.png" alt="more icon"></h3>
+                    <h3 class="verticalcenter">Einstellungen <img class="bottom_row_icons" src="/static/img/footer/more.png" alt="more icon"></h3>
                 </div>
                 
             </div>
             
             <div class="col-4 bottom_tile" onclick='pyview.open_switch_server()'>
                 <div class="bottom_tile-body">
-                    <h3 class="verticalcenter">Server list<img class="bottom_row_icons" src="/static/img/footer/more.png" alt="more icon"></h3>
+                    <h3 class="verticalcenter">Server Liste<img class="bottom_row_icons" src="/static/img/footer/more.png" alt="more icon"></h3>
                 </div>
             </div>
             
             {% if pyview.subject.session.state == "idle" %}
                 <div class="col-4 bottom_tile" onclick='pyhtmlgui.call(pyview.subject.session.connect_current_configuration)'>
                     <div class="bottom_tile-body">
-                        <h3 class="verticalcenter">Connect</h3>
+                        <h3 class="verticalcenter">Verbinden</h3>
                     </div>
                 </div>
             {% else %}
                 <div class="col-4 bottom_tile" onclick='pyview.subject.session.disconnect()'>
                     <div class="bottom_tile-body">
-                       <h3 class="verticalcenter"> Disconnect</h3>
+                       <h3 class="verticalcenter"> Verbindung trennen</h3>
                     </div>
                 </div>
             {% endif %}

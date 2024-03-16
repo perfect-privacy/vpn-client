@@ -35,7 +35,7 @@ except:
 try:
     open(os.path.join(APP_DIR, "var", ".test"), "w").write("success")
 except:
-    print("Perfect Privacy Service requires higher privileges (root/admin or system)")
+    print("Perfect Privacy Service erfordert höhere Privilegien (root/admin oder system)")
     if PLATFORM == PLATFORMS.windows:
         is_admin = (GetTokenInformation(OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY), TokenUser)[0] == CreateWellKnownSid(WinLocalSystemSid))
     else:

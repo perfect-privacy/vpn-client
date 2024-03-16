@@ -143,7 +143,7 @@ class Switch_server(PyHtmlView):
         <div class="row h-1of6 p-6of6 bottom_row">
             <div class="col-4 bottom_tile" onclick = 'pyhtmlgui.call(pyview.on_back)'>
                 <div class="bottom_tile-body">
-                     <h3 class="verticalcenter"><img class="bottom_row_icons" src="/static/img/footer/back.png" alt="back icon"> Back</h3>  
+                     <h3 class="verticalcenter"><img class="bottom_row_icons" src="/static/img/footer/back.png" alt="back icon"> Zurück</h3>  
                 </div>
             </div>
             
@@ -170,7 +170,7 @@ class Switch_server(PyHtmlView):
             
             <div class="col-4 bottom_tile" onclick ='pyhtmlgui.call(pyview.connect_button)'>
                 <div class="bottom_tile-body">
-                    <p><h3 class="verticalcenter"> Connect </h3></p>
+                    <p><h3 class="verticalcenter"> Verbinden </h3></p>
                 </div>
             </div>
         </div>
@@ -189,10 +189,10 @@ class Switch_server(PyHtmlView):
         self.city_list    = ServerList(subject.vpnGroupPlanet.citys   , self)
         self.server_list  = ServerList(subject.vpnGroupPlanet.servers , self)
         self.lists = [
-            ("Zones", self.zone_list),
-            ("Countries", self.country_list),
-            ("Cities", self.city_list),
-            ("Servers", self.server_list),
+            ("Zonen", self.zone_list),
+            ("Länder", self.country_list),
+            ("Städte", self.city_list),
+            ("Server", self.server_list),
         ]
         self.current_index = 0
         self.current_list = self.lists[self.current_index][1]
