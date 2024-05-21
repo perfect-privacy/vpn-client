@@ -1,7 +1,9 @@
+import gettext
 import random
 
 from pyhtmlgui import PyHtmlView, ObservableListView
 from .modals.select_server import ObservableDictViewWithFilter
+from ...common.translations import Translations
 
 
 class TrayView(PyHtmlView):
@@ -20,35 +22,32 @@ class TrayView(PyHtmlView):
             <section id="intro" class="wrapper style1 fullheight fade-up">
             {% if pyview.select_server == True %}
                 {{ pyview.selectServerView.render()  }}
-            {% else %}
-              
+            {% else %}   
                 <div class="head" style="height: 10vh;width: 100%;margin-bottom:10px;">
                     <img src="/static/img/logo_dark.png" style="width: 50%; position: absolute; top: 0.5em; left: 1em;">
                 </div>
-                
-
                 {% if pyview.confirm_exit == True %}
-                    <h2 style="padding: 2em;"> Are you sure you want to Exit?</h2>
+                    <h2 style="padding: 2em;"> {{_("Are you sure you want to Exit?")}}</h2>
                     {% if pyview.subject.settings.startup.enable_background_mode.get() == False %}
                         {% if pyview.subject.session._get_number_of_non_idle_connections() != 0 %}
-                            <h3 style="padding-bottom: 2em;"> This will <b>disconnect</b> all existing VPN Tunnels! </h3>
+                            <h3 style="padding-bottom: 2em;"> {{_("This will <b>disconnect</b> all existing VPN Tunnels!")}} </h3>
                         {% endif %}
                     {% else %}
                          {% if pyview.subject.session._get_number_of_non_idle_connections() != 0 %}
-                            <h3 style="padding-bottom: 2em;"> Background mode enabled, your VPN connections will stay active!</h3>
+                            <h3 style="padding-bottom: 2em;"> {{_("Background mode enabled, your VPN connections will stay active!")}}</h3>
                         {% else %}
                             {% if pyview.subject.settings.leakprotection.leakprotection_scope.get() == "program" %}
-                                <h3 style="padding-bottom: 2em;"> Background mode enabled, Leak Protection will stay active!</h3>
+                                <h3 style="padding-bottom: 2em;"> {{_("Background mode enabled, Leak Protection will stay active!")}}</h3>
                             {% endif %}
                         {% endif %}
                     {% endif %}
                     <br>          
                     <div style="position: absolute; bottom: 5px; width: calc(100% - 5px);">
                          <div style="width:50%;text-align:center;float:left">
-                            <button onclick="pyview.exit_app()">Yes</button>
+                            <button onclick="pyview.exit_app()">{{_("Yes")}}</button>
                          </div>     
                          <div style="width:50%;text-align:center;float:right">
-                            <button onclick="pyview.hide_confirm_exit()">No</button>
+                            <button onclick="pyview.hide_confirm_exit()">{{_("No")}}</button>
                          </div>     
                         </div>   
                 {% else %}
@@ -60,50 +59,50 @@ class TrayView(PyHtmlView):
                     <br>
                     <div style="width:100%;text-align:center;">              
                         {% if pyview.subject.session.state.get() == "idle" %}
-                             <h3 class="status_red">VPN Not Connected</h3>
+                             <h3 class="status_red">{{_("VPN Not Connected")}}</h3>
                         {% elif pyview.subject.session.state.get() == "connecting" %}
                             {% if pyview.subject.leakprotection.state.get() == "ENABLEING" %}
-                                 <h3 class="status_orange">Activating Leak Protection</h3>
+                                 <h3 class="status_orange">{{_("Activating Leak Protection")}}</h3>
                             {% else %}
-                                 <h3 class="status_orange">Connecting VPN Server</h3>
+                                 <h3 class="status_orange">{{_("Connecting VPN Server")}}</h3>
                             {% endif %}
                         {% elif pyview.subject.session.state.get() == "connected" %}
                             {% if pyview.subject.leakprotection.state.get() == "ENABLEING" or pyview.subject.ipcheck.state == "ACTIVE" %}
-                                 <h3 class="{% if pyview.subject.ipcheck.vpn_connected == true %}status_green{% else %}status_orange{% endif %}">Verifying VPN Security </h3>
+                                 <h3 class="{% if pyview.subject.ipcheck.vpn_connected == true %}status_green{% else %}status_orange{% endif %}">{{_("Verifying VPN Security")}} </h3>
                             {% else %}            
                                 {% if pyview.subject.ipcheck.vpn_connected == true %}
-                                     <h3 class="status_green">Connected to Perfect Privacy</h3>
+                                     <h3 class="status_green">{{_("Connected to Perfect Privacy")}}</h3>
                                 {% else %}
-                                     <h3 class="status_orange">Connected to Perfect Privacy, waiting for verification</h3>
+                                     <h3 class="status_orange">{{_("Connected to Perfect Privacy, waiting for verification")}}</h3>
                                 {% endif %}
                             {% endif %}
                         {% elif pyview.subject.session.state.get() == "disconnecting" %}
-                             <h3 class="status_orange">Disconnecting VPN</h3>
+                             <h3 class="status_orange">{{_("Disconnecting VPN")}}</h3>
                         {% endif %}
                     </div>
 
                     <div style="width:100%;text-align:center;">
                         {% if pyview.subject.leakprotection.state.get() == "ENABLEING" %}
-                             <h3 class="status_green">Verifying Leak Protection</h3>
+                             <h3 class="status_green">{{_("Verifying Leak Protection")}}</h3>
                         {% elif pyview.subject.leakprotection.state.get() == "ENABLED" %}
-                             <h3 class="status_green">Leak Protection enabled, all non VPN traffic is blocked</h3>
+                             <h3 class="status_green">{{_("Leak Protection enabled, all non VPN traffic is blocked")}}</h3>
                         {% endif %}
                     </div>     
                     <div style="display:none;width:100%;text-align:center;">
                         {% if pyview.subject.session._should_be_connected.get()  %}
-                            <button onclick='pyview.subject.session.disconnect()'>Disconnect</button>            
+                            <button onclick='pyview.subject.session.disconnect()'>{{_("Disconnect")}}</button>            
                         {% else %}
                             {% if pyview.subject.session.hops | length > 0 and pyview.subject.session._get_number_of_non_idle_connections() == 0 %}
-                                <button onclick='pyview.subject.session.connect()' style="background-color:#33c533a6">Connect</button>
+                                <button onclick='pyview.subject.session.connect()' style="background-color:#33c533a6">{{_("Connect")}}</button>
                             {% endif %}
                         {% endif %}
                     </div>     
                     <div style="position: absolute; bottom: 5px; width: calc(100% - 5px);">
                          <div style="width:50%;text-align:center;float:left">
-                            <button onclick='pyhtmlapp.show_app()'>Show App</button>     
+                            <button onclick='pyhtmlapp.show_app()'>{{_("Show App")}}</button>     
                          </div>     
                          <div style="width:50%;text-align:center;float:right">
-                            <button onclick='pyview.ask_confirm_exit()'>Exit App</button>     
+                            <button onclick='pyview.ask_confirm_exit()'>{{_("Exit App")}}</button>     
                          </div>     
                     </div>         
                 {% endif %}
@@ -126,8 +125,14 @@ class TrayView(PyHtmlView):
         self.add_observable(subject.session.state, self._on_subject_updated)
         self.add_observable(subject.userapi.default_port_forwarding, self._on_subject_updated)
         self.add_observable(subject.settings.vpn.openvpn.cascading_max_hops)
+        self.add_observable(self.subject.settings.language, self._on_language_updated)
         self.confirm_exit = False
         self.select_server = False
+        self.translations = Translations(self.subject.settings.language.get(), self._instance._template_env)
+
+    def _on_language_updated(self, source, **kwargs):
+        self.translations.update(self.subject.settings.language.get())
+        self.update()
 
     def show_select_server(self):
         self.select_server = True
@@ -165,14 +170,14 @@ class HopListView(PyHtmlView):
         </table>
         <div style="text-align:center">
             {% if pyview.core.session._should_be_connected.get()  %}
-                <button style="width:49%"  onclick='pyview.core.session.disconnect()'>Disconnect</button>            
+                <button style="width:49%"  onclick='pyview.core.session.disconnect()'>{{_("Disconnect")}}</button>            
             {% else %}
                 {% if pyview.core.session.hops | length > 0 and pyview.core.session._get_number_of_non_idle_connections() == 0 %}
-                    <button style="width:49%;background-color:#33c533a6" onclick='pyview.core.session.connect()' >Connect</button>
+                    <button style="width:49%;background-color:#33c533a6" onclick='pyview.core.session.connect()'>{{_("Connect")}}</button>
                 {% endif %}
             {% endif %}
             {% if pyview.core.session.hops | length < pyview.core.settings.vpn.openvpn.cascading_max_hops.get()  %}
-                <button style="width:49%"  onclick='pyview.parent.show_select_server()'>Add Server</button>
+                <button style="width:49%"  onclick='pyview.parent.show_select_server()'>{{_("Add Server")}}</button>
             {% endif %}  <!---  if pyview.core.session._should_be_connected.get() == false and ---->
         </div>
     '''
@@ -202,7 +207,7 @@ class HopListItemView(PyHtmlView):
                     {{ pyview.subject.connection.state.get() |title }}
                 {% else %}     
                     {% if pyview.core.session._get_number_of_non_idle_connections() == 0  %}
-                        <button style="border-radius: 2em;height: calc(2.75em + 2px);line-height: 2.75em;padding: 0 1.75em;" class="" onclick='pyview.core.session.remove_hop_by_index( {{ pyview.element_index() }})' >remove</button>
+                        <button style="border-radius: 2em;height: calc(2.75em + 2px);line-height: 2.75em;padding: 0 1.75em;" class="" onclick='pyview.core.session.remove_hop_by_index( {{ pyview.element_index() }})' >{{_("remove")}}</button>
                     {% endif %}
                 {% endif %}  
             </td>
@@ -223,11 +228,11 @@ class SelectServerView(PyHtmlView):
     TEMPLATE_STR = '''   
         <div style="width:100%;height:100vh;">
             <div style="float:left;font-size:0.8em" onclick='pyview.select_subsection(
-                {% if pyview.current_subsection_name  == "Favourites" %}"Favourites"{% endif %}
-                {% if pyview.current_subsection_name  == "Zones" %}"Zones"{% endif %}
-                {% if pyview.current_subsection_name  == "Countries"%}"Countries"{% endif %}
-                {% if pyview.current_subsection_name  == "Cityies" %}"Cityies"{% endif %}
-                {% if pyview.current_subsection_name  == "Servers" %}"Servers"{% endif %}
+                {% if pyview.current_subsection_name  == "Favourites" %}"{{_("Favourites")}}"{% endif %}
+                {% if pyview.current_subsection_name  == "Zones" %}"{{_("Zones")}}"{% endif %}
+                {% if pyview.current_subsection_name  == "Countries"%}"{{_("Countries")}}"{% endif %}
+                {% if pyview.current_subsection_name  == "Cityies" %}"{{_("Cityies")}}"{% endif %}
+                {% if pyview.current_subsection_name  == "Servers" %}"{{_("Servers")}}"{% endif %}
                 )'> {{pyview.current_subsection_name}}  
             </div>                                
             <div style="cursor:pointer;float:right;font-size: 2em;line-height: 1em;" class="" onclick="pyview.parent.hide_select_server()">
@@ -360,7 +365,7 @@ class ServerListsItemView(PyHtmlView):
             <td>
                 <h4 style="padding-top:4px">{{ pyview.subject.name|title }}
                 {% if pyview.subject.is_online == False %}
-                    <p style="margin:0px;padding:0px;font-size:0.8em;color:orange">maintenance</p>
+                    <p style="margin:0px;padding:0px;font-size:0.8em;color:orange">{{_("maintenance")}}</p>
                 {% endif %}
                 </h4>
             </td>

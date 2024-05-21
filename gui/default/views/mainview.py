@@ -1,5 +1,5 @@
 from pyhtmlgui import PyHtmlView
-
+import gettext
 from .modals.confirm_exit_update import ConfirmExitUpdateModalView
 from .stealth import StealthView
 from .port_forwarding import PortForwardingView
@@ -10,6 +10,7 @@ from .leak_protection import LeakProtectionView
 from .logs import LogsView
 from .modals.confirm_exit import ConfirmExitModalView
 from ...common.components import SelectComponent
+from ...common.translations import Translations
 
 
 class MainView(PyHtmlView):
@@ -24,24 +25,25 @@ class MainView(PyHtmlView):
         <section id="sidebar">
             <div class="inner">
                 <div style="position:absolute;top:0px;width:100%">
+                    <!--- {{_("Simple")}} , {{_("Advanced")}} , {{_("Expert")}} --->
                     {{ pyview.interface_level.render() }}
                 </div>
                 <nav>
                     <ul>
-                        <li><a href="#intro">Dashboard</a></li>
-                        <li><a href="#trackstop">TrackStop</a></li>
-                        <li><a href="#leakprotection">Leak Protection</a></li>
+                        <li><a href="#intro">{{_("Dashboard")}}</a></li>
+                        <li><a href="#trackstop">{{_("TrackStop")}}</a></li>
+                        <li><a href="#leakprotection">{{_("Leak Protection")}}</a></li>
                         {% if pyview.subject.settings.interface_level.get() != "simple" %}
-                            <li><a href="#stealth">Stealth</a></li>
-                            <li><a href="#portforwarding">Port Forwarding</a></li>
+                            <li><a href="#stealth">{{_("Stealth")}}</a></li>
+                            <li><a href="#portforwarding">{{_("Port Forwarding")}}</a></li>
                         {% endif %}
-                        <li><a href="#preferences">Preferences</a></li>
+                        <li><a href="#preferences">{{_("Preferences")}}</a></li>
                         {% if pyview.subject.settings.interface_level.get()  == "expert" %}
-                            <li><a href="#logs">Log</a></li>
+                            <li><a href="#logs">{{_("Log")}}</a></li>
                         {% endif %}
                     </ul>  
                 </nav>
-                <button onclick="pyview.confirmExitModal.show()" style="width:100%;position:absolute;bottom:20px"> Exit </button> 
+                <button onclick="pyview.confirmExitModal.show()" style="width:100%;position:absolute;bottom:20px">{{_("Exit")}}</button> 
             </div>
         </section>
         
@@ -102,6 +104,7 @@ class MainView(PyHtmlView):
         self.confirmExitUpdateModal = ConfirmExitUpdateModalView(subject, self)
         self.add_observable(self.subject.userapi.credentials_valid, self._on_subject_updated)
         self.add_observable(self.subject.settings.interface_level,  self._on_interface_level_updated)
+        self.add_observable(self.subject.settings.language, self._on_language_updated)
         self.interface_level = SelectComponent(subject.settings.interface_level, self,
                                             options=[
                                                 ("simple"  , "Simple" ),
@@ -109,12 +112,16 @@ class MainView(PyHtmlView):
                                                 ("expert"  , "Expert"  ),
                                             ])
         self.softwareUpdateHint = SoftwareUpdateHint(self.subject.softwareUpdater.state, self)
-
+        self.translations = Translations(self.subject.settings.language.get(), self._instance._template_env)
 
     def show_dashboard(self):
         if self.current_view != self.dashboard:
             self.current_view = self.dashboard
             self.update()
+
+    def _on_language_updated(self, source, **kwargs):
+        self.translations.update(self.subject.settings.language.get())
+        self.update()
 
     def _on_interface_level_updated(self, source, **kwargs):
         self.update()
@@ -124,7 +131,7 @@ class SoftwareUpdateHint(PyHtmlView):
     TEMPLATE_STR = '''
         {% if pyview.subject.get() == "READY_FOR_INSTALL" %}
             <div style="height:30px;position:fixed;bottom:0px;background-color:green;width:calc(100% - 15em);text-align:center">
-                <b style="cursor:pointer" onclick="pyview.ask_update()">Software update available, click here to install</b>
+                <b style="cursor:pointer" onclick="pyview.ask_update()">{{_("Software update available, click here to install")}}</b>
             </div>
         {% endif %}
     '''

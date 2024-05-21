@@ -125,7 +125,8 @@ class Core(Observable):
         self.leakprotection.update_async()
         self.routing.update_async()
 
-    def on_frontend_connected(self, pyHtmlGuiInstance, nr_of_active_frontends):
+    def on_frontend_connected(self, pyHtmlGuiInstances, nr_of_active_frontends):
+
         was_active = self.frontend_active
         self.frontend_active = nr_of_active_frontends > 0
         if was_active is False:

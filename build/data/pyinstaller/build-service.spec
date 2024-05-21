@@ -15,6 +15,9 @@ datas = [
     ( os.path.join(root_folder, "gui"       , "default" , "static"               ) , os.path.join("gui", "default", "static")),
     ( os.path.join(os.path.split(pyhtmlgui.__file__)[0], "templates")                 , "pyhtmlgui/templates")
 ]
+for locale in ["de", "en"]:
+    datas.append(( os.path.join(root_folder, "locales", locale, "LC_MESSAGES") , os.path.join("locales", locale, "LC_MESSAGES")))
+
 
 a = Analysis(
     [script],

@@ -32,6 +32,7 @@ def getPyHtmlGuiInstance( appInstance, frontend = "default", on_frontend_exit = 
         on_view_connected = on_frontend_ready,
         single_instance   = True,
     )
+
     gui.add_endpoint(
         app_instance    = appInstance,
         view_class      = TrayView,

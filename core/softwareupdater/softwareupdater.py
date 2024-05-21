@@ -62,12 +62,15 @@ class SoftwareUpdater(GenericUpdater):
 
             if self.version_online is not None and self._compare_version_numbers(self.version_online, self.version_local) > 0:
                 self.version_downloaded = "0.0.0"
-                if os.path.exists(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME)):
+
+                if os.path.exists(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME)) and os.path.exists(os.path.join(SOFTWARE_UPDATE_DIR,SOFTWARE_UPDATE_FILENAME)):
                     self.version_downloaded = open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "r").read()
                 if self._compare_version_numbers(self.version_online, self.version_downloaded) > 0:
                     self.state.set(UpdaterState.UPDATER_STATE_DOWNLOADING)
                     executable = SecureDownload().download(self.file_url, self.signature_url)
                     if executable is not None:
+                        if not os.path.exists(SOFTWARE_UPDATE_DIR):
+                            os.mkdir(SOFTWARE_UPDATE_DIR)
                         with open(os.path.join(SOFTWARE_UPDATE_DIR, SOFTWARE_UPDATE_FILENAME), "wb") as f:
                             f.write(executable)
                         with open(os.path.join(SOFTWARE_UPDATE_DIR, "%s.version" % SOFTWARE_UPDATE_FILENAME), "w") as f:

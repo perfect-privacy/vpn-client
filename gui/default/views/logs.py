@@ -1,14 +1,12 @@
 from pyhtmlgui import PyHtmlView, ObservableListView
-from gui.common.components import CheckboxComponent, SelectComponent
-from config.constants import VPN_PROTOCOLS, OPENVPN_CIPHER,OPENVPN_PROTOCOLS, OPENVPN_TLS_METHOD,OPENVPN_DRIVER
 import re
 
 class LogsView(PyHtmlView):
     TEMPLATE_STR = '''
         <div class="inner">
-            <button style="float:right" onclick='pyview.copy_to_clipboard()'> To Clipboard </button>
-            <button style="float:right" onclick='pyview.clear_log()'> Clear </button>
-            <h1 style="float:left"> Internal Log </h1>           
+            <button style="float:right" onclick='pyview.copy_to_clipboard()'> {{_("To Clipboard")}} </button>
+            <button style="float:right" onclick='pyview.clear_log()'> {{_("Clear")}} </button>
+            <h1 style="float:left"> {{_("Internal Log")}} </h1>           
             <input id="filter_str" type="text" onkeyup="pyview.set_filter(document.getElementById('filter_str').value)" value="{{filter_str}}" placeholder="filter"> </input>
             <div  style="max-height: 100vh;overflow: auto;margin-bottom: 30px;">
                 {{ pyview.log.render() }}

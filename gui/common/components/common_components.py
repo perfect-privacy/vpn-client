@@ -6,10 +6,10 @@ class SelectComponent(PyHtmlView):
     <label for="select_{{ pyview.uid }}"> {{pyview.label}} </label>
     <div id="select_{{ pyview.uid }}" class="nice-select" onclick="if(!this.classList.contains('open')){this.classList.toggle('open');this.children[0].focus();}">
         <input style="position:fixed;left:-9999px;" type="checkbox" onfocusout="setTimeout(function(){ document.getElementById('select_{{ pyview.uid }}').classList.remove('open') }, 200);"></input>
-        <div class="current">{{pyview.get_current_valuestr() }}</div>
+        <div class="current">{{_(pyview.get_current_valuestr() )}}</div>
         <ul class="list">
             {% for option in pyview.options %}
-                <li onclick='pyview.set_value("{{option.0}}")' class="option {% if pyview.subject.get() == option.0 %}selected{%endif%}"> {{option.1}} </li>
+                <li onclick='pyview.set_value("{{option.0}}")' class="option {% if pyview.subject.get() == option.0 %}selected{%endif%}"> {{_(option.1)}} </li>
             {% endfor %}
         </ul>
     </div>        

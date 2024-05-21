@@ -25,6 +25,7 @@ class FirewallRule():
         if not hasattr(self, "local_ports")     : self.local_ports      = None
         if not hasattr(self, "local_addresses") : self.local_addresses  = None
         if not hasattr(self, "applicationName") : self.applicationName  = None
+        if not hasattr(self, "interfaceIndex")  : self.interfaceIndex   = None
         self._is_enabled = None
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -81,6 +82,8 @@ class FirewallRule():
             args.append('-LocalAddress  @(%s)' % ", ".join(['"%s"' % x for x in self.local_addresses]))
         if self.applicationName is not None:
             args.append('-Program   "%s"' % self.applicationName)
+        if self.interfaceIndex is not None:
+            args.append('-InterfaceAlias(Get-NetAdapter -InterfaceIndex %s).InterfaceAlias' % self.interfaceIndex)
         return " ".join(args)
 
 class FirewallRuleOutgoingProfileDefaultBlock():
@@ -136,20 +139,55 @@ class FirewallRuleAllowNetworkingLan(FirewallRule):
         self.remote_addresses = ["10.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12","192.168.0.0/16", "fe80::/64", "ff01::/16", "ff02::/16"]
         super().__init__()
 
-class FirewallRuleAllowFromVpnLocalIps(FirewallRule):
+
+class FirewallRuleAllowFromVpnLocalIp(FirewallRule):
 
     def __init__(self):
-        self.name = "Perfect Privacy - Allow traffic from local VPN IP"
+        self.name = "Perfect Privacy - Allow traffic from local VPN IP from Interface"
         self.description = self.name
         self.action = NET_FW_ACTION_ALLOW
         self.direction = NET_FW_RULE_DIR_OUT
         super().__init__()
 
-    def enable(self, local_ipv4s, local_ipv6s):
-        changed = self.local_addresses != local_ipv4s+local_ipv6s or self.local_addresses is None
+    def enable(self, local_ipv4, local_ipv6, interfaceIndex):
+        changed = self.local_addresses != [local_ipv4, local_ipv6] or self.local_addresses is None or self.interfaceIndex != interfaceIndex
         if changed is True or self.is_enabled is False:
-            self.local_addresses = local_ipv4s+local_ipv6s
+            self.local_addresses = [local_ipv4, local_ipv6]
+            self.name = "Perfect Privacy - Allow traffic from local VPN IP from Interface %s" % interfaceIndex
+            self.interfaceIndex = interfaceIndex
             super().enable() if self.is_enabled is False else self.update()
+
+
+class FirewallRuleAllowFromVpnLocalIps(FirewallRule):
+
+    def __init__(self):
+        self.name = "Perfect Privacy - Allow traffic from local VPN IP from Interface"
+        self.rules = {}
+        self.local_hops = []
+        super().__init__()
+
+    def enable(self, local_hops):
+        changed = self.local_hops != local_hops
+        if changed is True or self.is_enabled is False:
+            for hop in local_hops:
+                hop_id = ":".join(hop)
+                if hop_id not in self.rules:
+                    self.rules[hop_id] = FirewallRuleAllowFromVpnLocalIp()
+                    self.rules[hop_id].enable(hop[0], hop[1], hop[2])
+            for key in [k for k in self.rules.keys()]:
+                if key not in [":".join(hop) for hop in local_hops]:
+                    self.rules[key].disable()
+                    del self.rules[key]
+
+    def disable(self):
+        if self.is_enabled is True:
+            self._logger.info("%s disabling" % self.__class__.__name__)
+            delete_rule_cmd = 'Remove-NetFirewallRule -Name "%s*"' % self.name
+            getPowershellInstance().execute(delete_rule_cmd, may_fail=True)
+        self.is_enabled = False
+
+
+
 
 
 class FirewallRuleBlockInternet(FirewallRule):

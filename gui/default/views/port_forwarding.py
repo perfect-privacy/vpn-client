@@ -55,32 +55,32 @@ class PortForwardingView(PyHtmlView):
     TEMPLATE_STR = '''
         {% if pyview.subject.userapi.credentials_valid.get() != True %}
             <div class="not_logged_in">
-                Login to change your Portforwarding settings.
+                {{_("Login to change your Portforwarding settings.")}}
             </div>
         {% endif %}
 
         <div class="inner">
-            <h1>Port Forwarding</h1>
-            <p>Port forwardings are helpful to optimize the speed for certain games or Peer-to-peer software like torrent clients. You can designate up to five specific ports to forward to your computer.
-            Note: It might take up to 3 minutes for any changes to apply on our Servers. 
-            If you update your port forwarding settings on our website, it might take some time for the settings below to refresh. <a onclick="pyview.refresh()">Refresh Now</a> 
+            <h1>{{_("Port Forwarding")}}</h1>
+            <p>
+                {{_("Port forwardings are helpful to optimize the speed for certain games or Peer-to-peer software like torrent clients. You can designate up to five specific ports to forward to your computer. Note: It might take up to 3 minutes for any changes to apply on our Servers. If you update your port forwarding settings on our website, it might take some time for the settings below to refresh. ")}}
+                <a onclick="pyview.refresh()">{{_("Refresh Now")}}</a> 
             </p>
             <div class="boxes">
                 <section>
                     <h3>
-                        Default Port Forwarding
+                        {{_("Default Port Forwarding")}}
                         <div class="input"> {{ pyview.default_port_forwarding.render() }}</div>
                     </h3>
                     <div>
-                        Enable standard port forwarding.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                        {{_("Enable standard port forwarding.")}}&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">{{_("more")}}</a>
                         <div class="tooltip" style="display:none">
-                            If default port forwarding is enabled, three random ports will be forwarded to your computer.
+                            {{_("If default port forwarding is enabled, three random ports will be forwarded to your computer.")}}
                         </div>
                     </div>
                 </section>
                 <section>
                     <h3>
-                        Enable Custom Port Forwarding
+                        {{_("Enable Custom Port Forwarding")}}
                         <div class="input">
                             <div class="CheckboxComponent">
                                 <input onchange='pyview.set_custom_port_forwarding($("#checkbox_custom_port_forwarding").prop("checked") === true )'
@@ -93,9 +93,9 @@ class PortForwardingView(PyHtmlView):
                         </div>
                     </h3>
                     <div>
-                        Enable configurable port forwarding.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                        {{_("Enable configurable port forwarding.")}}&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">{{_("more")}}</a>
                         <div class="tooltip" style="display:none">
-                            If this option is enabled, you can configure up to five port forwardings from Perfect Privacy servers to your computer. The ports are set randomly on the server side.
+                            {{_("If this option is enabled, you can configure up to five port forwardings from Perfect Privacy servers to your computer. The ports are set randomly on the server side.")}}
                         </div>
                     </div>
                     {% if pyview.custom_port_forwarding_enabled() == True %}
@@ -104,29 +104,29 @@ class PortForwardingView(PyHtmlView):
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th scope="col"> Server</th>
-                                    <th scope="col"> Server Port</th>
-                                    <th scope="col"> Local Port</th>
-                                    <th scope="col"> Valid until</th>
+                                    <th scope="col"> {{_("Server")}}</th>
+                                    <th scope="col"> {{_("Server Port")}}</th>
+                                    <th scope="col"> {{_("Local Port")}}</th>
+                                    <th scope="col"> {{_("Valid until")}}</th>
                                     <th scope="col"></th>
                                 </tr>
                             </thead>
                             {{ pyview.custom_port_forwardings.render() }}           
                         </table>
                         <div class="row">
-                            <div class="col-6">Forward to local port</div>
+                            <div class="col-6">{{_("Forward to local port")}}</div>
                             <div class="col-3">
                                 <input class="form-check-input" type="text" value="12345" id="local_port_input">
                                 <label class="form-check-label" for="local_port_input"> </label>
                             </div>
                             <div class="col-3">
-                                <button onclick='pyview.subject.userapi.customPortForwardings.add($("#select_servergroup_input").val(), $("#local_port_input").val() )'>add</button>
+                                <button onclick='pyview.subject.userapi.customPortForwardings.add($("#select_servergroup_input").val(), $("#local_port_input").val() )'>{{_("add")}}</button>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-9">1-to-1 Port Forwarding</div>
+                            <div class="col-9">{{_("1-to-1 Port Forwarding")}}</div>
                             <div class="col-3">
-                                <button onclick='pyview.subject.userapi.customPortForwardings.add_one_to_one($("#select_servergroup_input").val() )'> add </button>
+                                <button onclick='pyview.subject.userapi.customPortForwardings.add_one_to_one($("#select_servergroup_input").val() )'> {{_("add")}} </button>
                             </div>
                         </div>
                     {% endif %}
@@ -134,17 +134,17 @@ class PortForwardingView(PyHtmlView):
                 {% if pyview.custom_port_forwarding_enabled() == True %}
                     <section>
                         <h3>
-                            Auto Renew Port Forwarding
+                            {{_("Auto Renew Port Forwarding")}}
                             <div class="input">{{ pyview.auto_renew_port_forwarding.render() }} </div>
                         </h3>
-                        <div>Automatically renew port forwarding after expiration</div>
+                        <div>{{_("Automatically renew port forwarding after expiration")}}</div>
                     </section>
                     <section>
                         <h3>
-                            Email Notifications for Port Forwarding Renewal
+                            {{_("Email Notifications for Port Forwarding Renewal")}}
                             <div class="input"> {{ pyview.email_port_forwarding_updates.render() }} </div>
                         </h3>
-                        <div>Receive an email notification when port forwarding is renewed</div>
+                        <div>{{_("Receive an email notification when port forwarding is renewed")}}</div>
                     </section>
                 {% endif %}
             </div>
@@ -193,5 +193,5 @@ class CustomPortForwardingRowItem(PyHtmlView):
         <td> {{ pyview.subject.srcPort }}    </td>
         <td> {{ pyview.subject.dstPort }}    </td>
         <td> {{ pyview.subject.validUntil }} </td>
-        <td> <button onclick='pyview.subject.remove()'>delete</button> </td>
+        <td> <button onclick='pyview.subject.remove()'>{{_("delete")}}</button> </td>
     '''

@@ -13,6 +13,7 @@ var/user_settings.bson
 var/storage.db
 var/.perfect_privacy.instid
 var/mpass
+locales/*/LC_MESSAGES/translations_*.mo
 build_tmp
 venv
 .DS_Store

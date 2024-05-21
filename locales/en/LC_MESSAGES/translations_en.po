@@ -11,174 +11,169 @@ msgstr ""
 
 #: gui/default/views/dashboard.py:26
 msgid "Your account has expired"
-msgstr "Ihr Konto ist abgelaufen"
+msgstr ""
 
 #: gui/default/views/dashboard.py:28
-#, fuzzy
 msgid "Your account will expire in %(num)d day"
 msgid_plural "Your account will expire in %(num)d days"
-msgstr[0] "Ihr Konto läuft in %(num)d Tag ab"
-msgstr[1] "Ihr Konto läuft in %(num)d Tagen ab"
+msgstr[0] ""
+msgstr[1] ""
 
 #: gui/default/views/dashboard.py:30
 msgid "click here to extend!"
-msgstr "hier klicken, um zu verlängern!"
+msgstr ""
 
 #: gui/default/views/dashboard.py:40
 msgid "Username"
-msgstr "Benutzername"
+msgstr ""
 
 #: gui/default/views/dashboard.py:42
 msgid "Password"
-msgstr "Password"
+msgstr ""
 
 #: gui/default/views/dashboard.py:46
 msgid "account expired"
-msgstr "Konto abgelaufen"
+msgstr ""
 
 #: gui/default/views/dashboard.py:49
 msgid "account disabled"
-msgstr "Konto deaktiviert"
+msgstr ""
 
 #: gui/default/views/dashboard.py:52
 msgid "Failed to login"
-msgstr "Anmeldung fehlgeschlagen"
+msgstr ""
 
 #: gui/default/views/dashboard.py:57
 msgid "login"
-msgstr "Anmelden"
+msgstr ""
 
 #: gui/default/views/dashboard.py:115
 msgid "VPN Not Connected"
-msgstr "VPN nicht verbunden"
+msgstr ""
 
 #: gui/default/views/dashboard.py:118
 msgid "Activating Leak Protection"
-msgstr "Leckschutz wird aktiviert"
+msgstr ""
 
 #: gui/default/views/dashboard.py:120
 msgid "Connecting VPN Server"
-msgstr "VPN-Server wird verbunden"
+msgstr ""
 
 #: gui/default/views/dashboard.py:124
 msgid "Verifying VPN Security"
-msgstr "VPN-Sicherheit wird überprüft"
+msgstr ""
 
 #: gui/default/views/dashboard.py:127
 msgid "Connected to Perfect Privacy"
-msgstr "Mit Perfect Privacy verbunden"
+msgstr ""
 
 #: gui/default/views/dashboard.py:129
 msgid "Connected to Perfect Privacy, waiting for verification"
-msgstr "Mit Perfect Privacy verbunden, warte auf Verifizierung"
+msgstr ""
 
 #: gui/default/views/dashboard.py:133
 msgid "Disconnecting VPN"
-msgstr "VPN wird getrennt"
+msgstr ""
 
 #: gui/default/views/dashboard.py:149
 msgid "Ports %(port1)d, %(port2)d and %(port3)d forwarded"
-msgstr "Ports %(port1)d, %(port2)d und %(port3)d weitergeleitet"
+msgstr ""
 
 #: gui/default/views/dashboard.py:163
 msgid "Verifying Leak Protection"
-msgstr "Leckschutz wird überprüft"
+msgstr ""
 
 #: gui/default/views/dashboard.py:165
 msgid "Leak Protection enabled, all non VPN traffic is blocked"
-msgstr "Leckschutz aktiviert, sämtlicher Nicht-VPN-Verkehr wird blockiert"
+msgstr ""
 
 #: gui/default/views/dashboard.py:178
 msgid "Disconnect"
-msgstr "Trennen"
+msgstr ""
 
 #: gui/default/views/dashboard.py:183
 msgid "Connect"
-msgstr "Verbinden"
+msgstr ""
 
 #: gui/default/views/dashboard.py:186
 msgid "Disconnecting"
-msgstr "Trennung"
+msgstr ""
 
 #: gui/default/views/dashboard.py:192
 msgid "Add Server"
-msgstr "Server hinzufügen"
+msgstr ""
 
 #: gui/default/views/dashboard.py:251
 msgid "Removing"
-msgstr "Entfernen"
+msgstr ""
 
 #: gui/default/views/dashboard.py:258
 msgid "Connection Failed"
-msgstr "Verbindung fehlgeschlagen"
+msgstr ""
 
 #: gui/default/views/dashboard.py:259
 msgid "retrying in a few seconds"
-msgstr "Erneuter Versuch in wenigen Sekunden"
+msgstr ""
 
 #: gui/default/views/dashboard.py:261
 msgid "Waiting for connection"
-msgstr "Warten auf Verbindung"
+msgstr ""
 
 #: gui/default/views/dashboard.py:268
 msgid "remove"
-msgstr "entfernen"
+msgstr ""
 
 #: gui/default/views/dashboard.py:323
 msgid "Verify Connection.."
-msgstr "Verbindung wird überprüft"
+msgstr ""
 
 #: gui/default/views/dashboard.py:325
 msgid "Check Connection"
-msgstr "Verbindung überprüfen"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:12
 msgid "Leak Protection"
-msgstr "Leckschutz"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:17
 msgid "Leak Protection Mode:"
-msgstr "Leckschutz Modus"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:25
 msgid "In simple mode, leak protection is automatically managed for you"
-msgstr "Im einfachen Modus wird der Leckschutz automatisch für Sie verwaltet"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:29
 msgid ""
 "Use these settings to protect against data leaks in case your VPN connection "
 "drops."
 msgstr ""
-"Verwenden Sie diese Einstellungen, um sich gegen Datenlecks zu schützen, "
-"falls Ihre VPN-Verbindung abbricht."
 
 #: gui/default/views/leak_protection.py:33
 msgid "Leak Protection Scope:"
-msgstr "Leckschutz umfang:"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:34
 msgid "Disabled"
-msgstr "Deaktiviert"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:34
 msgid "Permanent"
-msgstr "Dauerhaft"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:34
 msgid "Program"
-msgstr "Programm"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:34
 msgid "Tunnel"
-msgstr "Tunnel"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:37
 msgid ""
 "Depending on your needs, you can choose how and when leak protection is "
 "activated for your system."
 msgstr ""
-"Je nach Ihren Bedürfnissen können Sie auswählen, wie und wann der Leckschutz "
-"für Ihr System aktiviert wird."
 
 #: gui/default/views/leak_protection.py:39
 msgid ""
@@ -192,39 +187,25 @@ msgid ""
 "is useful for devices that should never send unencrypted traffic and should "
 "always use the VPN for internet connectivity."
 msgstr ""
-"<b>Tunnel:</b> In diesem Modus ist der Leckschutz nur aktiv, wenn Sie mit "
-"dem VPN verbunden sind. Wenn Sie die VPN-Verbindung manuell trennen, wird "
-"der Leckschutz deaktiviert und Sie können ohne VPN auf das Internet "
-"zugreifen.<br><b>Programm:</b> In diesem Modus ist der Leckschutz immer "
-"aktiv, solange der VPN-Manager läuft. Wenn Sie die VPN-Verbindung trennen, "
-"kann kein Programm auf das Internet zugreifen, bis Sie eine neue Verbindung "
-"herstellen.<br><b>Dauerhaft:</b> In diesem Modus ist der Leckschutz immer "
-"aktiv, auch wenn die VPN-Software nicht läuft. Dies ist nützlich für Geräte, "
-"die nie unverschlüsselten Verkehr senden sollten und immer das VPN für die "
-"Internetverbindung verwenden sollten."
 
 #: gui/default/views/leak_protection.py:46
 msgid ""
 "You can also use the following specific settings to protect against leaks."
 msgstr ""
-"Sie können auch die folgenden spezifischen Einstellungen verwenden, um sich "
-"gegen Lecks zu schützen."
 
 #: gui/default/views/leak_protection.py:48
 msgid "Details"
-msgstr "Details"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:53
 msgid "Deadrouting"
-msgstr "Deadrouting"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:57
 msgid ""
 "Deadrouting is a secondary routing-based protection layer in addition to the "
 "normal firewall."
 msgstr ""
-"Deadrouting ist eine sekundäre, auf Routing basierende Schutzschicht "
-"zusätzlich zur normalen Firewall."
 
 #: gui/default/views/leak_protection.py:59
 msgid ""
@@ -232,18 +213,14 @@ msgid ""
 "will capture all non VPN internet traffic that might escape the normal "
 "routing and firewalling."
 msgstr ""
-"Deadrouting fügt eine sekundäre Sicherheitsschicht unterhalb der "
-"eigentlichen Firewall hinzu, die allen Nicht-VPN-Internetverkehr einfängt, "
-"der dem normalen Routing und der Firewall entkommen könnte."
 
 #: gui/default/views/leak_protection.py:66
 msgid "Prevent Local IPv6 Exposure"
-msgstr "Lokale IPv6-Leaks verhindern"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:70
 msgid "Prevent local apps from guessing parts of your public IPv6 address."
 msgstr ""
-"Verhindert dass lokale Apps Teile Ihrer öffentlichen IPv6-Adresse erraten."
 
 #: gui/default/views/leak_protection.py:72
 msgid ""
@@ -254,21 +231,14 @@ msgid ""
 "public prefixed IPv6 from network interfaces and block IPv6 DHCP to prevent "
 "a new address from being assigned."
 msgstr ""
-"Abhängig von Ihrer Netzwerkkonfiguration kann Ihre lokale IPv6 denselben "
-"Präfix wie Ihre öffentliche IPv6 haben. Dies könnte lokaler Software wie "
-"Ihrem Browser oder einer Filesharing-App ermöglichen, große Teile Ihrer "
-"öffentlichen IP zu erraten, selbst wenn kein Verkehr tatsächlich um das VPN "
-"herum durchsickert. Dieser Schutz entfernt alle öffentlich präfixierten IPv6 "
-"von Netzwerkschnittstellen und blockiert IPv6 DHCP, um die Zuweisung einer "
-"neuen Adresse zu verhindern."
 
 #: gui/default/views/leak_protection.py:79
 msgid "SNMP/UPnP Leak Protection"
-msgstr "SNMP/UPnP-Leckschutz"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:83
 msgid "Block SNMP/UPnP Ports."
-msgstr "SNMP/UPnP-Ports blockieren."
+msgstr ""
 
 #: gui/default/views/leak_protection.py:85
 msgid ""
@@ -279,25 +249,16 @@ msgid ""
 "please note that blocking access to these protocols may also prevent certain "
 "programs or services from functioning properly."
 msgstr ""
-"Durch Aktivieren dieser Funktion wird verhindert, dass Programme auf Ihrem "
-"Computer über SNMP- und UPnP-Protokolle auf andere Geräte zugreifen. Dies "
-"verhindert, dass potenziell sensible Informationen, wie Ihre öffentliche IP-"
-"Adresse, von anderen Geräten in Ihrem Netzwerk an Programme auf Ihrem "
-"Computer weitergegeben werden. Beachten Sie jedoch, dass das Blockieren des "
-"Zugriffs auf diese Protokolle auch verhindern kann, dass bestimmte Programme "
-"oder Dienste ordnungsgemäß funktionieren."
 
 #: gui/default/views/leak_protection.py:92
 msgid "Block access to local router"
-msgstr "Zugriff auf lokalen Router blockieren"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:96
 msgid ""
 "Prevent programs from determining your external IP address from your local "
 "Router."
 msgstr ""
-"Verhindert dass Programme Ihre externe IP-Adresse über Ihren lokalen Router "
-"bestimmen."
 
 #: gui/default/views/leak_protection.py:99
 msgid ""
@@ -306,21 +267,14 @@ msgid ""
 "access to network printers or hard drives connected to the router may also "
 "be blocked by the firewall"
 msgstr ""
-"Diese Einstellung verhindert, dass Programme Ihre externe IP-Adresse über "
-"SMTP und XSS bestimmen, was bei einigen Routern möglich ist. Bitte beachten "
-"Sie, dass der Zugriff auf Netzwerkdrucker oder Festplatten, die an den "
-"Router angeschlossen sind, ebenfalls durch die Firewall blockiert werden "
-"kann."
 
 #: gui/default/views/leak_protection.py:107
 msgid "Enable MS leak protection"
-msgstr "MS-Leckschutz aktivieren"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:111
 msgid "Prevent the leak of your Windows login and password information."
 msgstr ""
-"Verhindern Sie das Durchsickern Ihrer Windows-Anmelde- und "
-"Passwortinformationen."
 
 #: gui/default/views/leak_protection.py:114
 msgid ""
@@ -329,22 +283,15 @@ msgid ""
 "login information to network shares over the internet, and Perfect Privacy "
 "servers block requests on port 445."
 msgstr ""
-"Wenn aktiviert, schützt diese Funktion vor Angriffen, die Ihre Windows-"
-"Anmelde- und Passwortinformationen durchsickern lassen könnten. Unser VPN-"
-"Manager verhindert das Senden von Anmeldeinformationen an Netzwerkfreigaben "
-"über das Internet, und Perfect Privacy-Server blockieren Anfragen auf Port "
-"445."
 
 #: gui/default/views/leak_protection.py:121
 msgid "Prevent 'Wrong Way' Leak"
-msgstr "Verhindern Sie 'Wrong Way'-Lecks"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:125
 msgid ""
 "Block the potential leak of your real IP address through a routing feature."
 msgstr ""
-"Blockieren Sie das potenzielle Durchsickern Ihrer echten IP-Adresse über "
-"eine Routing-Funktion."
 
 #: gui/default/views/leak_protection.py:127
 msgid ""
@@ -353,23 +300,16 @@ msgid ""
 "revealing your real IP address. Enable this feature to prevent this type of "
 "leak."
 msgstr ""
-"Es besteht ein potenzielles Problem, bei dem Pakete, die über die echte IP "
-"empfangen werden, unter bestimmten Bedingungen über die VPN-Schnittstelle "
-"beantwortet werden können, wodurch möglicherweise Ihre echte IP-Adresse "
-"aufgedeckt wird. Aktivieren Sie diese Funktion, um diesen Typ von Leck zu "
-"verhindern."
 
 #: gui/default/views/leak_protection.py:135
 msgid "Prevent DNS Leaks"
-msgstr "DNS-Lecks verhindern"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:139
 msgid ""
 "Ensure that you are using the VPN tunnel for Domain Name Service (DNS) "
 "requests."
 msgstr ""
-"Stellen Sie sicher, dass Sie den VPN-Tunnel für Domain Name Service (DNS)-"
-"Anfragen verwenden."
 
 #: gui/default/views/leak_protection.py:141
 msgid ""
@@ -379,15 +319,10 @@ msgid ""
 "instead of the VPN tunnel or use a DNS server in your local network, "
 "bypassing the VPN."
 msgstr ""
-"DNS übersetzt den Domainnamen einer Website in IP-Adressen, was notwendig "
-"ist, um eine Verbindung zum Server herzustellen, der die Webseite oder den "
-"Dienst hostet. Ein DNS-Leck tritt auf, wenn Sie den DNS-Server Ihres "
-"Anbieters anstelle des VPN-Tunnels verwenden oder einen DNS-Server in Ihrem "
-"lokalen Netzwerk verwenden, wodurch das VPN umgangen wird."
 
 #: gui/default/views/leak_protection.py:149
 msgid "Custom DNS Servers"
-msgstr "Benutzerdefinierte DNS-Server"
+msgstr ""
 
 #: gui/default/views/leak_protection.py:153
 msgid ""
@@ -395,139 +330,134 @@ msgid ""
 "Perfect Privacy Servers. Note that setting custom nameservers interfers with "
 "TrackStop. TrackStop might not work, or you custom servers might not be used."
 msgstr ""
-"Sie möchten möglicherweise Ihre eigenen Nameserver anstelle der automatisch "
-"ausgewählten Perfect Privacy-Server verwenden. Beachten Sie, dass die "
-"Einstellung benutzerdefinierter Nameserver mit TrackStop interferiert. "
-"TrackStop funktioniert möglicherweise nicht, oder Ihre benutzerdefinierten "
-"Server werden möglicherweise nicht verwendet."
 
 #: gui/default/views/logs.py:7
 msgid "To Clipboard"
-msgstr "In die Zwischenablage"
+msgstr ""
 
 #: gui/default/views/logs.py:8
 msgid "Clear"
-msgstr "Leeren"
+msgstr ""
 
 #: gui/default/views/logs.py:9
 msgid "Internal Log"
-msgstr "Internes Protokoll"
+msgstr ""
 
 #: gui/default/views/mainview.py:27
 msgid "Advanced"
-msgstr "Erweitert"
+msgstr ""
 
 #: gui/default/views/mainview.py:27
 msgid "Expert"
-msgstr "Experte"
+msgstr ""
 
 #: gui/default/views/mainview.py:27
 msgid "Simple"
-msgstr "Einfach"
+msgstr ""
 
 #: gui/default/views/mainview.py:32
 msgid "Dashboard"
-msgstr "Dashboard"
+msgstr ""
 
 #: gui/default/views/mainview.py:33
 msgid "TrackStop"
-msgstr "TrackStop"
+msgstr ""
 
 #: gui/default/views/mainview.py:41
 msgid "Log"
-msgstr "Protokoll"
+msgstr ""
 
 #: gui/default/views/mainview.py:45
 msgid "Exit"
-msgstr "Beenden"
+msgstr ""
 
 #: gui/default/views/mainview.py:143
 msgid "Software update available, click here to install"
-msgstr "Software-Update verfügbar, hier klicken zum Installieren"
+msgstr ""
 
 #: gui/default/views/modals/confirm_exit.py:12
 msgid "Are you sure you want to Exit?"
-msgstr "Sind Sie sicher, dass Sie beenden möchten?"
+msgstr ""
 
 #: gui/default/views/modals/confirm_exit.py:19
 msgid "Background mode enabled, your VPN connections will stay active!"
-msgstr "Hintergrundmodus aktiviert, Ihre VPN-Verbindungen bleiben aktiv!"
+msgstr ""
 
 #: gui/default/views/modals/confirm_exit.py:22
 msgid "Background mode enabled, Leak Protection will stay active!"
-msgstr "Hintergrundmodus aktiviert, Leckschutz bleibt aktiv!"
+msgstr ""
 
 #: gui/default/views/modals/confirm_exit_update.py:12
 msgid "Update VPN client now?"
-msgstr "VPN-Client jetzt aktualisieren?"
+msgstr ""
 
 #: gui/default/views/modals/confirm_exit_update.py:14
 msgid "This will <b>disconnect</b> all existing VPN Tunnels!"
-msgstr "Dies wird <b>alle bestehenden VPN-Tunnel</b> trennen!"
+msgstr ""
 
 #: gui/default/views/modals/confirm_exit_update.py:16
 msgid "Yes"
-msgstr "Ja"
+msgstr ""
 
 #: gui/default/views/modals/confirm_exit_update.py:17
 msgid "No"
-msgstr "Nein"
+msgstr ""
 
 #: gui/default/views/modals/confirm_logout.py:12
 msgid "Are you sure you want to logout?"
-msgstr "Sind Sie sicher, dass Sie sich abmelden möchten?"
+msgstr ""
 
 #: gui/default/views/modals/confirm_logout.py:14
 msgid "This will <b>disconnect</b> any existing VPN Tunnels!"
-msgstr "Dies wird <b>alle bestehenden VPN-Tunnel</b> trennen!"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:11
 msgid "Favourites"
-msgstr "Favoriten"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:12
 msgid "Countries"
-msgstr "Länder"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:13
 msgid "Cities"
-msgstr "Städte"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:14
 msgid "All Servers"
-msgstr "Alle Server"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:15
 msgid "Select"
-msgstr "Auswählen"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:114
 msgid "Name"
-msgstr "Name"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:115
 msgid "Bandwidth"
-msgstr "Bandbreite"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:116
 msgid "Load"
-msgstr "Auslastung"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:117
 msgid "Favorite"
-msgstr "Favorit"
+msgstr ""
 
 #: gui/default/views/modals/select_server.py:186
 msgid "down for maintenance"
-msgstr "wegen Wartung nicht verfügbar"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:58
 msgid "Login to change your Portforwarding settings."
-msgstr "Melden Sie sich an, um Ihre Portweiterleitungseinstellungen zu ändern."
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:63
 msgid "Port Forwarding"
-msgstr "Portweiterleitung"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:65
 msgid ""
@@ -538,41 +468,32 @@ msgid ""
 "settings on our website, it might take some time for the settings below to "
 "refresh. "
 msgstr ""
-"Portweiterleitungen sind hilfreich, um die Geschwindigkeit für bestimmte "
-"Spiele oder Peer-to-Peer-Software wie Torrent-Clients zu optimieren. Sie "
-"können bis zu fünf spezifische Ports festlegen, die an Ihren Computer "
-"weitergeleitet werden sollen. Hinweis: Es kann bis zu 3 Minuten dauern, bis "
-"Änderungen auf unseren Servern wirksam werden. Wenn Sie Ihre "
-"Portweiterleitungseinstellungen auf unserer Website aktualisieren, kann es "
-"einige Zeit dauern, bis die untenstehenden Einstellungen aktualisiert werden."
 
 #: gui/default/views/port_forwarding.py:71
 msgid "Default Port Forwarding"
-msgstr "Standard-Portweiterleitung"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:75
 msgid "Enable standard port forwarding."
-msgstr "Standard-Portweiterleitung aktivieren."
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:77
 msgid ""
 "If default port forwarding is enabled, three random ports will be forwarded "
 "to your computer."
 msgstr ""
-"Wenn die Standard-Portweiterleitung aktiviert ist, werden drei zufällige "
-"Ports an Ihren Computer weitergeleitet."
 
 #: gui/default/views/port_forwarding.py:83
 msgid "Enable Custom Port Forwarding"
-msgstr "Benutzerdefinierte Portweiterleitung aktivieren"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:96
 msgid "Enable configurable port forwarding."
-msgstr "Konfigurierbare Portweiterleitung aktivieren."
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:96
 msgid "more"
-msgstr "mehr"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:98
 msgid ""
@@ -580,116 +501,104 @@ msgid ""
 "from Perfect Privacy servers to your computer. The ports are set randomly on "
 "the server side."
 msgstr ""
-"Wenn diese Option aktiviert ist, können Sie bis zu fünf Portweiterleitungen "
-"von Perfect Privacy-Servern zu Ihrem Computer konfigurieren. Die Ports "
-"werden serverseitig zufällig festgelegt."
 
 #: gui/default/views/port_forwarding.py:107
 msgid "Server"
-msgstr "Server"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:108
 msgid "Server Port"
-msgstr "Server-Port"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:109
 msgid "Local Port"
-msgstr "Lokaler Port"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:110
 msgid "Valid until"
-msgstr "Gültig bis"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:117
 msgid "Forward to local port"
-msgstr "An lokalen Port weiterleiten"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:127
 msgid "1-to-1 Port Forwarding"
-msgstr "1-zu-1-Portweiterleitung"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:129
 msgid "add"
-msgstr "hinzufügen"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:137
 msgid "Auto Renew Port Forwarding"
-msgstr "Portweiterleitung automatisch erneuern"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:140
 msgid "Automatically renew port forwarding after expiration"
-msgstr "Portweiterleitung nach Ablauf automatisch erneuern"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:144
 msgid "Email Notifications for Port Forwarding Renewal"
-msgstr "E-Mail-Benachrichtigungen für die Erneuerung der Portweiterleitung"
+msgstr ""
 
 #: gui/default/views/port_forwarding.py:147
 msgid "Receive an email notification when port forwarding is renewed"
 msgstr ""
-"Erhalten Sie eine E-Mail-Benachrichtigung, wenn die Portweiterleitung "
-"erneuert wird"
 
 #: gui/default/views/port_forwarding.py:196
 msgid "delete"
-msgstr "löschen"
+msgstr ""
 
 #: gui/default/views/preferences.py:15
 msgid "Preferences"
-msgstr "Einstellungen"
+msgstr ""
 
 #: gui/default/views/preferences.py:18
 msgid "English"
-msgstr "Englisch"
+msgstr ""
 
 #: gui/default/views/preferences.py:18
 msgid "German"
-msgstr "Deutsch"
+msgstr ""
 
 #: gui/default/views/preferences.py:19
 msgid "Language"
-msgstr "Sprache"
+msgstr ""
 
 #: gui/default/views/preferences.py:25
 msgid "Start with %(os_name)s"
-msgstr "Mit %(os_name)s starten"
+msgstr ""
 
 #: gui/default/views/preferences.py:28
 msgid ""
 "If checked, the application will automatically start when you log into your "
 "computer."
 msgstr ""
-"Wenn diese Option aktiviert ist, startet die Anwendung automatisch, wenn Sie "
-"sich an Ihrem Computer anmelden."
 
 #: gui/default/views/preferences.py:32
 msgid "Connect on start"
-msgstr "Beim Start verbinden"
+msgstr ""
 
 #: gui/default/views/preferences.py:37
 msgid ""
 "Automatically connect to VPN if Perfect Privacy App is started or directly "
 "after boot if background mode is active."
 msgstr ""
-"Automatisch mit VPN verbinden, wenn Perfect Privacy App gestartet wird oder "
-"direkt nach dem Booten, wenn der Hintergrundmodus aktiv ist."
 
 #: gui/default/views/preferences.py:39
 msgid "Automatically connect to VPN if Perfect Privacy App is started."
 msgstr ""
-"Automatisch mit VPN verbinden, wenn Perfect Privacy App gestartet wird."
 
 #: gui/default/views/preferences.py:47
 msgid "Background Mode"
-msgstr "Hintergrundmodus"
+msgstr ""
 
 #: gui/default/views/preferences.py:51
 msgid ""
 "If background mode is enabled, all your VPN connections can be active even "
 "if the Perfect Privacy App is not running."
 msgstr ""
-"Wenn der Hintergrundmodus aktiviert ist, können alle Ihre VPN-Verbindungen "
-"aktiv sein, auch wenn die Perfect Privacy App nicht läuft."
 
 #: gui/default/views/preferences.py:53
 msgid ""
@@ -698,16 +607,10 @@ msgid ""
 "with OS' is not needed for background mode, as this will only start the "
 "frontend App. The background service will always start after boot."
 msgstr ""
-"Verwenden Sie dies, um die Nutzung Ihrer VPN-App auf dem Bildschirm zu "
-"verbergen, oder um nach dem Booten automatisch alle Benutzer mit dem VPN zu "
-"verbinden, ohne dass sie die App überhaupt sehen. 'Mit Betriebssystem "
-"starten' ist für den Hintergrundmodus nicht erforderlich, da dies nur die "
-"Frontend-App startet. Der Hintergrunddienst wird immer nach dem Booten "
-"gestartet."
 
 #: gui/default/views/preferences.py:61
 msgid "External IP"
-msgstr "Externe IP"
+msgstr ""
 
 #: gui/default/views/preferences.py:62
 msgid ""
@@ -715,14 +618,10 @@ msgid ""
 "If you update your external ip settings on our website, it might take some "
 "time for the settings below to refresh."
 msgstr ""
-"Hinweis: Es kann bis zu 3 Minuten dauern, bis Änderungen auf unseren Servern "
-"wirksam werden. Wenn Sie Ihre externen IP-Einstellungen auf unserer Webseite "
-"aktualisieren, kann es einige Zeit dauern, bis die untenstehenden "
-"Einstellungen aktualisiert werden."
 
 #: gui/default/views/preferences.py:68
 msgid "NeuroRouting"
-msgstr "NeuroRouting"
+msgstr ""
 
 #: gui/default/views/preferences.py:72
 msgid ""
@@ -731,31 +630,24 @@ msgid ""
 "only routed though the open internet for as short as possible, making it way "
 "harder to do any kind of traffic analysis."
 msgstr ""
-"Verwenden Sie unsere KI-gesteuerte Routing-Technologie, um Ihren "
-"Internetverkehr so weit wie möglich in unserem verschlüsselten Netzwerk zu "
-"halten. Dies stellt sicher, dass Ihr Verkehr so kurz wie möglich durch das "
-"offene Internet geleitet wird, wodurch eine Verkehrsanalyse erheblich "
-"erschwert wird."
 
 #: gui/default/views/preferences.py:79
 msgid "Enforce Primary Ip"
-msgstr "Primäre IP erzwingen"
+msgstr ""
 
 #: gui/default/views/preferences.py:82
 msgid ""
 "Make sure servers primary ip address is used as exit ip. Otherwise a random "
 "IP will be assigned."
 msgstr ""
-"Stellen Sie sicher, dass die primäre IP-Adresse des Servers als Exit-IP "
-"verwendet wird. Andernfalls wird eine zufällige IP zugewiesen."
 
 #: gui/default/views/preferences.py:87
 msgid "Connection"
-msgstr "Verbindung"
+msgstr ""
 
 #: gui/default/views/preferences.py:93
 msgid "Connection Protocol"
-msgstr "Verbindungsprotokoll"
+msgstr ""
 
 #: gui/default/views/preferences.py:97
 msgid ""
@@ -766,21 +658,14 @@ msgid ""
 "connections in routed or bridged configurations and remote access "
 "facilities. Choose the protocol that best suits your needs."
 msgstr ""
-"IPsec (Internet Protocol Security) ist eine sichere Netzwerkprotokoll-Suite, "
-"die die über ein Netzwerk gesendeten Datenpakete authentifiziert und "
-"verschlüsselt. OpenVPN ist eine Open-Source-Softwareanwendung, die virtuelle "
-"private Netzwerktechniken (VPN) implementiert, um sichere Punkt-zu-Punkt- "
-"oder Standort-zu-Standort-Verbindungen in gerouteten oder gebrückten "
-"Konfigurationen und Fernzugriffseinrichtungen zu erstellen. Wählen Sie das "
-"Protokoll, das am besten zu Ihren Bedürfnissen passt."
 
 #: gui/default/views/preferences.py:103
 msgid "Connection Details"
-msgstr "Verbindungsdetails"
+msgstr ""
 
 #: gui/default/views/preferences.py:108
 msgid "OpenVPN Protocol"
-msgstr "OpenVPN-Protokoll"
+msgstr ""
 
 #: gui/default/views/preferences.py:112
 msgid ""
@@ -788,23 +673,18 @@ msgid ""
 "networks TCP might work more reliable. TCP is automatically used if stealth "
 "is enabled."
 msgstr ""
-"Wählen Sie das OpenVPN-Protokoll, UDP wird in den meisten Fällen empfohlen, "
-"jedoch könnte TCP in einigen Netzwerken zuverlässiger funktionieren. TCP "
-"wird automatisch verwendet, wenn Stealth aktiv ist"
 
 #: gui/default/views/preferences.py:118
 msgid "Maximum Cascading Hops"
-msgstr "Maximale Anzahl an Kaskadierungs-Sprüngen"
+msgstr ""
 
 #: gui/default/views/preferences.py:122
 msgid "Select the maximum number of available hops for cascading connections."
 msgstr ""
-"Wählen Sie die maximale Anzahl verfügbarer Sprünge für kaskadierende "
-"Verbindungen"
 
 #: gui/default/views/preferences.py:129
 msgid "OpenVPN Encryption Cipher"
-msgstr "OpenVPN-Verschlüsselungs-Chiffre"
+msgstr ""
 
 #: gui/default/views/preferences.py:133
 msgid ""
@@ -812,50 +692,41 @@ msgid ""
 "ciphers have different strengths and weaknesses, so choose the one that best "
 "meets your security needs."
 msgstr ""
-"Wählen Sie die gewünschte Verschlüsselungs-Chiffre für Ihre OpenVPN-"
-"Verbindung. Verschiedene Chiffren haben unterschiedliche Stärken und "
-"Schwächen, wählen Sie also diejenige, die am besten Ihren "
-"Sicherheitsanforderungen entspricht."
 
 #: gui/default/views/preferences.py:139
 msgid "OpenVPN Port"
-msgstr "OpenVPN-Port"
+msgstr ""
 
 #: gui/default/views/preferences.py:143
 msgid "Select the desired port for your OpenVPN connection."
-msgstr "Wählen Sie den gewünschten Port für Ihre OpenVPN-Verbindung."
+msgstr ""
 
 #: gui/default/views/preferences.py:149
 msgid "TLS Method"
-msgstr "TLS-Methode"
+msgstr ""
 
 #: gui/default/views/preferences.py:153
 msgid ""
 "Select prefered OpenVPN TLS Method. TLS-CRYPT is the newer, recommended way."
 msgstr ""
-"Wählen Sie die bevorzugte OpenVPN TLS-Methode. TLS-CRYPT ist die neuere, "
-"empfohlene Methode."
 
 #: gui/default/views/preferences.py:164
 msgid ""
 "Select OpenVPN Driver. WinTUN is the newest, fastest OpenVPN driver, but "
 "some older Windows version might need some older driver."
 msgstr ""
-"Wählen Sie den OpenVPN-Treiber. WinTUN ist der neueste, schnellste OpenVPN-"
-"Treiber, aber einige ältere Windows-Versionen benötigen möglicherweise einen "
-"älteren Treiber."
 
 #: gui/default/views/preferences.py:177
 msgid "OpenVPN Driver"
-msgstr "OpenVPN-Treiber"
+msgstr ""
 
 #: gui/default/views/preferences.py:187
 msgid "Help our community"
-msgstr "Unterstützen Sie unserer Community"
+msgstr ""
 
 #: gui/default/views/preferences.py:191
 msgid "Automatically send crash reports"
-msgstr "Absturzberichte automatisch senden"
+msgstr ""
 
 #: gui/default/views/preferences.py:195
 msgid ""
@@ -864,11 +735,6 @@ msgid ""
 "crashes on your system,  it might behave incorrectly for users whose life "
 "and liberty depends on a functioning VPN."
 msgstr ""
-"Wir und alle anderen Nutzer wären sehr dankbar, wenn Sie diese Option "
-"aktiviert lassen. Wenn unser VPN-Client oder eine Hintergrundkomponente wie "
-"der Leckschutz auf Ihrem System abstürzt, könnte dies auch bei Nutzer deren "
-"Leben und Freiheit von einem funktionierenden VPN abhängen zu Fehlfunktionen "
-"führen."
 
 #: gui/default/views/preferences.py:197
 msgid ""
@@ -877,15 +743,10 @@ msgid ""
 "the bullshit information that causes us all to hate and block telemetry and "
 "is not assigned to a IP/User/Account or anything else."
 msgstr ""
-"Absturzberichte enthalten die Client-Version, die Installations-ID, das "
-"Betriebssystem und die tatsächliche interne Python-Stack-Spur des Absturzes. "
-"Sie enthalten nichts vom dem unnötigen Quatsch der uns alle dazu bringt "
-"Telemetrie zu hassen und zu blockieren, und werden keiner IP/Benutzer/Konto "
-"oder etwas anderem zugeordnet."
 
 #: gui/default/views/preferences.py:203
 msgid "Automatically report local settings"
-msgstr "Lokale Einstellungen automatisch melden"
+msgstr ""
 
 #: gui/default/views/preferences.py:207
 msgid ""
@@ -893,13 +754,10 @@ msgid ""
 "settings, stealth options and openvpn drivers. It does not collect any "
 "system information except your operating system (Windows, Mac, Linux)."
 msgstr ""
-"Diese Option hilft uns, Statistiken über die tatsächlich verwendeten VPN-"
-"Einstellungen, Stealth-Optionen und OpenVPN-Treiber zu sammeln. Sie sammelt "
-"keine Systeminformationen außer Ihrem Betriebssystem (Windows, Mac, Linux)."
 
 #: gui/default/views/preferences.py:209
 msgid "Statistics include the following information and nothing else:"
-msgstr "Statistiken beinhalten folgende Informationen und nichts anderes:"
+msgstr ""
 
 #: gui/default/views/preferences.py:210
 msgid ""
@@ -912,76 +770,68 @@ msgid ""
 "expect from our service).Statistics are only collected once approximatly "
 "every 500 days."
 msgstr ""
-"Client-Version, Betriebssystem (ohne genaue Version), Schnittstellenebene "
-"(einfach, fortgeschritten, Experte), Einstellungen für Leckschutz, Stealth-"
-"Einstellungen (ohne private Knoten), VPN-Protokoll, OpenVPN-Treiber, TLS-"
-"Methode, Port, maximale Kaskadierungs-Sprünge, die tatsächliche Anzahl "
-"verwendeter Sprünge, ob Sie eine IPv4 haben, ob Sie eine IPv6 haben und ob "
-"Sie mit dem VPN verbunden sind.<br>Berichte werden keiner IP/Benutzer/Konto/"
-"Installation oder etwas anderem zugeordnet (wie Sie es von unserem Dienst "
-"erwarten können). Statistiken werden nur einmal etwa alle 500 Tage gesammelt."
 
 #: gui/default/views/preferences.py:336
 msgid "Updates"
-msgstr "Updates"
+msgstr ""
 
 #: gui/default/views/preferences.py:339
 msgid "Check now"
-msgstr "Jetzt überprüfen"
+msgstr ""
 
 #: gui/default/views/preferences.py:352
 msgid "Software"
-msgstr "Software"
+msgstr ""
 
 #: gui/default/views/preferences.py:358
 msgid "Config"
-msgstr "Konfiguration"
+msgstr ""
 
 #: gui/default/views/preferences.py:389
 msgid "%(num)s report has been send"
 msgid_plural "%(num)s reports have been send"
-msgstr[0] "%(num)s Bericht wurde gesendet"
-msgstr[1] "%(num)s Berichte wurden gesendet"
+msgstr[0] ""
+msgstr[1] ""
 
 #: gui/default/views/preferences.py:394
 msgid "Hide"
-msgstr "Verstecken"
+msgstr ""
 
 #: gui/default/views/preferences.py:396
 msgid "Show Latest"
-msgstr "Neuestes anzeigen"
+msgstr ""
 
 #: gui/default/views/preferences.py:440
 msgid "Network drivers"
-msgstr "Netzwerktreiber"
+msgstr ""
 
 #: gui/default/views/preferences.py:453
 msgid "Driver"
-msgstr "Treiber"
+msgstr ""
 
 #: gui/default/views/preferences.py:454
 msgid "Installed Version"
-msgstr "Installierte Version"
+msgstr ""
 
 #: gui/default/views/preferences.py:455
 msgid "Available Version"
-msgstr "Verfügbare Version"
+msgstr ""
 
 #: gui/default/views/preferences.py:492
 msgid "Network devices"
-msgstr "Netzwerkgeräte"
+msgstr ""
 
 #: gui/default/views/preferences.py:496
 msgid "Reinstall"
-msgstr "Neuinstallieren"
+msgstr ""
 
 #: gui/default/views/preferences.py:506
 msgid "Type"
-msgstr "Typ"
+msgstr ""
 
 #: gui/default/views/stealth.py:11
 msgid "Stealth"
-msgstr "Stealth"
+msgstr ""
 
 #: gui/default/views/stealth.py:13
 msgid ""
@@ -990,31 +840,26 @@ msgid ""
 "encryption and obfuscation techniques to scramble your VPN traffic and make "
 "it difficult to identify as such."
 msgstr ""
-"Stealth VPN ist darauf ausgelegt, Ihren VPN-Verkehr zu verschleiern, sodass "
-"es für Netzwerkadministratoren oder ISPs schwierig wird, diesen zu "
-"blockieren. Wenn aktiviert, verwendet Stealth VPN Verschlüsselungs- und "
-"Verschleierungstechniken, um Ihren VPN-Verkehr zu verschlüsseln und seine "
-"Identifizierung zu erschweren."
 
 #: gui/default/views/stealth.py:19
 msgid "No Stealth"
-msgstr "Kein Stealth"
+msgstr ""
 
 #: gui/default/views/stealth.py:20
 msgid "Select Stealth Method"
-msgstr "Stealth-Methode auswählen"
+msgstr ""
 
 #: gui/default/views/stealth.py:23
 msgid "Choose a stealth method to obfuscate your VPN traffic"
-msgstr "Wählen Sie eine Stealth-Methode, um Ihren VPN-Verkehr zu verschleiern"
+msgstr ""
 
 #: gui/default/views/stealth.py:28
 msgid "auto"
-msgstr "Auto"
+msgstr ""
 
 #: gui/default/views/stealth.py:29
 msgid "Stealth Port"
-msgstr "Stealth-Port"
+msgstr ""
 
 #: gui/default/views/stealth.py:32
 msgid ""
@@ -1022,37 +867,30 @@ msgid ""
 "more or less likely to be detected and blocked by network administrators or "
 "ISPs"
 msgstr ""
-"Wählen Sie einen Port für die Stealth-VPN-Verbindung. Verschiedene Ports "
-"können von Netzwerkadministratoren oder ISPs eher oder weniger "
-"wahrscheinlich erkannt und blockiert werden"
 
 #: gui/default/views/stealth.py:40
 msgid "Use Custom Stealth Node"
-msgstr "Benutzerdefinierten Stealth-Knoten verwenden"
+msgstr ""
 
 #: gui/default/views/stealth.py:43
 msgid ""
 "Enable this option to specify a custom host or IP to use as a stealth "
 "tunneling node for your VPN traffic."
 msgstr ""
-"Aktivieren Sie diese Option, um einen benutzerdefinierten Host oder eine IP "
-"als Stealth-Tunnelknoten für Ihren VPN-Verkehr anzugeben."
 
 #: gui/default/views/stealth.py:52
 msgid "Custom Tunneling Node Host and Port"
-msgstr "Host und Port des benutzerdefinierten Tunnelknotens"
+msgstr ""
 
 #: gui/default/views/stealth.py:53
 msgid ""
 "Specify a custom host and port to use as the stealth tunneling node for your "
 "VPN traffic"
 msgstr ""
-"Geben Sie einen benutzerdefinierten Host und Port an, um ihn als Stealth-"
-"Tunnelknoten für Ihren VPN-Verkehr zu verwenden"
 
 #: gui/default/views/stealth.py:58
 msgid "Use Authentication for Tunneling Node"
-msgstr "Authentifizierung für Tunnelknoten verwenden"
+msgstr ""
 
 #: gui/default/views/stealth.py:61
 msgid ""
@@ -1060,34 +898,30 @@ msgid ""
 "tunneling node. This may be required if the custom tunneling node requires "
 "authentication to establish a connection"
 msgstr ""
-"Aktivieren Sie diese Option, um Authentifizierungsdaten für den "
-"benutzerdefinierten Tunnelknoten anzugeben. Dies kann erforderlich sein, "
-"wenn der benutzerdefinierte Tunnelknoten eine Authentifizierung zur "
-"Herstellung einer Verbindung benötigt"
 
 #: gui/default/views/stealth.py:67
 msgid "Username:"
-msgstr "Benutzername:"
+msgstr ""
 
 #: gui/default/views/stealth.py:68
 msgid "Password:"
-msgstr "Passwort:"
+msgstr ""
 
 #: gui/default/views/stealth.py:70
 msgid "Fingerprint"
-msgstr "Fingerabdruck"
+msgstr ""
 
 #: gui/default/views/stealth.py:73
 msgid "Username/password"
-msgstr "Benutzername/Passwort"
+msgstr ""
 
 #: gui/default/views/stealth.py:74
 msgid "Stealth Hosts username and passwords"
-msgstr "Benutzernamen und Passwörter der Stealth-Hosts"
+msgstr ""
 
 #: gui/default/views/trackstop.py:10
 msgid "Login to change your TrackStop settings."
-msgstr "Anmelden, um Ihre TrackStop-Einstellungen zu ändern."
+msgstr ""
 
 #: gui/default/views/trackstop.py:17
 msgid ""
@@ -1097,85 +931,67 @@ msgid ""
 "changes to apply on our Servers. If you update your filter settings on our "
 "website, it might take some time for the settings below to refresh."
 msgstr ""
-"Die TrackStop-Funktion ermöglicht es Ihnen, unerwünschte Domänen direkt auf "
-"VPN-Ebene zu blockieren. Sie können auswählen, welche Arten von Domänen Sie "
-"blockieren möchten, indem Sie einen oder mehrere Filter aktivieren. Hinweis: "
-"Es kann bis zu 3 Minuten dauern, bis Änderungen auf unseren Servern wirksam "
-"werden. Wenn Sie Ihre Filtereinstellungen auf unserer Webseite "
-"aktualisieren, kann es einige Zeit dauern, bis die untenstehenden "
-"Einstellungen aktualisiert werden."
 
 #: gui/default/views/trackstop.py:18
 msgid "Refresh Now"
-msgstr "Jetzt aktualisieren"
+msgstr ""
 
 #: gui/default/views/trackstop.py:25
 msgid "Ads / Analytics"
-msgstr "Werbung / Analytics"
+msgstr ""
 
 #: gui/default/views/trackstop.py:28
 msgid ""
 "Protect your privacy and block over 30,000 tracking and advertisement "
 "domains with this filter"
 msgstr ""
-"Schützen Sie Ihre Privatsphäre und blockieren Sie über 30.000 Tracking- und "
-"Werbedomänen mit diesem Filter"
 
 #: gui/default/views/trackstop.py:33
 msgid "Fraud / Malware"
-msgstr "Betrug / Malware"
+msgstr ""
 
 #: gui/default/views/trackstop.py:36
 msgid ""
 "Activate this filter to block over 65,000 known malware and phishing domains."
 msgstr ""
-"Aktivieren Sie diesen Filter, um über 65.000 bekannte Malware- und Phishing-"
-"Domänen zu blockieren."
 
 #: gui/default/views/trackstop.py:41
 msgid "Google Services"
-msgstr "Google-Dienste"
+msgstr ""
 
 #: gui/default/views/trackstop.py:44
 msgid ""
 "Warning: This blocks all Google domains, including YouTube, ReCaptcha and "
 "many other services from Google used on many websites!"
 msgstr ""
-"Warnung: Dies blockiert alle Google-Domänen, einschließlich YouTube, "
-"ReCaptcha und viele andere auf vielen Websites verwendete Google-Dienste!"
 
 #: gui/default/views/trackstop.py:52
 msgid "Activate this filter and block all Facebook domains."
-msgstr "Aktivieren Sie diesen Filter und blockieren Sie alle Facebook-Domänen."
+msgstr ""
 
 #: gui/default/views/trackstop.py:57
 msgid "All social media"
-msgstr "Alle sozialen Medien"
+msgstr ""
 
 #: gui/default/views/trackstop.py:60
 msgid ""
 "Block all major social media sites. including Facebook, Twitter, Tumblr, "
 "Instagram, Google+, Pinterest, MySpace and LinkedIn."
 msgstr ""
-"Blockieren Sie alle großen sozialen Medien, einschließlich Facebook, "
-"Twitter, Tumblr, Instagram, Google+, Pinterest, MySpace und LinkedIn."
 
 #: gui/default/views/trackstop.py:65
 msgid "Fakenews"
-msgstr "Fakenews"
+msgstr ""
 
 #: gui/default/views/trackstop.py:68
 msgid ""
 "Block domains known to publish fake news using a publicly available filter "
 "list hosted on GitHub that anyone can contribute to."
 msgstr ""
-"Blockieren Sie Domänen, die dafür bekannt sind, Falschnachrichten zu "
-"veröffentlichen, indem Sie eine öffentlich verfügbare Filterliste verwenden, "
-"die auf GitHub gehostet wird und zu der jeder beitragen kann."
 
 #: gui/default/views/trackstop.py:73
 msgid "Adult content"
-msgstr "Erwachseneninhalte"
+msgstr ""
 
 #: gui/default/views/trackstop.py:76
 msgid ""
@@ -1184,31 +1000,27 @@ msgid ""
 "lists for tracking and advertisement as well as fraud, so those filters do "
 "not need to be activated separately."
 msgstr ""
-"Blockieren Sie eine große Anzahl von Websites, die für Kinder ungeeignet "
-"sind, wie pornografische Inhalte und Glücksspiel. Dieser Filter umfasst auch "
-"die Sperrlisten für Tracking und Werbung sowie Betrug, sodass diese Filter "
-"nicht separat aktiviert werden müssen."
 
 #: gui/default/views/trayview.py:101
 msgid "Show App"
-msgstr "App anzeigen"
+msgstr ""
 
 #: gui/default/views/trayview.py:104
 msgid "Exit App"
-msgstr "Beenden"
+msgstr ""
 
 #: gui/default/views/trayview.py:240
 msgid "Zones"
-msgstr "Zonen"
+msgstr ""
 
 #: gui/default/views/trayview.py:242
 msgid "Cityies"
-msgstr "Städte"
+msgstr ""
 
 #: gui/default/views/trayview.py:243
 msgid "Servers"
-msgstr "Server"
+msgstr ""
 
 #: gui/default/views/trayview.py:376
 msgid "maintenance"
-msgstr "Wartung"
+msgstr ""

@@ -8,28 +8,28 @@ from config.constants import STEALTH_METHODS, STEALTH_PORTS, VPN_PROTOCOLS, OPEN
 class StealthView(PyHtmlView):
     TEMPLATE_STR = '''
         <div class="inner">
-            <h1>Stealth</h1>
+            <h1>{{_("Stealth")}}</h1>
             <p>
-Stealth VPN is designed to obfuscate your VPN traffic, making it difficult to block for network administrators or ISPs. 
-When enabled, stealth VPN  uses encryption and obfuscation techniques to scramble your VPN traffic and make it difficult to identify as such.</p>
+                {{_("Stealth VPN is designed to obfuscate your VPN traffic, making it difficult to block for network administrators or ISPs. When enabled, stealth VPN  uses encryption and obfuscation techniques to scramble your VPN traffic and make it difficult to identify as such.")}}
+            </p>
         
             {% if pyview.subject.settings.vpn.vpn_protocol.get() == pyview.VPN_PROTOCOLS.openvpn %}
                 <div class="boxes">
                     <section>
-                        <h3>
-                            Select Stealth Method
+                        <h3><!--- {{_("No Stealth")}} --->
+                            {{_("Select Stealth Method")}}
                             <div class="input"> {{ pyview.stealth_method.render() }} </div>
                         </h3>
-                        <div>Choose a stealth method to obfuscate your VPN traffic</div>
+                        <div>{{_("Choose a stealth method to obfuscate your VPN traffic")}}</div>
                     </section>
                     {% if pyview.subject.settings.stealth.stealth_method.get() !=  pyview.STEALTH_METHODS.no_stealth %}
                         {% if pyview.subject.settings.stealth.stealth_custom_node.get() == False %}
                             <section>
-                                <h3>
-                                    Stealth Port
+                                <h3> <!--- {{_("auto")}} --->
+                                    {{_("Stealth Port")}}
                                     <div class="input"> {{ pyview.stealth_port.render() }} </div>
                                 </h3>
-                                <div>Choose a port to use for the stealth VPN connection. Different ports may be more or less likely to be detected and blocked by network administrators or ISPs</div>
+                                <div>{{_("Choose a port to use for the stealth VPN connection. Different ports may be more or less likely to be detected and blocked by network administrators or ISPs")}}</div>
                             </section>
                         {% endif %}
                         {% if pyview.subject.settings.interface_level.get()  == "expert" %}
@@ -37,10 +37,10 @@ When enabled, stealth VPN  uses encryption and obfuscation techniques to scrambl
                                 <section>
                                     
                                     <h3>
-                                        Use Custom Stealth Node
+                                        {{_("Use Custom Stealth Node")}}
                                         <div class="input"> {{ pyview.stealth_custom_node.render() }} </div>
                                     </h3>
-                                    <div>Enable this option to specify a custom host or IP to use as a stealth tunneling node for your VPN traffic.</div>
+                                    <div>{{_("Enable this option to specify a custom host or IP to use as a stealth tunneling node for your VPN traffic.")}}</div>
                                 </section>
             
                                 {% if pyview.subject.settings.stealth.stealth_custom_node.get() == True %}
@@ -49,29 +49,29 @@ When enabled, stealth VPN  uses encryption and obfuscation techniques to scrambl
                                             Host:{{ pyview.stealth_custom_hostname.render() }}
                                             Port:{{ pyview.stealth_custom_port.render() }}
                                         </div>
-                                        <h3>Custom Tunneling Node Host and Port</h3>
-                                        <div> Specify a custom host and port to use as the stealth tunneling node for your VPN traffic</div>
+                                        <h3>{{_("Custom Tunneling Node Host and Port")}}</h3>
+                                        <div>{{_("Specify a custom host and port to use as the stealth tunneling node for your VPN traffic")}}</div>
                                     </section>
             
                                     <section>
                                         <h3>
-                                            Use Authentication for Tunneling Node
+                                            {{_("Use Authentication for Tunneling Node")}}
                                             <div class="input"> {{ pyview.stealth_custom_require_auth.render() }}  </div>
                                         </h3>
-                                        <p>Enable this option to specify authentication credentials for the custom tunneling node. This may be required if the custom tunneling node requires authentication to establish a connection</p>
+                                        <p>{{_("Enable this option to specify authentication credentials for the custom tunneling node. This may be required if the custom tunneling node requires authentication to establish a connection")}}</p>
                                     </section>
             
                                     {% if pyview.subject.settings.stealth.stealth_custom_require_auth.get() ==  True %}
                                         <section>
                                             <div class="input">
-                                                Username:{{ pyview.stealth_custom_auth_username.render() }}
-                                                Password:{{ pyview.stealth_custom_auth_password.render() }}
+                                                {{_("Username:")}}{{ pyview.stealth_custom_auth_username.render() }}
+                                                {{_("Password:")}}{{ pyview.stealth_custom_auth_password.render() }}
                                                 {% if pyview.subject.settings.stealth.stealth_method.get() ==  pyview.STEALTH_METHODS.ssh %}
-                                                    Fingerprint{{ pyview.stealth_custom_ssh_fingerprint.render() }}
+                                                    {{_("Fingerprint")}}{{ pyview.stealth_custom_ssh_fingerprint.render() }}
                                                 {% endif %}
                                             </div>
-                                            <h3>Username/password</h3>
-                                            <p>Protect yourself by activating this filter and blocking over 30.000 tracking and advertisement domains.</p>
+                                            <h3>{{_("Username/password")}}</h3>
+                                            <p>{{_("Stealth Hosts username and passwords")}}</p>
                                             {% if pyview.subject.settings.stealth.stealth_method.get() ==  pyview.STEALTH_METHODS.http %}
                                                 NTLM Auth: {{ pyview.stealth_custom_proxy_auth_use_ntlm.render() }}
                                             {% endif %}
