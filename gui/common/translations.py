@@ -1,14 +1,16 @@
 
 import gettext, sys, os
+
+from config.paths import APP_DIR
+
+
 class Translations():
     def __init__(self, language, template_env):
         self.language = language
         self.template_env = template_env
-
-        bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))  # get the bundle dir if bundled or simply the __file__ dir if not bundled
         self.translations = {}
         for locale in ["de", "en"]:
-            self.translations[locale] = gettext.translation('translations_%s' % locale, os.path.abspath(os.path.join(bundle_dir, 'locales')), fallback=False, languages=[locale])
+            self.translations[locale] = gettext.translation('translations_%s' % locale, os.path.abspath(os.path.join(APP_DIR, 'locales')), fallback=False, languages=[locale])
 
         self._install()
 
