@@ -102,12 +102,18 @@ class LeakProtection_windows(LeakProtection_Generic):
                     self.firewallRuleAllowIpSecGRE.disable()
 
         # ALLOW FROM LOCAL VPN IPS
-        local_ips = []
+        local_hops = []
+        local_vpn_ipv4s = []
+        local_vpn_ipv6s = []
         for hop in self.core.session.hops:
-            if hop.connection is not None and hop.connection.ipv4_local_ip is not None:
-                local_ips.append([hop.connection.ipv4_local_ip, hop.connection.ipv6_local_ip, hop.connection.interface])
-        if len(local_ips) > 0:
-            self.firewallRuleAllowFromVpnLocalIps.enable(local_ips)
+            if hop.connection is not None and hop.connection.ipv4_local_ip is not None and  hop.connection.interface is not None:
+                local_vpn_ipv4s.append(hop.connection.ipv4_local_ip)
+                local_hops.append([hop.connection.ipv4_local_ip, hop.connection.ipv6_local_ip, hop.connection.interface])
+                if hop.connection.ipv6_local_ip is not None:
+                    local_vpn_ipv6s.append(hop.connection.ipv6_local_ip)
+
+        if len(local_hops) > 0:
+            self.firewallRuleAllowFromVpnLocalIps.enable(local_hops)
         else:
             self.firewallRuleAllowFromVpnLocalIps.disable()
 

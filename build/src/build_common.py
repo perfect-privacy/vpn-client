@@ -75,7 +75,9 @@ class BuildCommon():
         open( os.path.join(self.BUILD_DIR_TARGET, "var", "configs", "configs.zip"), "wb" ).write(r.content)
         if self.PLATFORM == "windows":
             os.system("cd \"%s\" & powershell -command \"Expand-Archive '%s'\"" % (os.path.join(self.BUILD_DIR_TARGET, "var", "configs"), "configs.zip"))
-
+            for f in glob.glob(os.path.join(self.BUILD_DIR_TARGET, "var", "configs", "configs","Perfect_Privacy_App_Configs", "*")):
+                shutil.move(f, os.path.join(self.BUILD_DIR_TARGET, "var", "configs" ))
+            shutil.rmtree(os.path.join(self.BUILD_DIR_TARGET, "var", "configs", "configs"))
         else:
             os.system("cd \"%s\" &&  unzip '%s'" % (os.path.join(self.BUILD_DIR_TARGET, "var", "configs"), "configs.zip"))
             os.system("cd \"%s\" && mv Perfect_Privacy_App_Configs/* . && rm -r Perfect_Privacy_App_Configs" % os.path.join(self.BUILD_DIR_TARGET, "var", "configs"))
@@ -92,7 +94,7 @@ class BuildCommon():
                 shutil.rmtree(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty"))
             else:
                 os.system("cd \"%s\" &&  unzip '%s'" % (os.path.join(self.SOURCE_DIR, "thirdparty"), "thirdparty.zip"))
-        os.remove(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty.zip"))
+        #os.remove(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty.zip"))
 
     def _copy_files(self):
         # create var dirs

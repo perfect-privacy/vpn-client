@@ -178,6 +178,7 @@ class FirewallRuleAllowFromVpnLocalIps(FirewallRule):
                 if key not in [":".join(hop) for hop in local_hops]:
                     self.rules[key].disable()
                     del self.rules[key]
+            self.local_hops = local_hops
 
     def disable(self):
         if self.is_enabled is True:

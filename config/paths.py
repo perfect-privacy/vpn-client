@@ -13,3 +13,14 @@ CONFIG_DIR          = os.path.join(APP_VAR_DIR, "configs")
 SOFTWARE_UPDATE_DIR = os.path.join(APP_VAR_DIR, "software_update")
 CONFIG_UPDATE_DIR   = os.path.join(APP_VAR_DIR, "config_update")
 
+if not os.path.exists(APP_VAR_DIR):
+    os.mkdir(APP_VAR_DIR)
+
+if not os.path.exists(CONFIG_DIR):
+    os.mkdir(CONFIG_DIR)
+
+if not os.path.exists(SOFTWARE_UPDATE_DIR):
+    os.mkdir(SOFTWARE_UPDATE_DIR)
+
+if not os.path.exists(CONFIG_UPDATE_DIR):
+    os.mkdir(CONFIG_UPDATE_DIR)
