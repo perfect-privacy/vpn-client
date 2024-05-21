@@ -37,8 +37,6 @@ class BuildCommon():
         if os.path.exists(self.BUILD_DIR_TARGET): shutil.rmtree(self.BUILD_DIR_TARGET)
         os.mkdir(self.BUILD_DIR_TARGET)
 
-        'https://www.perfect-privacy.com/downloads/Perfect_Privacy_App_Configs.zip'
-
     def _run_pyinstaller(self):
         os.chdir(self.BUILD_DIR_TMP)
         python = sys.executable
