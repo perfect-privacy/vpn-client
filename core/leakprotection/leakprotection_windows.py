@@ -187,6 +187,7 @@ class LeakProtection_windows(LeakProtection_Generic):
                 rule.is_enabled = False
                 continue
             rule.disable()
+        self.firewallRuleAllowFromVpnLocalIps.disable()
         self.networkInterfaces.enableIpv6()
         self.networkInterfaces.disableDnsLeakProtection()
 

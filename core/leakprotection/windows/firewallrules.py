@@ -186,8 +186,8 @@ class FirewallRuleAllowFromVpnLocalIps(FirewallRule):
             self._logger.info("%s disabling" % self.__class__.__name__)
             delete_rule_cmd = 'Remove-NetFirewallRule -Name "%s*"' % self.name
             getPowershellInstance().execute(delete_rule_cmd, may_fail=True)
-            self.rules = {}
-            self.local_hops = []
+        self.rules = {}
+        self.local_hops = []
         self.is_enabled = False
 
 
