@@ -149,7 +149,7 @@ class OpenVPNConnection(VPNConnection):
             if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
                 args.extend(["--fragment", "1300"])
 
-                
+
         if PLATFORM == PLATFORMS.windows:
             args.append("--disable-dco")
 
