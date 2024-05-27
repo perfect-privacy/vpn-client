@@ -169,15 +169,16 @@ class FirewallRuleAllowFromVpnLocalIps(FirewallRule):
     def enable(self, local_hops):
         changed = self.local_hops != local_hops
         if changed is True or self.is_enabled is False:
+            for key in ["%s"%k for k in self.rules.keys()]:
+                if key not in [":".join(hop) for hop in local_hops]:
+                    self.rules[key].disable()
+                    del self.rules[key]
             for hop in local_hops:
                 hop_id = ":".join(hop)
                 if hop_id not in self.rules:
                     self.rules[hop_id] = FirewallRuleAllowFromVpnLocalIp()
                     self.rules[hop_id].enable(hop[0], hop[1], hop[2])
-            for key in ["%s"%k for k in self.rules.keys()]:
-                if key not in [":".join(hop) for hop in local_hops]:
-                    self.rules[key].disable()
-                    del self.rules[key]
+
             self.local_hops = local_hops
 
     def disable(self):
