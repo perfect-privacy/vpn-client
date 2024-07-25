@@ -43,7 +43,9 @@ class Reporter(Observable):
         if APP_DIR is not None and os.path.exists(os.path.join(APP_DIR, "var", ".perfect_privacy.instid")):
             self.installation_id = open(os.path.join(APP_DIR, "var", ".perfect_privacy.instid"), "r").read().strip()
             if os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid")):
-                os.remove(os.path.join(tmp_dir, ".perfect_privacy.instid"))
+                try:
+                    os.remove(os.path.join(tmp_dir, ".perfect_privacy.instid"))
+                except: pass
         if os.path.exists(os.path.join(Path.home(), ".perfect_privacy.instid")) and self.installation_id == "":
             self.installation_id = open(os.path.join(Path.home(), ".perfect_privacy.instid"), "r").read().strip()
         if os.path.exists(os.path.join(tmp_dir, ".perfect_privacy.instid"))  and self.installation_id == "":

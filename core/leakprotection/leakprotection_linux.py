@@ -21,7 +21,7 @@ class LeakProtection_linux(LeakProtection_Generic):
 
     def _enable(self):
         local_ipv4_ranges = ["10.0.0.0/8", "127.0.0.0/8", "192.168.0.0/16", "172.16.0.0/12", "169.254.0.0/16", ]
-        local_ipv6_ranges = ["fe80::/64", "ff01::/16", "ff02::/16"]
+        local_ipv6_ranges = ["fe80::/64", "ff01::/16", "ff02::/16", "fdbf:1d37:bbe0::/48"]
 
         rules = []
         rules.append("iptables  -N perfect-privacy")
@@ -66,11 +66,12 @@ class LeakProtection_linux(LeakProtection_Generic):
         rules.append('iptables -A perfect-privacy -d 224.0.0.251 -p TCP --dport 5353 -j ACCEPT')
         rules.append('iptables -A perfect-privacy -d 224.0.0.251 -p UDP --dport 5353 -j ACCEPT')
         for local_ipv4_range in local_ipv4_ranges:
-            rules.append('iptables -A perfect-privacy -s %s -j ACCEPT' % local_ipv4_range)
+            rules.append('iptables -A perfect-privacy -d %s -j ACCEPT' % local_ipv4_range)
         for local_ipv6_range in local_ipv6_ranges:
-            rules.append('ip6tables -A perfect-privacy -s %s -j ACCEPT' % local_ipv6_range)
+            rules.append('ip6tables -A perfect-privacy -d %s -j ACCEPT' % local_ipv6_range)
 
-        # Allow connection to server
+        # Allow connection to server and from highest hop ip
+        rules.append('ip6tables -A perfect-privacy -s fdbf:1d37:bbe0::/48 -j ACCEPT')
         if len(self.core.session.hops) > 0:
             for hop in self.core.session.hops:
                 if hop.connection is not None and hop.connection.external_host_ip is not None:

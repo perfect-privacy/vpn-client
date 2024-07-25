@@ -8,8 +8,8 @@
   <vendor_url>https://www.perfect-privacy.com/</vendor_url>
 
  <action id="org.freedesktop.policykit.pkexec.perfect-privacy-gui">
-    <description>Perfect Privacy VPN</description>
-    <message>Authentication is required to start Perfect Privacy VPN</message>
+    <description>Perfect Privacy</description>
+    <message>Authentication is required to start Perfect Privacy</message>
     <icon_name>perfect-privacy-gui</icon_name>
     <defaults>
       <allow_any>yes</allow_any>

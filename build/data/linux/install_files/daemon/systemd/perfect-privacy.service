@@ -4,9 +4,9 @@ After=network.target auditd.service
 
 [Service]
 Type=forking
-PIDFile=/var/run/perfect-privacy.pid
-ExecStart=/opt/perfect-privacy/perfect-privacy daemon start
-ExecStop=/opt/perfect-privacy/perfect-privacy daemon stop
+PIDFile=/var/run/perfect-privacy-service.pid
+ExecStart=/opt/perfect-privacy/perfect-privacy-service daemon start
+ExecStop=/opt/perfect-privacy/perfect-privacy-service daemon stop
 TimeoutSec=20
 Restart=on-failure
 

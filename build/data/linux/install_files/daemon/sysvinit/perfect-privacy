@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ### BEGIN INIT INFO
-# Provides:          perfect-privacy-vpnd
+# Provides:          perfect-privacy-service
 # Required-Start:    $remote_fs $syslog $network $named $time
 # Required-Stop:     $remote_fs $syslog $network $named $time
 # Default-Start:     2 3 4 5
@@ -10,8 +10,8 @@
 # Description:       The daemon for the Perfect Privacy VPN client
 ### END INIT INFO
 
-DAEMON_NAME="perfect-privacy"
-DAEMON="/opt/perfect-privacy/perfect-privacy"
+DAEMON_NAME="perfect-privacy-service"
+DAEMON="/opt/perfect-privacy/perfect-privacy-service"
 
 . /lib/lsb/init-functions
 

@@ -1,9 +1,9 @@
 [Desktop Entry]
 Version=1.0
-Name=Perfect Privacy VPN
-Comment=Manage your VPN connections
+Name=Perfect Privacy
+Comment=Perfect Privacy VPN
 Categories=GTK;GNOME;Network;
-Exec=perfect-privacy-gui
-Icon=perfect-privacy-gui
+Exec=/opt/perfect-privacy/perfect-privacy
+Icon=/opt/perfect-privacy/install_files/icons/64x64/apps/perfect-privacy.png
 Terminal=false
 Type=Application

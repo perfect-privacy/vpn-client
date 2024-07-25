@@ -23,7 +23,7 @@ import errno
 import argparse
 import logging
 import signal
-from config.files import PID_FILE, LOG_FILE
+from config.files import LOG_FILE
 from config.config import FRONTEND
 from core.core import Core
 from core.libs.logger import Logger
@@ -247,6 +247,7 @@ class LinuxDaemon():
         self.logger = Logger(quiet=True)
 
     def from_commandline(self):
+        PID_FILE = "/var/run/perfect-privacy-service.pid"
         daemonManager = DaemonManager(pidfile=PID_FILE, stdout=LOG_FILE)
         args = parse_arguments(daemonManager.start, daemonManager.stop, daemonManager.restart)
 
