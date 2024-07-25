@@ -89,28 +89,31 @@ class LeakProtection_windows(LeakProtection_Generic):
             if lowest_hop.connection is not None and lowest_hop.connection.external_host_ip is not None:
                 external_host_ip = lowest_hop.connection.external_host_ip
                 if lowest_hop.connection.type == "ipsec":
-                    self.firewallRuleAllowIpSec.enable(lowest_hop.connection.external_host_ip)
-                    self.firewallRuleAllowIpSecUDP.enable(lowest_hop.connection.external_host_ip)
-                    self.firewallRuleAllowIpSecTCP.enable(lowest_hop.connection.external_host_ip)
-                    self.firewallRuleAllowIpSecGRE.enable(lowest_hop.connection.external_host_ip)
+                    self.firewallRuleAllowIpSec.enable(external_host_ip)
+                    self.firewallRuleAllowIpSecUDP.enable(external_host_ip)
+                    self.firewallRuleAllowIpSecTCP.enable(external_host_ip)
+                    self.firewallRuleAllowIpSecGRE.enable(external_host_ip)
                     self.firewallRuleAllowConnectionToServer.disable()
                 else:
-                    self.firewallRuleAllowConnectionToServer.enable(lowest_hop.connection.external_host_ip, lowest_hop.connection.external_host_port, lowest_hop.connection.external_host_protocol)
+                    self.firewallRuleAllowConnectionToServer.enable(external_host_ip, lowest_hop.connection.external_host_port, lowest_hop.connection.external_host_protocol)
                     self.firewallRuleAllowIpSec.disable()
                     self.firewallRuleAllowIpSecUDP.disable()
                     self.firewallRuleAllowIpSecTCP.disable()
                     self.firewallRuleAllowIpSecGRE.disable()
 
         # ALLOW FROM LOCAL VPN IPS
+        local_hops = []
         local_vpn_ipv4s = []
         local_vpn_ipv6s = []
         for hop in self.core.session.hops:
-            if hop.connection is not None and hop.connection.ipv4_local_ip is not None:
-                local_vpn_ipv4s.append( hop.connection.ipv4_local_ip)
-                if  hop.connection.ipv6_local_ip is not None:
-                    local_vpn_ipv6s.append( hop.connection.ipv6_local_ip)
-        if len(local_vpn_ipv4s) > 0:
-            self.firewallRuleAllowFromVpnLocalIps.enable(local_vpn_ipv4s, local_vpn_ipv6s)
+            if hop.connection is not None and hop.connection.ipv4_local_ip is not None and  hop.connection.interface is not None:
+                local_vpn_ipv4s.append(hop.connection.ipv4_local_ip)
+                local_hops.append([hop.connection.ipv4_local_ip, hop.connection.ipv6_local_ip, hop.connection.interface])
+                if hop.connection.ipv6_local_ip is not None:
+                    local_vpn_ipv6s.append(hop.connection.ipv6_local_ip)
+
+        if len(local_hops) > 0:
+            self.firewallRuleAllowFromVpnLocalIps.enable(local_hops)
         else:
             self.firewallRuleAllowFromVpnLocalIps.disable()
 
@@ -184,6 +187,7 @@ class LeakProtection_windows(LeakProtection_Generic):
                 rule.is_enabled = False
                 continue
             rule.disable()
+        self.firewallRuleAllowFromVpnLocalIps.disable()
         self.networkInterfaces.enableIpv6()
         self.networkInterfaces.disableDnsLeakProtection()
 

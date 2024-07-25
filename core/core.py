@@ -125,7 +125,8 @@ class Core(Observable):
         self.leakprotection.update_async()
         self.routing.update_async()
 
-    def on_frontend_connected(self, pyHtmlGuiInstance, nr_of_active_frontends):
+    def on_frontend_connected(self, pyHtmlGuiInstances, nr_of_active_frontends):
+
         was_active = self.frontend_active
         self.frontend_active = nr_of_active_frontends > 0
         if was_active is False:
@@ -187,7 +188,10 @@ class Core(Observable):
                 shortcut = shell.CreateShortCut(shortcut_path)
                 shortcut.IconLocation = str(os.path.join(APP_DIR, "gui", "default", "static", "icons", "pp_icon.ico"))
                 shortcut.Targetpath = os.path.join(APP_DIR, "perfect-privacy.exe")
-                shortcut.save()
+                try:
+                    shortcut.save()
+                except:
+                    pass
 
         elif PLATFORM == PLATFORMS.macos:
             if self.settings.startup.start_on_boot.get() == False:
@@ -206,7 +210,7 @@ class Core(Observable):
                         <true/>
                         <key>ProgramArguments</key>
                         <array>
-                            <string>/Applications/Perfect\ Privacy.app/Contents/MacOS/perfect-privacy</string>
+                            <string>/Applications/Perfect Privacy.app/Contents/MacOS/perfect-privacy</string>
                         </array>
                     </dict>
                     </plist>

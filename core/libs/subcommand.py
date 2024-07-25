@@ -90,12 +90,18 @@ class MySubProcess():
 
     def stop(self, timeout = 10):
         if self._process is not None and self._process.poll() is None:
-            self._process.terminate()
+            try:
+                self._process.terminate()
+            except:
+                pass
             self._wait_exit(timeout)
         if self._process is not None and self._process.poll() is None:
             self._logger.debug("Process not dead, killing")
-            self._process.kill()
-            os.kill(self._pid, signal.SIGKILL)
+            try:
+                self._process.kill()
+                os.kill(self._pid, signal.SIGKILL)
+            except:
+                pass
             self._wait_exit(timeout)
 
         if self.check_exited() is False:

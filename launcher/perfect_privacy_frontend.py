@@ -1,11 +1,16 @@
 import os, sys
+import platform
 import subprocess
 import time
 import webbrowser
+from shlex import quote
+
+PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
+sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
+sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
 
 from core.libs.web.reporter import ReporterInstance
 
-PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 import psutil
 try:
@@ -91,7 +96,7 @@ class MainApp():
         except:
             self.minimized = False
 
-        errormsg = ""
+        errormsg = '<button style="background-image:linear-gradient(to bottom,#5cb85c 0,#419641 100%);  border-color: #3e8f3e; cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" onclick="pyhtmlapp.fix_service_as_admin()">Try to repair background service (as Admin)</button><br>'
         self.restart = False
         self.update_on_exit = False
 
@@ -124,6 +129,7 @@ class MainApp():
         self.tray.addJavascriptFunction("show_app", self.window.show)
         self.tray.addJavascriptFunction("hide_app", self.window.hide)
         self.tray.addJavascriptFunction("set_icon_state", self.animatedTrayIcon.set_state)
+        self.window.addJavascriptFunction("set_icon_state", self.animatedTrayIcon.set_state)
 
         if PLATFORM == PLATFORMS.macos:
             def confirm_exit():
@@ -134,11 +140,29 @@ class MainApp():
             self.window.on_closed_event.attach_observer(self.app.hide_osx_dock)
             self.window.on_show_event.attach_observer(self.app.show_osx_dock)
             self.app.on_activated_event.attach_observer(self.window.show)
+            if platform.processor() == "arm": # just fixes for flickering webview
+                self.window.on_show_event.attach_observer(self.hide_tray_menu)  # on osx arm hide tray menu if window is show, because for some reason the webview will flicker white if its visible more than once
+                self.window.on_closed_event.attach_observer(self.load_tray_page) # load tray page if main window is hidden so tray icon stays updated
+                self.tray.on_show_event.attach_observer(self.tray._webWidget.load_page)
+                self.tray.on_closed_event.attach_observer(self.on_tray_close)
         else:
-            #self.window.on_minimized_event.attach_observer(self.window.hide)
             self.tray.on_left_clicked.attach_observer(self.window.show)
+
         self.window._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self.tray._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+
+    # on osx arm hide tray menu if window is show, because for some reason the webview will flicker white if its visible more than once
+    def hide_tray_menu(self, *args):
+        if self.tray._menu_is_open is True:
+            self.tray._trayAction.trigger()
+        self.tray._webWidget.unload_page()
+
+    def load_tray_page(self, *args):
+        if self.tray._menu_is_open is False:
+            self.tray._webWidget.load_page()
+    def on_tray_close(self, *args):
+        if self.window._qMainWindow.isVisible():
+            self.tray._webWidget.unload_page() # unload page while main window is visible to prevent flickering on arm mac
 
 
     def open_url(self, url):
@@ -187,6 +211,22 @@ class MainApp():
             if SHARED_SECRET == "REPLACE_TOKEN_ON_POST_INSTALL":
                 self.restart = True
                 self.stop()
+
+        elif PLATFORM == PLATFORMS.macos:
+            try:
+                cmd = [ "launchctl","load","/Library/LaunchDaemons/perfect-privacy-service.plist"]
+                subprocess.Popen(["osascript", "-e","do shell script %s with administrator privileges without altering line endings" % self.quote_applescript(self.quote_shell(cmd))])
+            except OSError as e:
+                print(e)
+
+    def quote_shell(self, args):
+        return " ".join(quote(arg) for arg in args)
+
+    def quote_applescript(self, string):
+        charmap = { "\n": "\\n", "\r": "\\r", "\t": "\\t", "\"": "\\\"", "\\": "\\\\", }
+        return '"%s"' % "".join(charmap.get(char, char) for char in string)
+
+
 
 class StartupCheckerWin():
 

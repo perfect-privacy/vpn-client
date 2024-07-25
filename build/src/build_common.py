@@ -22,6 +22,7 @@ class BuildCommon():
         self._write_runtime_config()
         self.download_thirdparty()
         self._copy_files()
+        self.download_configs()
         self._create_installer()
 
     def _parse_commandline(self):
@@ -35,7 +36,6 @@ class BuildCommon():
         os.mkdir(self.BUILD_DIR_TMP)
         if os.path.exists(self.BUILD_DIR_TARGET): shutil.rmtree(self.BUILD_DIR_TARGET)
         os.mkdir(self.BUILD_DIR_TARGET)
-
 
     def _run_pyinstaller(self):
         os.chdir(self.BUILD_DIR_TMP)
@@ -72,6 +72,19 @@ class BuildCommon():
         f.write("BRANCH=%s\n" % self.BRANCH)
         f.close()
 
+    def download_configs(self):
+        r = requests.get("https://www.perfect-privacy.com/downloads/Perfect_Privacy_App_Configs.zip")
+        open( os.path.join(self.BUILD_DIR_TARGET, "var", "configs", "configs.zip"), "wb" ).write(r.content)
+        if self.PLATFORM == "windows":
+            os.system("cd \"%s\" & powershell -command \"Expand-Archive '%s'\"" % (os.path.join(self.BUILD_DIR_TARGET, "var", "configs"), "configs.zip"))
+            for f in glob.glob(os.path.join(self.BUILD_DIR_TARGET, "var", "configs", "configs","Perfect_Privacy_App_Configs", "*")):
+                shutil.move(f, os.path.join(self.BUILD_DIR_TARGET, "var", "configs" ))
+            shutil.rmtree(os.path.join(self.BUILD_DIR_TARGET, "var", "configs", "configs"))
+        else:
+            os.system("cd \"%s\" &&  unzip '%s'" % (os.path.join(self.BUILD_DIR_TARGET, "var", "configs"), "configs.zip"))
+            os.system("cd \"%s\" && mv Perfect_Privacy_App_Configs/* . && rm -r Perfect_Privacy_App_Configs" % os.path.join(self.BUILD_DIR_TARGET, "var", "configs"))
+        os.remove(os.path.join(self.BUILD_DIR_TARGET, "var", "configs", "configs.zip"))
+
     def download_thirdparty(self):
         if not os.path.exists(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty.zip")):
             r = requests.get("https://github.com/perfect-privacy/vpn-client/releases/download/ThirdpartySoftware/thirdparty.zip")
@@ -83,13 +96,15 @@ class BuildCommon():
                 shutil.rmtree(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty"))
             else:
                 os.system("cd \"%s\" &&  unzip '%s'" % (os.path.join(self.SOURCE_DIR, "thirdparty"), "thirdparty.zip"))
+        #os.remove(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty.zip"))
 
     def _copy_files(self):
         # create var dirs
         os.mkdir(os.path.join(self.BUILD_DIR_TARGET, "var"))
         os.mkdir(os.path.join(self.BUILD_DIR_TARGET, "var", "software_update"))
         os.mkdir(os.path.join(self.BUILD_DIR_TARGET, "var", "config_update"))
-        shutil.copytree(os.path.join(self.SOURCE_DIR, "var", "configs"), os.path.join(self.BUILD_DIR_TARGET, "var", "configs"))
+        os.mkdir(os.path.join(self.BUILD_DIR_TARGET, "var", "configs"))
+        #shutil.copytree(os.path.join(self.SOURCE_DIR, "var", "configs"), os.path.join(self.BUILD_DIR_TARGET, "var", "configs"))
 
         for f in glob.glob(os.path.join(self.BUILD_DIR_TMP, "dist", "perfect-privacy-service", "*")):
             try:

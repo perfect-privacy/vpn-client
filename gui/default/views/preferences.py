@@ -12,39 +12,45 @@ from config.config import PLATFORM
 class PreferencesView(PyHtmlView):
     TEMPLATE_STR = '''
     <div class="inner">
-        <h1>Preferences</h1>
+        <h1>{{_("Preferences")}}</h1>
         <div class="boxes">
             <section>
-                <h3>
-                    Start with {{pyview.osname}}
-                    <div class="input"> {{ pyview.start_on_boot.render() }} </div>
+                <h3> <!--- {{_("English")}} , {{_("German")}} --->
+                    {{_("Language")}}
+                    <div class="input"> {{ pyview.language.render() }} </div>
                 </h3>
-                <div>If checked, the application will automatically start when you log into your computer.</div>
             </section>
             <section>
                 <h3>
-                    Connect on start
+                    {{_("Start with %(os_name)s", os_name=pyview.osname)}}
+                    <div class="input"> {{ pyview.start_on_boot.render() }} </div>
+                </h3>
+                <div>{{_("If checked, the application will automatically start when you log into your computer.")}}</div>
+            </section>
+            <section>
+                <h3>
+                    {{_("Connect on start")}}
                     <div class="input"> {{ pyview.connect_on_start.render() }} </div>
                 </h3>
                 <div>
-                    Automatically connect to VPN if Perfect Privacy App is started{% if pyview.subject.settings.interface_level.get() == "expert" %} or directly after boot if background mode is active{% endif %}.
+                    {% if pyview.subject.settings.interface_level.get() == "expert" %}
+                        {{_("Automatically connect to VPN if Perfect Privacy App is started or directly after boot if background mode is active.")}}
+                    {% else %}
+                        {{_("Automatically connect to VPN if Perfect Privacy App is started.")}}
+                    {% endif %}
+                    
                 </div>
             </section>
             {% if pyview.subject.settings.interface_level.get() == "expert" %}
                 <section>
                     <h3>
-                        Background Mode
+                        {{_("Background Mode")}}
                         <div class="input"> {{ pyview.enable_background_mode.render() }} </div>
                     </h3>
                     <div>
-                        If background mode is enabled, 
-                        all your VPN connections can be active even if the Perfect Privacy App is not running.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                        {{_("If background mode is enabled, all your VPN connections can be active even if the Perfect Privacy App is not running.")}}&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">{{_("more")}}</a>
                         <div class="tooltip" style="display:none">
-                           Use this to hide your VPN App usage from screen, 
-                           or to automatically connect all users to the vpn after boot, 
-                           without them even seeing the App. "Start with OS" is not needed for background mode, 
-                           as this will only start the frontend App. 
-                           The background service will always start after boot.
+                           {{_("Use this to hide your VPN App usage from screen, or to automatically connect all users to the vpn after boot, without them even seeing the App. 'Start with OS' is not needed for background mode, as this will only start the frontend App. The background service will always start after boot.")}}
                         </div>
                     </div>
                 </section>
@@ -52,114 +58,110 @@ class PreferencesView(PyHtmlView):
             {% endif %}
             
         </div>   
-        <h2>External IP</h2>
-        Note: It might take up to 3 minutes for any changes to apply on our Servers. 
-        If you update your external ip settings on our website, it might take some time for the settings below to refresh. <a onclick="pyview.refresh()">Refresh Now</a> 
+        <h2>{{_("External IP")}}</h2>
+        {{_("Note: It might take up to 3 minutes for any changes to apply on our Servers. If you update your external ip settings on our website, it might take some time for the settings below to refresh.")}}
+        <a onclick="pyview.refresh()">{{_("Refresh Now")}}</a> 
 
         <div class="boxes">
             <section>
                 <h3>
-                    NeuroRouting
+                    {{_("NeuroRouting")}}
                     <div class="input"> {{ pyview.neuro_routing.render() }} </div>
                 </h3> 
                 <div>
-                    Use our AI-driven routing technology to keep your internet traffic within our encrypted network wherever possible. This makes sure your traffic is only routed 
-                    though the open internet for as short as possible, making it way harder to do any kind of traffic analysis.  
+                    {{_("Use our AI-driven routing technology to keep your internet traffic within our encrypted network wherever possible. This makes sure your traffic is only routed though the open internet for as short as possible, making it way harder to do any kind of traffic analysis.")}} 
                 </div>
             </section>
 
             {% if pyview.subject.settings.interface_level.get() != "simple" %}
                 <section>
                     <h3>
-                        Enforce Primary Ip
+                        {{_("Enforce Primary Ip")}}
                         <div class="input"> {{ pyview.enforce_primary_ip.render() }} </div>
                     </h3> 
-                    <div>Make sure servers primary ip address is used as exit ip. Otherwise a random IP will be assigned.</div>
+                    <div>{{_("Make sure servers primary ip address is used as exit ip. Otherwise a random IP will be assigned.")}}</div>
                 </section>
             {% endif %}
         </div> 
         {% if (pyview.subject.settings.vpn.vpn_protocol.get() == pyview.VPN_PROTOCOLS.openvpn and  pyview.subject.settings.interface_level.get() != "simple" ) or pyview.PLATFORM == pyview.PLATFORMS.windows %}
-            <h2>Connection</h2>
+            <h2>{{_("Connection")}}</h2>
         {% endif %}
         {% if pyview.PLATFORM == pyview.PLATFORMS.windows %}
             <div class="boxes">
                 <section>
                     <h3>
-                        Connection Protocol
+                        {{_("Connection Protocol")}}
                         <div class="input">{{ pyview.vpn_protocol.render() }} </div>
                     </h3> 
                     <div>
-                        IPsec (Internet Protocol Security) is a secure network protocol suite that authenticates and encrypts the packets of data sent over a network. 
-                        OpenVPN is an open-source software application that implements virtual private network (VPN) techniques to create secure point-to-point or site-to-site 
-                        connections in routed or bridged configurations and remote access facilities. Choose the protocol that best suits your needs.
+                        {{_("IPsec (Internet Protocol Security) is a secure network protocol suite that authenticates and encrypts the packets of data sent over a network. OpenVPN is an open-source software application that implements virtual private network (VPN) techniques to create secure point-to-point or site-to-site connections in routed or bridged configurations and remote access facilities. Choose the protocol that best suits your needs.")}}
                     </div>
                 </section>	    
             </div>  
         {% endif %}
         {% if pyview.subject.settings.vpn.vpn_protocol.get() == pyview.VPN_PROTOCOLS.openvpn and  pyview.subject.settings.interface_level.get() != "simple" %}
-            <h3>Connection Details</h3>
+            <h3>{{_("Connection Details")}}</h3>
             <div class="boxes">
 
                 <section>
                     <h3>
-                        OpenVPN Protocol
+                        {{_("OpenVPN Protocol")}}
                         <div class="input">{{ pyview.openvpn_protocol.render() }}</div>
                     </h3> 
                     <div>
-                        Select OpenVPN protocol, UDP is recommended in most cases, however in some networks TCP might work more reliable. TCP is automatically used if stealth is enabled.  
+                        {{_("Select OpenVPN protocol, UDP is recommended in most cases, however in some networks TCP might work more reliable. TCP is automatically used if stealth is enabled.")}}
                     </div>
                 </section>
 
                 <section>
                     <h3>
-                        Maximum Cascading Hops
+                        {{_("Maximum Cascading Hops")}}
                         <div class="input" style="width:5em;"> {{ pyview.openvpn_cascading_max_hops.render() }}</div>
                     </h3> 
                     <div>
-                        Select the maximum number of available hops for cascading connections. 
+                        {{_("Select the maximum number of available hops for cascading connections.")}}
                     </div>
                 </section>                              
 
                 {% if pyview.subject.settings.interface_level.get() == "expert" %}
                     <section>
                         <h3>
-                            OpenVPN Encryption Cipher
+                            {{_("OpenVPN Encryption Cipher")}}
                             <div class="input" style="width:8em;"> {{ pyview.openvpn_cipher.render() }} </div>    
                         </h3> 
                         <div>
-                            Select the desired encryption cipher for your OpenVPN connection.
-                            Different ciphers have different strengths and weaknesses, so choose the one that best meets your security needs.
+                            {{_("Select the desired encryption cipher for your OpenVPN connection. Different ciphers have different strengths and weaknesses, so choose the one that best meets your security needs.")}}
                         </div>
                     </section>
 
                     <section>
                         <h3>
-                            OpenVPN Port
+                            {{_("OpenVPN Port")}}
                             <div class="input" style="width:8em;"> {{ pyview.openvpn_port.render() }} </div>    
                         </h3> 
                         <div>
-                            Select the desired port for your OpenVPN connection.
+                            {{_("Select the desired port for your OpenVPN connection.")}}
                         </div>
                     </section>
 
                     <section>
                         <h3>
-                            TLS Method
+                            {{_("TLS Method")}}
                             <div class="input" style="width:8em;"> {{ pyview.openvpn_tls_method.render() }} </div>
                         </h3> 
                         <div>
-                           Select prefered OpenVPN TLS Method. TLS-CRYPT is the newer, recommended way. 
+                           {{_("Select prefered OpenVPN TLS Method. TLS-CRYPT is the newer, recommended way.")}}
                         </div>
                     </section>
 
                     {% if pyview.PLATFORM == pyview.PLATFORMS.windows %}
                         <section> 
                             <h3>
-                                OpenVPN Driver
+                                {{_("OpenVPN Driver")}}
                                 <div class="input" style="width:8em;"> {{ pyview.openvpn_driver.render() }} </div>
                             </h3> 
                             <div>
-                                Select OpenVPN Driver. WinTUN is the newest, fastest OpenVPN driver, but some older Windows version might need some older driver. 
+                                {{_("Select OpenVPN Driver. WinTUN is the newest, fastest OpenVPN driver, but some older Windows version might need some older driver.")}}
                             </div>
                         </section>
                     {% endif %}
@@ -168,11 +170,11 @@ class PreferencesView(PyHtmlView):
             </div>
         {% endif %}
         
-        <h2>Updates</h2>
+        <h2>{{_("Updates")}}</h2>
         {{ pyview.updater.render() }}
         
         {% if pyview.subject.settings.interface_level.get() == "expert" and pyview.PLATFORM == pyview.PLATFORMS.windows %}
-            <h2>OpenVPN Driver</h2>
+            <h2>{{_("OpenVPN Driver")}}</h2>
             {% if pyview.openvpndriver %}
                 {{ pyview.openvpndriver.render() }}
             {% endif %}       
@@ -182,38 +184,30 @@ class PreferencesView(PyHtmlView):
         {% endif %}  
         
         
-        <h2>Help our community</h2>
+        <h2>{{_("Help our community")}}</h2>
         <div class="boxes">
             <section> 
                 <h3>
-                    Automatically send crash reports
+                    {{_("Automatically send crash reports")}}
                     <div class="input" style="width:8em;"> {{ pyview.send_crashreports.render() }} </div>
                 </h3> 
                 <div>
-                    We, and all other users, would greatly appreciate if you keep this option active. If our VPN client, 
-                    or some background component like leak protection crashes on your system, 
-                    it might behave incorrectly for users whose life and liberty depends on a functioning VPN.&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                    {{_("We, and all other users, would greatly appreciate if you keep this option active. If our VPN client, or some background component like leak protection crashes on your system,  it might behave incorrectly for users whose life and liberty depends on a functioning VPN.")}}&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">{{_("more")}}</a>
                     <div class="tooltip" style="display:none">
-                        Crash reports include the client version, installation ID, the OS, and the actual internal python stack trace of the crash.
-                        They do not contain any of the bullshit information that causes us all to hate and block telemetry and is not assigned to a IP/User/Account or anything else. 
+                        {{_("Crash reports include the client version, installation ID, the OS, and the actual internal python stack trace of the crash. They do not contain any of the bullshit information that causes us all to hate and block telemetry and is not assigned to a IP/User/Account or anything else.")}}
                     </div>
                 </div>
             </section>
             <section> 
                 <h3>
-                    Automatically report local settings
+                    {{_("Automatically report local settings")}}
                     <div class="input" style="width:8em;"> {{ pyview.send_statistics.render() }} </div>
                 </h3> 
                 <div>
-                    This option helps us collect statistics about the actually used VPN settings, stealth options and openvpn drivers.
-                    It does not collect any system information except your operating system (Windows, Mac, Linux).&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">more</a>
+                    {{_("This option helps us collect statistics about the actually used VPN settings, stealth options and openvpn drivers. It does not collect any system information except your operating system (Windows, Mac, Linux).")}}&nbsp;<a class="tooltip_more_less" onclick="show_tooltip(this)" data-txt_less="less" data-txt_more="more">{{_("more")}}</a>
                     <div class="tooltip" style="display:none">
-                        Statistics include the following information and nothing else:<br> 
-                        Client version, OS (without exact version), interface level (simple,advanced, expert), leak protection settings, 
-                        stealth settings (without private nodes), vpn protocol, openvpn driver, tls method, port, max cascading hops, 
-                        the actual number of hops used, if you have an Ipv4, if you have an Ipv6 and if you are connected to the VPN.<br>
-                        Reports are not assigned to a IP/User/Account/Installation or anything else (As you might expect from our service).
-                        Statistics are only collected once approximatly every 500 days. 
+                        {{_("Statistics include the following information and nothing else:")}}
+                        {{_("Client version, OS (without exact version), interface level (simple,advanced, expert), leak protection settings, stealth settings (without private nodes), vpn protocol, openvpn driver, tls method, port, max cascading hops, the actual number of hops used, if you have an Ipv4, if you have an Ipv6 and if you are connected to the VPN.<br>Reports are not assigned to a IP/User/Account/Installation or anything else (As you might expect from our service).Statistics are only collected once approximatly every 500 days.")}}
                     </div>
                 </div>
             </section>  
@@ -244,6 +238,12 @@ class PreferencesView(PyHtmlView):
         self.add_observable(subject.settings.vpn.openvpn.protocol, self._on_object_updated)
         self.add_observable(subject.settings.vpn.openvpn.tls_method, self._on_object_updated)
         self.add_observable(subject.settings.startup.enable_background_mode, self._on_object_updated)
+        self.language = SelectComponent(subject.settings.language, self,
+                                                options=[
+                                                    ("de", "German"),
+                                                    ("en", "English"),
+                                                ])
+
         self.openvpn_cipher = SelectComponent(subject.settings.vpn.openvpn.cipher, self,
                                               options=[
                                                   (OPENVPN_CIPHER.aes_128_gcm, OPENVPN_CIPHER.aes_128_gcm),
@@ -333,29 +333,29 @@ class UpdaterView(PyHtmlView):
     TEMPLATE_STR = '''
     <div class="boxes">
         <section>
-            <h3>Updates
+            <h3>{{_("Updates")}}
             <span class="input" style="width:20em"> 
                 <label></label>
-                <button onclick='pyview.check_now()'> Check now </button>
+                <button onclick='pyview.check_now()'> {{_("Check now")}} </button>
             </span>
             </h3>
             <table class="table">
                 <thead>
                     <tr>
                         <th scope="col">  </th>
-                        <th scope="col"> Installed Version </th>
-                        <th scope="col"> Available Version </th>
+                        <th scope="col"> {{_("Installed Version")}} </th>
+                        <th scope="col"> {{_("Available Version")}} </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td> Software </td>
+                        <td> {{_("Software")}} </td>
                         <td> {{ pyview.subject.softwareUpdater.version_local }} </td>
                         <td> {{ pyview.subject.softwareUpdater.version_online }} </td>
                         <td> {{ pyview.subject.softwareUpdater.state.get() }}  </td>
                     </tr>
                     <tr>
-                        <td> Config </td>
+                        <td> {{_("Config")}} </td>
                         <td> {{ pyview.subject.configUpdater.version_local }} </td>
                         <td> {{ pyview.subject.configUpdater.version_online }} </td>
                         <td> {{ pyview.subject.configUpdater.state.get() }} </td>
@@ -386,14 +386,14 @@ class ReporterView(PyHtmlView):
     DOM_ELEMENT = "section"
     TEMPLATE_STR = '''
         <h3>
-            {{ pyview.subject.reports_send }} Reports have been send 
+            {{ ngettext("%(num)s report has been send", "%(num)s reports have been send", pyview.subject.reports_send )}}
             {% if pyview.subject.latest_reports | length > 0 %}
                 <div class="input" style="width:20em;margin-top:10px">
                 {% if pyview.is_shown %}
-                    <button onclick="pyview.clear_reports()"> Clear</button> 
-                    <button onclick="pyview.hide_reports()"> Hide</button> 
+                    <button onclick="pyview.clear_reports()"> {{_("Clear")}}</button> 
+                    <button onclick="pyview.hide_reports()"> {{_("Hide")}}</button> 
                 {% else %}
-                    <button onclick="pyview.show_reports()"> Show Latest</button> 
+                    <button onclick="pyview.show_reports()"> {{_("Show Latest")}}</button> 
                 {% endif %}
                 </div>
             {% endif %}
@@ -437,11 +437,11 @@ class StatusOpenVpnDriverView(PyHtmlView):
     TEMPLATE_STR = '''
     <div class="boxes">
         <section>
-            <h3>Network drivers
+            <h3>{{_("Network drivers")}}
                 <span class="input" style="width:20em;"> 
                     <label></label>
                     {% if pyview.subject.state.get() == "IDLE" %}
-                        <button onclick='pyview.subject.reinstall()'> Reinstall </button>
+                        <button onclick='pyview.subject.reinstall()'> {{_("Reinstall")}} </button>
                     {% else %}
                         {{ pyview.subject.state.get() }}
                     {% endif %}
@@ -450,9 +450,9 @@ class StatusOpenVpnDriverView(PyHtmlView):
             <table class="table">
                 <thead>
                     <tr>
-                        <th scope="col"> Driver </th>
-                        <th scope="col"> Installed Version </th>
-                        <th scope="col"> Available Version </th>
+                        <th scope="col"> {{_("Driver")}} </th>
+                        <th scope="col"> {{_("Installed Version")}} </th>
+                        <th scope="col"> {{_("Available Version")}} </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -489,11 +489,11 @@ class StatusNetworkDevicesView(PyHtmlView):
     TEMPLATE_STR = '''
     <div class="boxes">
         <section>
-            <h3>Network devices
+            <h3>{{_("Network devices")}}
                 <span class="input" style="width:20em;"> 
                     <label></label>
                     {% if pyview.subject.state.get() == "IDLE" %}
-                        <button onclick='pyview.subject.reinstall()'> Reinstall </button>
+                        <button onclick='pyview.subject.reinstall()'> {{_("Reinstall")}} </button>
                     {% else %}
                         {{ pyview.subject.state.get() }}
                     {% endif %}
@@ -502,8 +502,8 @@ class StatusNetworkDevicesView(PyHtmlView):
             <table class="table">
                 <thead>
                     <tr>
-                        <th scope="col"> Name </th>
-                        <th scope="col"> Type </th>
+                        <th scope="col"> {{_("Name")}} </th>
+                        <th scope="col"> {{_("Type")}} </th>
                         <th scope="col"> Uid </th>
                     </tr>
                 </thead>

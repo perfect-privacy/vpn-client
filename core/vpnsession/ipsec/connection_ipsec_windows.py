@@ -100,18 +100,19 @@ class IpsecConnection(VPNConnection):
 
     def _get_interface_data(self):
         routing_table = getPowershellInstance().execute("Get-NetRoute | Select-Object -Property ifIndex,DestinationPrefix,NextHop,InterfaceAlias | ConvertTo-Csv ")
-        for line in routing_table.split(b"\n"):
-            try:
-                if b"PerfectPrivacyVPN" in line:
-                    ifIndex, destinationPrefix, nextHop, interfaceAlias = line.decode("utf-8").strip().split(",")
-                    self.interface = ifIndex[1:-1]
-                    destinationPrefix = destinationPrefix[1:-1]
-                    nextHop = nextHop[1:-1]
-                    if destinationPrefix.startswith("10.") and destinationPrefix.endswith("/32") and nextHop.startswith(
-                            "0.0.0.0"):  # our ip found
-                        self.ipv4_local_ip = destinationPrefix.split("/")[0]
-            except Exception as e:
-                pass
+        if routing_table is not None:
+            for line in routing_table.split(b"\n"):
+                try:
+                    if b"PerfectPrivacyVPN" in line:
+                        ifIndex, destinationPrefix, nextHop, interfaceAlias = line.decode("utf-8").strip().split(",")
+                        self.interface = ifIndex[1:-1]
+                        destinationPrefix = destinationPrefix[1:-1]
+                        nextHop = nextHop[1:-1]
+                        if destinationPrefix.startswith("10.") and destinationPrefix.endswith("/32") and nextHop.startswith(
+                                "0.0.0.0"):  # our ip found
+                            self.ipv4_local_ip = destinationPrefix.split("/")[0]
+                except Exception as e:
+                    pass
 
     def _worker_thread(self):
         while self.is_active is True:

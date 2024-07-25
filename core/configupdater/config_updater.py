@@ -136,6 +136,7 @@ class ConfigUpdater(GenericUpdater):
         finally:
             if os.path.exists(CONFIG_UPDATE_DIR):
                 shutil.rmtree(CONFIG_UPDATE_DIR, ignore_errors=True)
+            os.mkdir(CONFIG_UPDATE_DIR)
 
     def __unzip(self, zip_path, unzip_dir):
         self._logger.debug("unzipping '{}' to '{}'".format(zip_path, unzip_dir))

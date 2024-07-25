@@ -25,6 +25,7 @@ class FirewallRule():
         if not hasattr(self, "local_ports")     : self.local_ports      = None
         if not hasattr(self, "local_addresses") : self.local_addresses  = None
         if not hasattr(self, "applicationName") : self.applicationName  = None
+        if not hasattr(self, "interfaceIndex")  : self.interfaceIndex   = None
         self._is_enabled = None
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -81,6 +82,8 @@ class FirewallRule():
             args.append('-LocalAddress  @(%s)' % ", ".join(['"%s"' % x for x in self.local_addresses]))
         if self.applicationName is not None:
             args.append('-Program   "%s"' % self.applicationName)
+        if self.interfaceIndex is not None:
+            args.append('-InterfaceAlias(Get-NetAdapter -InterfaceIndex %s).InterfaceAlias' % self.interfaceIndex)
         return " ".join(args)
 
 class FirewallRuleOutgoingProfileDefaultBlock():
@@ -102,13 +105,12 @@ class FirewallRuleOutgoingProfileDefaultBlock():
     def disable(self):
         if self.is_enabled.get() is False:
             return
-        if self.default_profiles.get() is not None:
-            self._logger.info("%s disabling" % self.__class__.__name__)
+        #if self.default_profiles.get() is not None:
+        #    self._logger.info("%s disabling" % self.__class__.__name__)
             #for profile in self.default_profiles.get(): # this would be better, for user whos default profile is not "allow", but this results in many more problems
             #    getPowershellInstance().execute("Set-NetFirewallProfile -Profile %s -DefaultOutboundAction %s" % (profile["Profile"],  profile["DefaultOutboundAction"]))
             #self.default_profiles.set(None)
-            getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
-
+        getPowershellInstance().execute("Set-NetFirewallProfile -Profile Domain,Public,Private -DefaultOutboundAction Allow")
         self.is_enabled.set(False)
 
 class FirewallRuleAllowConnectionToServer(FirewallRule):
@@ -137,20 +139,59 @@ class FirewallRuleAllowNetworkingLan(FirewallRule):
         self.remote_addresses = ["10.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12","192.168.0.0/16", "fe80::/64", "ff01::/16", "ff02::/16"]
         super().__init__()
 
-class FirewallRuleAllowFromVpnLocalIps(FirewallRule):
+
+class FirewallRuleAllowFromVpnLocalIp(FirewallRule):
 
     def __init__(self):
-        self.name = "Perfect Privacy - Allow traffic from local VPN IP"
+        self.name = "Perfect Privacy - Allow traffic from local VPN IP from Interface"
         self.description = self.name
         self.action = NET_FW_ACTION_ALLOW
         self.direction = NET_FW_RULE_DIR_OUT
         super().__init__()
 
-    def enable(self, local_ipv4s, local_ipv6s):
-        changed = self.local_addresses != local_ipv4s+local_ipv6s or self.local_addresses is None
+    def enable(self, local_ipv4, local_ipv6, interfaceIndex):
+        changed = self.local_addresses != [local_ipv4, local_ipv6] or self.local_addresses is None or self.interfaceIndex != interfaceIndex
         if changed is True or self.is_enabled is False:
-            self.local_addresses = local_ipv4s+local_ipv6s
+            self.local_addresses = [local_ipv4, local_ipv6]
+            self.name = "Perfect Privacy - Allow traffic from local VPN IP from Interface %s" % interfaceIndex
+            self.interfaceIndex = interfaceIndex
             super().enable() if self.is_enabled is False else self.update()
+
+
+class FirewallRuleAllowFromVpnLocalIps(FirewallRule):
+
+    def __init__(self):
+        self.name = "Perfect Privacy - Allow traffic from local VPN IP from Interface"
+        self.rules = {}
+        self.local_hops = []
+        super().__init__()
+
+    def enable(self, local_hops):
+        changed = self.local_hops != local_hops
+        if changed is True or self.is_enabled is False:
+            for key in ["%s"%k for k in self.rules.keys()]:
+                if key not in [":".join(hop) for hop in local_hops]:
+                    self.rules[key].disable()
+                    del self.rules[key]
+            for hop in local_hops:
+                hop_id = ":".join(hop)
+                if hop_id not in self.rules:
+                    self.rules[hop_id] = FirewallRuleAllowFromVpnLocalIp()
+                    self.rules[hop_id].enable(hop[0], hop[1], hop[2])
+
+            self.local_hops = local_hops
+
+    def disable(self):
+        if self.is_enabled is True:
+            self._logger.info("%s disabling" % self.__class__.__name__)
+            delete_rule_cmd = 'Remove-NetFirewallRule -Name "%s*"' % self.name
+            getPowershellInstance().execute(delete_rule_cmd, may_fail=True)
+        self.rules = {}
+        self.local_hops = []
+        self.is_enabled = False
+
+
+
 
 
 class FirewallRuleBlockInternet(FirewallRule):
@@ -167,8 +208,11 @@ class FirewallRuleBlockInternet(FirewallRule):
     def enable(self, remote_ipv4s, local_ipv4s):
         local_ipv4_boundarys = ["0.0.0.0", "223.255.255.255"]
         for local_ipv4 in set(local_ipv4s):
-            local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) - 1))
-            local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) + 1))
+            try:
+                local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) - 1))
+                local_ipv4_boundarys.append(self.int2ip(self.ip2int(local_ipv4) + 1))
+            except:
+                pass
         local_ipv4_boundarys.sort(key=lambda x:self.ip2int(x))
 
         localAddresses = []
@@ -182,8 +226,11 @@ class FirewallRuleBlockInternet(FirewallRule):
            "172.32.0.0","192.167.255.255","192.169.0.0","223.255.255.255"
         ]
         for remote_ipv4 in remote_ipv4s:
-            internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) - 1))
-            internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) + 1))
+            try:
+                internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) - 1))
+                internet_ipv4_boundarys.append(self.int2ip(self.ip2int(remote_ipv4) + 1))
+            except:
+                pass
         internet_ipv4_boundarys.sort(key=lambda x:self.ip2int(x))
 
         remoteAddresses = []

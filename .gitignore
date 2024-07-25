@@ -8,9 +8,11 @@ var/software_update/*
 var/config_update/*
 var/mpass
 var/reports
+var/configs/*
 var/user_settings.bson
 var/storage.db
 var/.perfect_privacy.instid
+var/mpass
 build_tmp
 venv
 .DS_Store

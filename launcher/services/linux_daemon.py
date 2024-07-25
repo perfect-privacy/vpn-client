@@ -210,8 +210,10 @@ class DaemonManager(object):
 
             pid = str(os.getpid())
             sys.stdout.write("daemon started with PID {}\n".format(pid))
-            sys.stdout.flush()
-
+            try:
+                sys.stdout.flush()
+            except:
+                pass
             if self.pidfile:
                 with open(self.pidfile, 'w+') as pf:
                     os.chmod(self.pidfile, 0o644)

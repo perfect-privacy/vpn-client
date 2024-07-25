@@ -7,42 +7,41 @@ class TrackstopView(PyHtmlView):
     TEMPLATE_STR = '''
         {% if pyview.subject.userapi.credentials_valid.get() != True %}
             <div class="not_logged_in">
-                Login to change your TrackStop settings.
+                {{_("Login to change your TrackStop settings.")}}
             </div>
         {% endif %}
     
         <div class="inner">
             <h1>TrackStop</h1>
             <p>
-                The TrackStop feature allows you to block unwanted domains directly on VPN level.  You can choose what kind of domains you want to block by activating one or more of the filters.
-                Note: It might take up to 3 minutes for any changes to apply on our Servers. 
-                If you update your filter settings on our website, it might take some time for the settings below to refresh. <a onclick="pyview.refresh()">Refresh Now</a> 
+                {{_("The TrackStop feature allows you to block unwanted domains directly on VPN level.  You can choose what kind of domains you want to block by activating one or more of the filters. Note: It might take up to 3 minutes for any changes to apply on our Servers. If you update your filter settings on our website, it might take some time for the settings below to refresh.")}}
+                <a onclick="pyview.refresh()">{{_("Refresh Now")}}</a> 
             </p>
             
             <div class="boxes">
                 
                 <section>
                     <h3>
-                        Ads / Analytics
+                        {{_("Ads / Analytics")}}
                         <div class="input">  {{ pyview.block_ads.render() }} </div>
                     </h3> 
-                    <div>Protect your privacy and block over 30,000 tracking and advertisement domains with this filter</div>
+                    <div>{{_("Protect your privacy and block over 30,000 tracking and advertisement domains with this filter")}}</div>
                 </section>
                 
                 <section>
                     <h3>
-                        Fraud / Malware
+                        {{_("Fraud / Malware")}}
                         <div class="input"> {{ pyview.block_fraud.render() }} </div>
                     </h3> 
-                    <div>Activate this filter to block over 65,000 known malware and phishing domains.</div>
+                    <div>{{_("Activate this filter to block over 65,000 known malware and phishing domains.")}}</div>
                 </section>
                 
                 <section>
                     <h3>
-                        Google Services
+                        {{_("Google Services")}}
                         <div class="input"> {{ pyview.block_google.render() }} </div>
                     </h3> 
-                    <div> Warning: This blocks all Google domains, including YouTube, ReCaptcha and many other services from Google used on many websites!  </div>
+                    <div>{{_("Warning: This blocks all Google domains, including YouTube, ReCaptcha and many other services from Google used on many websites!")}}</div>
                 </section>
                 
                 <section>
@@ -50,31 +49,31 @@ class TrackstopView(PyHtmlView):
                         Facebook
                         <div class="input"> {{ pyview.block_facebook.render() }}</div>
                     </h3> 
-                    <div>Activate this filter and block all Facebook domains.</div>
+                    <div>{{_("Activate this filter and block all Facebook domains.")}}</div>
                 </section>
                 
                 <section>
                     <h3>
-                        All social media
+                        {{_("All social media")}}
                         <div class="input"> {{ pyview.block_social.render() }} </div>
                     </h3> 
-                    <div>Block all major social media sites. including Facebook, Twitter, Tumblr, Instagram, Google+, Pinterest, MySpace and LinkedIn.</div>
+                    <div>{{_("Block all major social media sites. including Facebook, Twitter, Tumblr, Instagram, Google+, Pinterest, MySpace and LinkedIn.")}}</div>
                 </section>
     
                 <section>
                     <h3>
-                        Fakenews
+                        {{_("Fakenews")}}
                         <div class="input"> {{ pyview.block_fakenews.render() }} </div>
                     </h3> 
-                    <div> Block domains known to publish fake news using a publicly available filter list hosted on GitHub that anyone can contribute to.</div>
+                    <div>{{_("Block domains known to publish fake news using a publicly available filter list hosted on GitHub that anyone can contribute to.")}}</div>
                 </section>
                             
                 <section>
                     <h3>
-                        Adult content
+                        {{_("Adult content")}}
                         <div class="input"> {{ pyview.block_kids.render() }} </div>
                     </h3> 
-                    <div>Block a large number of websites that are inappropriate for children, such as pornographic content and gambling. This filter also includes the block lists for tracking and advertisement as well as fraud, so those filters do not need to be activated separately.</div>
+                    <div>{{_("Block a large number of websites that are inappropriate for children, such as pornographic content and gambling. This filter also includes the block lists for tracking and advertisement as well as fraud, so those filters do not need to be activated separately.")}}</div>
                 </section>
             </div>						
         </div>						

@@ -1,0 +1,1026 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-02 21:01+0100\n"
+"Language: EN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gui/default/views/dashboard.py:26
+msgid "Your account has expired"
+msgstr ""
+
+#: gui/default/views/dashboard.py:28
+msgid "Your account will expire in %(num)d day"
+msgid_plural "Your account will expire in %(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: gui/default/views/dashboard.py:30
+msgid "click here to extend!"
+msgstr ""
+
+#: gui/default/views/dashboard.py:40
+msgid "Username"
+msgstr ""
+
+#: gui/default/views/dashboard.py:42
+msgid "Password"
+msgstr ""
+
+#: gui/default/views/dashboard.py:46
+msgid "account expired"
+msgstr ""
+
+#: gui/default/views/dashboard.py:49
+msgid "account disabled"
+msgstr ""
+
+#: gui/default/views/dashboard.py:52
+msgid "Failed to login"
+msgstr ""
+
+#: gui/default/views/dashboard.py:57
+msgid "login"
+msgstr ""
+
+#: gui/default/views/dashboard.py:115
+msgid "VPN Not Connected"
+msgstr ""
+
+#: gui/default/views/dashboard.py:118
+msgid "Activating Leak Protection"
+msgstr ""
+
+#: gui/default/views/dashboard.py:120
+msgid "Connecting VPN Server"
+msgstr ""
+
+#: gui/default/views/dashboard.py:124
+msgid "Verifying VPN Security"
+msgstr ""
+
+#: gui/default/views/dashboard.py:127
+msgid "Connected to Perfect Privacy"
+msgstr ""
+
+#: gui/default/views/dashboard.py:129
+msgid "Connected to Perfect Privacy, waiting for verification"
+msgstr ""
+
+#: gui/default/views/dashboard.py:133
+msgid "Disconnecting VPN"
+msgstr ""
+
+#: gui/default/views/dashboard.py:149
+msgid "Ports %(port1)d, %(port2)d and %(port3)d forwarded"
+msgstr ""
+
+#: gui/default/views/dashboard.py:163
+msgid "Verifying Leak Protection"
+msgstr ""
+
+#: gui/default/views/dashboard.py:165
+msgid "Leak Protection enabled, all non VPN traffic is blocked"
+msgstr ""
+
+#: gui/default/views/dashboard.py:178
+msgid "Disconnect"
+msgstr ""
+
+#: gui/default/views/dashboard.py:183
+msgid "Connect"
+msgstr ""
+
+#: gui/default/views/dashboard.py:186
+msgid "Disconnecting"
+msgstr ""
+
+#: gui/default/views/dashboard.py:192
+msgid "Add Server"
+msgstr ""
+
+#: gui/default/views/dashboard.py:251
+msgid "Removing"
+msgstr ""
+
+#: gui/default/views/dashboard.py:258
+msgid "Connection Failed"
+msgstr ""
+
+#: gui/default/views/dashboard.py:259
+msgid "retrying in a few seconds"
+msgstr ""
+
+#: gui/default/views/dashboard.py:261
+msgid "Waiting for connection"
+msgstr ""
+
+#: gui/default/views/dashboard.py:268
+msgid "remove"
+msgstr ""
+
+#: gui/default/views/dashboard.py:323
+msgid "Verify Connection.."
+msgstr ""
+
+#: gui/default/views/dashboard.py:325
+msgid "Check Connection"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:12
+msgid "Leak Protection"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:17
+msgid "Leak Protection Mode:"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:25
+msgid "In simple mode, leak protection is automatically managed for you"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:29
+msgid ""
+"Use these settings to protect against data leaks in case your VPN connection "
+"drops."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:33
+msgid "Leak Protection Scope:"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:34
+msgid "Disabled"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:34
+msgid "Permanent"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:34
+msgid "Program"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:34
+msgid "Tunnel"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:37
+msgid ""
+"Depending on your needs, you can choose how and when leak protection is "
+"activated for your system."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:39
+msgid ""
+"<b>Tunnel:</b> In this mode, leak protection is only active when you are "
+"connected to the VPN. If you disconnect the VPN manually, leak protection is "
+"deactivated and you can access the internet without VPN.<br><b>Program:</b> "
+"In this mode, leak protection is always active as long as the VPN manager is "
+"running. If you disconnect the VPN, no program can access the internet until "
+"you establish a new connection.<br><b>Permanent:</b> In this mode, leak "
+"protection is always active, even when the VPN software is not running. This "
+"is useful for devices that should never send unencrypted traffic and should "
+"always use the VPN for internet connectivity."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:46
+msgid ""
+"You can also use the following specific settings to protect against leaks."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:48
+msgid "Details"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:53
+msgid "Deadrouting"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:57
+msgid ""
+"Deadrouting is a secondary routing-based protection layer in addition to the "
+"normal firewall."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:59
+msgid ""
+"Deadrouting adds a secondary security layer below the actual firewall that "
+"will capture all non VPN internet traffic that might escape the normal "
+"routing and firewalling."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:66
+msgid "Prevent Local IPv6 Exposure"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:70
+msgid "Prevent local apps from guessing parts of your public IPv6 address."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:72
+msgid ""
+"Depending on your network configuration, your local IPv6 may have the same "
+"prefix as your public Ipv6. This might allow local software like your "
+"browser or filesharing app to guess large parts of your public IP, even if "
+"no traffic actually leaks around the VPN. This protection will remove all "
+"public prefixed IPv6 from network interfaces and block IPv6 DHCP to prevent "
+"a new address from being assigned."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:79
+msgid "SNMP/UPnP Leak Protection"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:83
+msgid "Block SNMP/UPnP Ports."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:85
+msgid ""
+"Enabling this feature will prevent programs on your computer from accessing "
+"other devices via SNMP and UPnP protocols. This prevents potentially "
+"sensitive information, such as your public IP address, from being revealed "
+"to programs on your computer from other devices in your network. However, "
+"please note that blocking access to these protocols may also prevent certain "
+"programs or services from functioning properly."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:92
+msgid "Block access to local router"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:96
+msgid ""
+"Prevent programs from determining your external IP address from your local "
+"Router."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:99
+msgid ""
+"This setting prevents programs from determining your external IP address "
+"through SMTP and XSS, which is possible with some routers.  Please note that "
+"access to network printers or hard drives connected to the router may also "
+"be blocked by the firewall"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:107
+msgid "Enable MS leak protection"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:111
+msgid "Prevent the leak of your Windows login and password information."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:114
+msgid ""
+"If enabled, this feature protects against attacks that may leak your Windows "
+"login and password information. Our VPN Manager prevents the sending of "
+"login information to network shares over the internet, and Perfect Privacy "
+"servers block requests on port 445."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:121
+msgid "Prevent 'Wrong Way' Leak"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:125
+msgid ""
+"Block the potential leak of your real IP address through a routing feature."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:127
+msgid ""
+"There is a potential issue where packets received over the real IP may be "
+"answered via the VPN interface under certain conditions, potentially "
+"revealing your real IP address. Enable this feature to prevent this type of "
+"leak."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:135
+msgid "Prevent DNS Leaks"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:139
+msgid ""
+"Ensure that you are using the VPN tunnel for Domain Name Service (DNS) "
+"requests."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:141
+msgid ""
+"DNS translates the domain name of a website into IP addresses, which is "
+"necessary to establish a connection to the server hosting the web page or "
+"service. A DNS leak occurs when you are using your provider's DNS server "
+"instead of the VPN tunnel or use a DNS server in your local network, "
+"bypassing the VPN."
+msgstr ""
+
+#: gui/default/views/leak_protection.py:149
+msgid "Custom DNS Servers"
+msgstr ""
+
+#: gui/default/views/leak_protection.py:153
+msgid ""
+"You may want to use your own Nameservers instead of automatically selected "
+"Perfect Privacy Servers. Note that setting custom nameservers interfers with "
+"TrackStop. TrackStop might not work, or you custom servers might not be used."
+msgstr ""
+
+#: gui/default/views/logs.py:7
+msgid "To Clipboard"
+msgstr ""
+
+#: gui/default/views/logs.py:8
+msgid "Clear"
+msgstr ""
+
+#: gui/default/views/logs.py:9
+msgid "Internal Log"
+msgstr ""
+
+#: gui/default/views/mainview.py:27
+msgid "Advanced"
+msgstr ""
+
+#: gui/default/views/mainview.py:27
+msgid "Expert"
+msgstr ""
+
+#: gui/default/views/mainview.py:27
+msgid "Simple"
+msgstr ""
+
+#: gui/default/views/mainview.py:32
+msgid "Dashboard"
+msgstr ""
+
+#: gui/default/views/mainview.py:33
+msgid "TrackStop"
+msgstr ""
+
+#: gui/default/views/mainview.py:41
+msgid "Log"
+msgstr ""
+
+#: gui/default/views/mainview.py:45
+msgid "Exit"
+msgstr ""
+
+#: gui/default/views/mainview.py:143
+msgid "Software update available, click here to install"
+msgstr ""
+
+#: gui/default/views/modals/confirm_exit.py:12
+msgid "Are you sure you want to Exit?"
+msgstr ""
+
+#: gui/default/views/modals/confirm_exit.py:19
+msgid "Background mode enabled, your VPN connections will stay active!"
+msgstr ""
+
+#: gui/default/views/modals/confirm_exit.py:22
+msgid "Background mode enabled, Leak Protection will stay active!"
+msgstr ""
+
+#: gui/default/views/modals/confirm_exit_update.py:12
+msgid "Update VPN client now?"
+msgstr ""
+
+#: gui/default/views/modals/confirm_exit_update.py:14
+msgid "This will <b>disconnect</b> all existing VPN Tunnels!"
+msgstr ""
+
+#: gui/default/views/modals/confirm_exit_update.py:16
+msgid "Yes"
+msgstr ""
+
+#: gui/default/views/modals/confirm_exit_update.py:17
+msgid "No"
+msgstr ""
+
+#: gui/default/views/modals/confirm_logout.py:12
+msgid "Are you sure you want to logout?"
+msgstr ""
+
+#: gui/default/views/modals/confirm_logout.py:14
+msgid "This will <b>disconnect</b> any existing VPN Tunnels!"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:11
+msgid "Favourites"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:12
+msgid "Countries"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:13
+msgid "Cities"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:14
+msgid "All Servers"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:15
+msgid "Select"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:114
+msgid "Name"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:115
+msgid "Bandwidth"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:116
+msgid "Load"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:117
+msgid "Favorite"
+msgstr ""
+
+#: gui/default/views/modals/select_server.py:186
+msgid "down for maintenance"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:58
+msgid "Login to change your Portforwarding settings."
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:63
+msgid "Port Forwarding"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:65
+msgid ""
+"Port forwardings are helpful to optimize the speed for certain games or Peer-"
+"to-peer software like torrent clients. You can designate up to five specific "
+"ports to forward to your computer. Note: It might take up to 3 minutes for "
+"any changes to apply on our Servers. If you update your port forwarding "
+"settings on our website, it might take some time for the settings below to "
+"refresh. "
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:71
+msgid "Default Port Forwarding"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:75
+msgid "Enable standard port forwarding."
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:77
+msgid ""
+"If default port forwarding is enabled, three random ports will be forwarded "
+"to your computer."
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:83
+msgid "Enable Custom Port Forwarding"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:96
+msgid "Enable configurable port forwarding."
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:96
+msgid "more"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:98
+msgid ""
+"If this option is enabled, you can configure up to five port forwardings "
+"from Perfect Privacy servers to your computer. The ports are set randomly on "
+"the server side."
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:107
+msgid "Server"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:108
+msgid "Server Port"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:109
+msgid "Local Port"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:110
+msgid "Valid until"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:117
+msgid "Forward to local port"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:127
+msgid "1-to-1 Port Forwarding"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:129
+msgid "add"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:137
+msgid "Auto Renew Port Forwarding"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:140
+msgid "Automatically renew port forwarding after expiration"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:144
+msgid "Email Notifications for Port Forwarding Renewal"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:147
+msgid "Receive an email notification when port forwarding is renewed"
+msgstr ""
+
+#: gui/default/views/port_forwarding.py:196
+msgid "delete"
+msgstr ""
+
+#: gui/default/views/preferences.py:15
+msgid "Preferences"
+msgstr ""
+
+#: gui/default/views/preferences.py:18
+msgid "English"
+msgstr ""
+
+#: gui/default/views/preferences.py:18
+msgid "German"
+msgstr ""
+
+#: gui/default/views/preferences.py:19
+msgid "Language"
+msgstr ""
+
+#: gui/default/views/preferences.py:25
+msgid "Start with %(os_name)s"
+msgstr ""
+
+#: gui/default/views/preferences.py:28
+msgid ""
+"If checked, the application will automatically start when you log into your "
+"computer."
+msgstr ""
+
+#: gui/default/views/preferences.py:32
+msgid "Connect on start"
+msgstr ""
+
+#: gui/default/views/preferences.py:37
+msgid ""
+"Automatically connect to VPN if Perfect Privacy App is started or directly "
+"after boot if background mode is active."
+msgstr ""
+
+#: gui/default/views/preferences.py:39
+msgid "Automatically connect to VPN if Perfect Privacy App is started."
+msgstr ""
+
+#: gui/default/views/preferences.py:47
+msgid "Background Mode"
+msgstr ""
+
+#: gui/default/views/preferences.py:51
+msgid ""
+"If background mode is enabled, all your VPN connections can be active even "
+"if the Perfect Privacy App is not running."
+msgstr ""
+
+#: gui/default/views/preferences.py:53
+msgid ""
+"Use this to hide your VPN App usage from screen, or to automatically connect "
+"all users to the vpn after boot, without them even seeing the App. 'Start "
+"with OS' is not needed for background mode, as this will only start the "
+"frontend App. The background service will always start after boot."
+msgstr ""
+
+#: gui/default/views/preferences.py:61
+msgid "External IP"
+msgstr ""
+
+#: gui/default/views/preferences.py:62
+msgid ""
+"Note: It might take up to 3 minutes for any changes to apply on our Servers. "
+"If you update your external ip settings on our website, it might take some "
+"time for the settings below to refresh."
+msgstr ""
+
+#: gui/default/views/preferences.py:68
+msgid "NeuroRouting"
+msgstr ""
+
+#: gui/default/views/preferences.py:72
+msgid ""
+"Use our AI-driven routing technology to keep your internet traffic within "
+"our encrypted network wherever possible. This makes sure your traffic is "
+"only routed though the open internet for as short as possible, making it way "
+"harder to do any kind of traffic analysis."
+msgstr ""
+
+#: gui/default/views/preferences.py:79
+msgid "Enforce Primary Ip"
+msgstr ""
+
+#: gui/default/views/preferences.py:82
+msgid ""
+"Make sure servers primary ip address is used as exit ip. Otherwise a random "
+"IP will be assigned."
+msgstr ""
+
+#: gui/default/views/preferences.py:87
+msgid "Connection"
+msgstr ""
+
+#: gui/default/views/preferences.py:93
+msgid "Connection Protocol"
+msgstr ""
+
+#: gui/default/views/preferences.py:97
+msgid ""
+"IPsec (Internet Protocol Security) is a secure network protocol suite that "
+"authenticates and encrypts the packets of data sent over a network. OpenVPN "
+"is an open-source software application that implements virtual private "
+"network (VPN) techniques to create secure point-to-point or site-to-site "
+"connections in routed or bridged configurations and remote access "
+"facilities. Choose the protocol that best suits your needs."
+msgstr ""
+
+#: gui/default/views/preferences.py:103
+msgid "Connection Details"
+msgstr ""
+
+#: gui/default/views/preferences.py:108
+msgid "OpenVPN Protocol"
+msgstr ""
+
+#: gui/default/views/preferences.py:112
+msgid ""
+"Select OpenVPN protocol, UDP is recommended in most cases, however in some "
+"networks TCP might work more reliable. TCP is automatically used if stealth "
+"is enabled."
+msgstr ""
+
+#: gui/default/views/preferences.py:118
+msgid "Maximum Cascading Hops"
+msgstr ""
+
+#: gui/default/views/preferences.py:122
+msgid "Select the maximum number of available hops for cascading connections."
+msgstr ""
+
+#: gui/default/views/preferences.py:129
+msgid "OpenVPN Encryption Cipher"
+msgstr ""
+
+#: gui/default/views/preferences.py:133
+msgid ""
+"Select the desired encryption cipher for your OpenVPN connection. Different "
+"ciphers have different strengths and weaknesses, so choose the one that best "
+"meets your security needs."
+msgstr ""
+
+#: gui/default/views/preferences.py:139
+msgid "OpenVPN Port"
+msgstr ""
+
+#: gui/default/views/preferences.py:143
+msgid "Select the desired port for your OpenVPN connection."
+msgstr ""
+
+#: gui/default/views/preferences.py:149
+msgid "TLS Method"
+msgstr ""
+
+#: gui/default/views/preferences.py:153
+msgid ""
+"Select prefered OpenVPN TLS Method. TLS-CRYPT is the newer, recommended way."
+msgstr ""
+
+#: gui/default/views/preferences.py:164
+msgid ""
+"Select OpenVPN Driver. WinTUN is the newest, fastest OpenVPN driver, but "
+"some older Windows version might need some older driver."
+msgstr ""
+
+#: gui/default/views/preferences.py:177
+msgid "OpenVPN Driver"
+msgstr ""
+
+#: gui/default/views/preferences.py:187
+msgid "Help our community"
+msgstr ""
+
+#: gui/default/views/preferences.py:191
+msgid "Automatically send crash reports"
+msgstr ""
+
+#: gui/default/views/preferences.py:195
+msgid ""
+"We, and all other users, would greatly appreciate if you keep this option "
+"active. If our VPN client, or some background component like leak protection "
+"crashes on your system,  it might behave incorrectly for users whose life "
+"and liberty depends on a functioning VPN."
+msgstr ""
+
+#: gui/default/views/preferences.py:197
+msgid ""
+"Crash reports include the client version, installation ID, the OS, and the "
+"actual internal python stack trace of the crash. They do not contain any of "
+"the bullshit information that causes us all to hate and block telemetry and "
+"is not assigned to a IP/User/Account or anything else."
+msgstr ""
+
+#: gui/default/views/preferences.py:203
+msgid "Automatically report local settings"
+msgstr ""
+
+#: gui/default/views/preferences.py:207
+msgid ""
+"This option helps us collect statistics about the actually used VPN "
+"settings, stealth options and openvpn drivers. It does not collect any "
+"system information except your operating system (Windows, Mac, Linux)."
+msgstr ""
+
+#: gui/default/views/preferences.py:209
+msgid "Statistics include the following information and nothing else:"
+msgstr ""
+
+#: gui/default/views/preferences.py:210
+msgid ""
+"Client version, OS (without exact version), interface level (simple,"
+"advanced, expert), leak protection settings, stealth settings (without "
+"private nodes), vpn protocol, openvpn driver, tls method, port, max "
+"cascading hops, the actual number of hops used, if you have an Ipv4, if you "
+"have an Ipv6 and if you are connected to the VPN.<br>Reports are not "
+"assigned to a IP/User/Account/Installation or anything else (As you might "
+"expect from our service).Statistics are only collected once approximatly "
+"every 500 days."
+msgstr ""
+
+#: gui/default/views/preferences.py:336
+msgid "Updates"
+msgstr ""
+
+#: gui/default/views/preferences.py:339
+msgid "Check now"
+msgstr ""
+
+#: gui/default/views/preferences.py:352
+msgid "Software"
+msgstr ""
+
+#: gui/default/views/preferences.py:358
+msgid "Config"
+msgstr ""
+
+#: gui/default/views/preferences.py:389
+msgid "%(num)s report has been send"
+msgid_plural "%(num)s reports have been send"
+msgstr[0] ""
+msgstr[1] ""
+
+#: gui/default/views/preferences.py:394
+msgid "Hide"
+msgstr ""
+
+#: gui/default/views/preferences.py:396
+msgid "Show Latest"
+msgstr ""
+
+#: gui/default/views/preferences.py:440
+msgid "Network drivers"
+msgstr ""
+
+#: gui/default/views/preferences.py:453
+msgid "Driver"
+msgstr ""
+
+#: gui/default/views/preferences.py:454
+msgid "Installed Version"
+msgstr ""
+
+#: gui/default/views/preferences.py:455
+msgid "Available Version"
+msgstr ""
+
+#: gui/default/views/preferences.py:492
+msgid "Network devices"
+msgstr ""
+
+#: gui/default/views/preferences.py:496
+msgid "Reinstall"
+msgstr ""
+
+#: gui/default/views/preferences.py:506
+msgid "Type"
+msgstr ""
+
+#: gui/default/views/stealth.py:11
+msgid "Stealth"
+msgstr ""
+
+#: gui/default/views/stealth.py:13
+msgid ""
+"Stealth VPN is designed to obfuscate your VPN traffic, making it difficult "
+"to block for network administrators or ISPs. When enabled, stealth VPN  uses "
+"encryption and obfuscation techniques to scramble your VPN traffic and make "
+"it difficult to identify as such."
+msgstr ""
+
+#: gui/default/views/stealth.py:19
+msgid "No Stealth"
+msgstr ""
+
+#: gui/default/views/stealth.py:20
+msgid "Select Stealth Method"
+msgstr ""
+
+#: gui/default/views/stealth.py:23
+msgid "Choose a stealth method to obfuscate your VPN traffic"
+msgstr ""
+
+#: gui/default/views/stealth.py:28
+msgid "auto"
+msgstr ""
+
+#: gui/default/views/stealth.py:29
+msgid "Stealth Port"
+msgstr ""
+
+#: gui/default/views/stealth.py:32
+msgid ""
+"Choose a port to use for the stealth VPN connection. Different ports may be "
+"more or less likely to be detected and blocked by network administrators or "
+"ISPs"
+msgstr ""
+
+#: gui/default/views/stealth.py:40
+msgid "Use Custom Stealth Node"
+msgstr ""
+
+#: gui/default/views/stealth.py:43
+msgid ""
+"Enable this option to specify a custom host or IP to use as a stealth "
+"tunneling node for your VPN traffic."
+msgstr ""
+
+#: gui/default/views/stealth.py:52
+msgid "Custom Tunneling Node Host and Port"
+msgstr ""
+
+#: gui/default/views/stealth.py:53
+msgid ""
+"Specify a custom host and port to use as the stealth tunneling node for your "
+"VPN traffic"
+msgstr ""
+
+#: gui/default/views/stealth.py:58
+msgid "Use Authentication for Tunneling Node"
+msgstr ""
+
+#: gui/default/views/stealth.py:61
+msgid ""
+"Enable this option to specify authentication credentials for the custom "
+"tunneling node. This may be required if the custom tunneling node requires "
+"authentication to establish a connection"
+msgstr ""
+
+#: gui/default/views/stealth.py:67
+msgid "Username:"
+msgstr ""
+
+#: gui/default/views/stealth.py:68
+msgid "Password:"
+msgstr ""
+
+#: gui/default/views/stealth.py:70
+msgid "Fingerprint"
+msgstr ""
+
+#: gui/default/views/stealth.py:73
+msgid "Username/password"
+msgstr ""
+
+#: gui/default/views/stealth.py:74
+msgid "Stealth Hosts username and passwords"
+msgstr ""
+
+#: gui/default/views/trackstop.py:10
+msgid "Login to change your TrackStop settings."
+msgstr ""
+
+#: gui/default/views/trackstop.py:17
+msgid ""
+"The TrackStop feature allows you to block unwanted domains directly on VPN "
+"level.  You can choose what kind of domains you want to block by activating "
+"one or more of the filters. Note: It might take up to 3 minutes for any "
+"changes to apply on our Servers. If you update your filter settings on our "
+"website, it might take some time for the settings below to refresh."
+msgstr ""
+
+#: gui/default/views/trackstop.py:18
+msgid "Refresh Now"
+msgstr ""
+
+#: gui/default/views/trackstop.py:25
+msgid "Ads / Analytics"
+msgstr ""
+
+#: gui/default/views/trackstop.py:28
+msgid ""
+"Protect your privacy and block over 30,000 tracking and advertisement "
+"domains with this filter"
+msgstr ""
+
+#: gui/default/views/trackstop.py:33
+msgid "Fraud / Malware"
+msgstr ""
+
+#: gui/default/views/trackstop.py:36
+msgid ""
+"Activate this filter to block over 65,000 known malware and phishing domains."
+msgstr ""
+
+#: gui/default/views/trackstop.py:41
+msgid "Google Services"
+msgstr ""
+
+#: gui/default/views/trackstop.py:44
+msgid ""
+"Warning: This blocks all Google domains, including YouTube, ReCaptcha and "
+"many other services from Google used on many websites!"
+msgstr ""
+
+#: gui/default/views/trackstop.py:52
+msgid "Activate this filter and block all Facebook domains."
+msgstr ""
+
+#: gui/default/views/trackstop.py:57
+msgid "All social media"
+msgstr ""
+
+#: gui/default/views/trackstop.py:60
+msgid ""
+"Block all major social media sites. including Facebook, Twitter, Tumblr, "
+"Instagram, Google+, Pinterest, MySpace and LinkedIn."
+msgstr ""
+
+#: gui/default/views/trackstop.py:65
+msgid "Fakenews"
+msgstr ""
+
+#: gui/default/views/trackstop.py:68
+msgid ""
+"Block domains known to publish fake news using a publicly available filter "
+"list hosted on GitHub that anyone can contribute to."
+msgstr ""
+
+#: gui/default/views/trackstop.py:73
+msgid "Adult content"
+msgstr ""
+
+#: gui/default/views/trackstop.py:76
+msgid ""
+"Block a large number of websites that are inappropriate for children, such "
+"as pornographic content and gambling. This filter also includes the block "
+"lists for tracking and advertisement as well as fraud, so those filters do "
+"not need to be activated separately."
+msgstr ""
+
+#: gui/default/views/trayview.py:101
+msgid "Show App"
+msgstr ""
+
+#: gui/default/views/trayview.py:104
+msgid "Exit App"
+msgstr ""
+
+#: gui/default/views/trayview.py:240
+msgid "Zones"
+msgstr ""
+
+#: gui/default/views/trayview.py:242
+msgid "Cityies"
+msgstr ""
+
+#: gui/default/views/trayview.py:243
+msgid "Servers"
+msgstr ""
+
+#: gui/default/views/trayview.py:376
+msgid "maintenance"
+msgstr ""

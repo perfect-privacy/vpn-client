@@ -108,7 +108,7 @@ class NetworkInterfaces():
             self.networkinterfaces = {}
         networkdatas = getPowershellInstance().execute("Get-DnsClientServerAddress | Select-Object -Property InterfaceIndex,ServerAddresses,AddressFamily", as_data = True)
         if networkdatas is None:
-            ReporterInstance.report("failed_to_load_network_devices","")
+            #ReporterInstance.report("failed_to_load_network_devices","")
             return
 
         for networkdata in networkdatas:
@@ -130,7 +130,7 @@ class NetworkInterfaces():
 
         networkdatas = getPowershellInstance().execute("Get-CimInstance -Class Win32_NetworkAdapterConfiguration | Select-Object -Property InterfaceIndex,DHCPEnabled,IPEnabled,IPAddress,IPSubnet", as_data = True )
         if networkdatas is None:
-            ReporterInstance.report("failed_to_load_network_devices_part2", "")
+            #ReporterInstance.report("failed_to_load_network_devices_part2", "")
             return
         for networkdata in networkdatas:
             try:

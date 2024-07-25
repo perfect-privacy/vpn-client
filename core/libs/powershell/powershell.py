@@ -2,6 +2,7 @@ import logging
 import subprocess
 import traceback
 import uuid
+import os
 from subprocess import PIPE
 from threading import Thread, Lock
 from queue import Queue, Empty
@@ -35,6 +36,11 @@ class Powershell():
                     result = result.decode("UTF-8", errors="replace")
                 except:
                     pass
+                if "A system shutdown is in progress" in result:
+                    return None
+                if "Der Computer wird" in result and "heruntergefahren" in result:
+                    return None
+
                 try:
                     result = json.dumps(result)
                 except:
@@ -53,21 +59,25 @@ class Powershell():
         command = command.encode("UTF-8")
         uniq_id = ("%s" % uuid.uuid4()).split("-")[0].strip().encode("UTF-8")
         if self._process is None:
-            self._process = subprocess.Popen(['powershell'], stdin=PIPE, stderr=PIPE, stdout=PIPE)
+            self._process = subprocess.Popen([os.path.join(os.environ['SystemRoot'], 'System32', "WindowsPowerShell", "v1.0", "powershell.exe")], stdin=PIPE, stderr=PIPE, stdout=PIPE)
         if self._stdout_read_tread is None:
             self._stdout_read_tread = Thread(target=self._read_thread, args=(self._process.stdout, self._stdout_queue), daemon=True)
             self._stdout_read_tread.start()
             self._stderr_read_tread = Thread(target=self._read_thread, args=(self._process.stderr, self._stdout_queue), daemon=True)
             self._stderr_read_tread.start()
             self._process.stdin.write(b'[Console]::OutputEncoding = [Text.Encoding]::UTF8 ; ')
-            self._process.stdin.write(b"$PSDefaultParameterValues['*:Encoding'] = 'utf-8' ; ")
+            self._process.stdin.write(b"$PSDefaultParameterValues['*:Encoding'] = 'utf8' ; ")
             self._process.stdin.write(b"Import-Module DnsClient ; ")
+            self._process.stdin.write(b"Import-Module NetTCPIP ; ")
+            self._process.stdin.write(b"Import-Module NetSecurity ; ")
 
         self._process.stdin.write(b'Write-Host __STARTMARKER-%s__ ; ' % uniq_id)
         self._process.stdin.write(b'' + command + b" ; ")
         self._process.stdin.write(b'Write-Host __ENDMARKER-%s__ \n' % uniq_id)
-        self._process.stdin.flush()
-
+        try:
+            self._process.stdin.flush()
+        except:
+            pass
         lines = []
         startfound = False
         while True:

@@ -226,6 +226,8 @@ class Settings(Observable):
         self.interface_level.attach_observer(self._on_interfacelevel_updated)
 
         self.installation_id         = PermanentProperty(self.__class__.__name__ + ".installation_id", "%s" % uuid.uuid4())
+        self.language         = PermanentProperty(self.__class__.__name__ + ".language", "en")
+
         try:
             with open(os.path.join(Path.home(),".perfect_privacy.instid"), "r") as f:
                 self.installation_id.set(f.read())

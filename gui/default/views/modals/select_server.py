@@ -8,11 +8,11 @@ class SelectServerModalView(Modal):
     <div id="myModal" class="modal">
         <div class="modal-content">
             <div style="width:20%;height:100%;float:left;position:relative">
-                <p style="{% if pyview.current_subsection_name  == "Favourites" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Favourites')">Favourites</p>
-                <p style="{% if pyview.current_subsection_name  == "Countries" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Countries')">Countries</p> 
-                <p style="{% if pyview.current_subsection_name  == "Cities" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Cities')">Cities </p>
-                <p style="{% if pyview.current_subsection_name  == "Servers" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Servers')">All Servers </p>
-                <div style="position:absolute;bottom:1em;" onclick="pyview.select_button()"><button>Select</button></div>    
+                <p style="{% if pyview.current_subsection_name  == "Favourites" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Favourites')">{{_("Favourites")}}</p>
+                <p style="{% if pyview.current_subsection_name  == "Countries" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Countries')">{{_("Countries")}}</p> 
+                <p style="{% if pyview.current_subsection_name  == "Cities" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Cities')">{{_("Cities")}} </p>
+                <p style="{% if pyview.current_subsection_name  == "Servers" %}color:#eee{% endif %};cursor:pointer;border-bottom:1px solid #aaa;margin-right:30px" onclick="pyview.select_subsection_with_filterclear('Servers')">{{_("All Servers")}} </p>
+                <div style="position:absolute;bottom:1em;" onclick="pyview.select_button()"><button>{{_("Select")}}</button></div>    
             </div>
              
             <div style="width:80%;float:left;height:100%;font-size: 1.2em">
@@ -111,10 +111,10 @@ class ServerListView(PyHtmlView):
         <thead>
             <tr>
                 <th>  </th>
-                <th> Name </th>
-                <th> Bandwidth </th>
-                <th> Load </th>
-                <th> Favorite </th>
+                <th> {{_("Name")}} </th>
+                <th> {{_("Bandwidth")}} </th>
+                <th> {{_("Load")}} </th>
+                <th> {{_("Favorite")}} </th>
                 <th>  </th>
             </tr>
         </thead>
@@ -183,7 +183,7 @@ class ServerListsItemView(PyHtmlView):
                     {{ pyview.subject.bandwidth_used_percent }}%
                 </td>
             {% else %}
-                <td colspan="2">down for maintenance</td>
+                <td colspan="2">{{_("down for maintenance")}}</td>
             {% endif %}
             
             <td>
