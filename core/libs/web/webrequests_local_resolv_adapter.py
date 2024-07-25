@@ -2,7 +2,7 @@
 from __future__ import print_function
 
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.connection import SocketTimeout, ConnectTimeoutError, SocketError, NewConnectionError, connection
+from requests.packages.urllib3.connection import SocketTimeout, ConnectTimeoutError, NewConnectionError, connection
 
 import random
 from unittest import mock
@@ -104,7 +104,7 @@ def _patched_new_conn(self):
             self, "Connection to %s (%s) timed out. (connect timeout=%s)" %
                   (self.host, address, self.timeout))
 
-    except SocketError as e:
+    except OSError as e:
         raise NewConnectionError(
             self, "Failed to establish a new connection: %s" % e)
 
