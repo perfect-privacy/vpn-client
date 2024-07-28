@@ -1,11 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
 import pyhtmlgui
+
 try:
     name        = sys.argv[-3]
     root_folder = os.path.abspath(sys.argv[-2])
     script      = os.path.abspath(sys.argv[-1])
-except:
+except Exception as e:
     print("args: name, root_folder, script")
     exit(1)
 
@@ -49,7 +50,8 @@ exe = EXE(pyz,
     bootloader_ignore_signals = False,
     strip       = False,
     upx         = False,
-    console     = True
+    console     = True,
+    contents_directory='.'
 )
 
 coll = COLLECT(

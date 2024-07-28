@@ -43,13 +43,15 @@ class BuildCommon():
         if python.endswith(".exe"):
             python = "python"
 
-        os.system('%s -m PyInstaller "%s" perfect-privacy-service  "%s" "%s"' % (
+        cmd = '%s -m PyInstaller  "%s" -- perfect-privacy-service  "%s" "%s"' % (
             python,
             os.path.join(self.SOURCE_DIR, "build", "data/pyinstaller", "build-service.spec"),
             self.SOURCE_DIR,
             os.path.join(self.SOURCE_DIR, "launcher", "perfect_privacy_service.py")
-        ))
-        os.system('%s -m PyInstaller "%s" perfect-privacy-frontend "%s" "%s"' % (
+        )
+        print(cmd)
+        os.system(cmd)
+        os.system('%s -m PyInstaller "%s" -- perfect-privacy-frontend "%s" "%s"' % (
             python,
             os.path.join(self.SOURCE_DIR, "build", "data/pyinstaller", "build-frontend.spec"),
             self.SOURCE_DIR,

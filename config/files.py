@@ -58,6 +58,5 @@ if PLATFORM == PLATFORMS.linux:
 
 SETTINGS_FILE = os.path.join(APP_VAR_DIR, "storage.db")
 
-PID_FILE = "/var/run/perfect-privacy.pid" # fixme
 LOG_FILE = "/var/log/perfect-privacy.log"
 

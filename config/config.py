@@ -4,8 +4,13 @@ from .constants import PLATFORMS, BRANCHES
 APP_NAME = "Perfect Privacy"
 
 if getattr( sys, 'frozen', False ) == True:  # check if we are bundled by pyinstaller
-    RUNTIME_CONF = os.path.join(sys._MEIPASS, "runtime.conf")
-    RELEASE_CONF = os.path.join(sys._MEIPASS, "release.conf")
+    if "_internal" in sys._MEIPASS:
+        RUNTIME_CONF = os.path.join(sys._MEIPASS, ".." ,"runtime.conf")
+        RELEASE_CONF = os.path.join(sys._MEIPASS, ".." ,"release.conf")
+    else:
+        RUNTIME_CONF = os.path.join(sys._MEIPASS, "runtime.conf")
+        RELEASE_CONF = os.path.join(sys._MEIPASS, "release.conf")
+
 else:
     RUNTIME_CONF = os.path.join(os.path.dirname(os.path.realpath(__file__)), "runtime.conf")
     RELEASE_CONF = os.path.join(os.path.dirname(os.path.realpath(__file__)), "release.conf")
