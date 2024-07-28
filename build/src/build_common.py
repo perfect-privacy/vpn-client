@@ -46,7 +46,7 @@ class BuildCommon():
         os.system("%s -m pip install -r %s " % (python, os.path.join(self.SOURCE_DIR, "requirements.txt")))
         if self.PLATFORM == "windows":
             os.system("%s -m pip install -r %s " % (python, os.path.join(self.SOURCE_DIR, "requirements_win.txt")))
-        elif self.PLATFORM == "linux":
+        elif self.PLATFORM == "linux" or self.PLATFORM == "linux-arm64":
             os.system("%s -m pip install -r %s" % (python, os.path.join(self.SOURCE_DIR, "requirements_linux.txt")))
         elif self.PLATFORM == "macos" or self.PLATFORM == "macos-arm":
             os.system("%s -m pip install -r %s " % (python, os.path.join(self.SOURCE_DIR, "requirements_mac.txt")))
