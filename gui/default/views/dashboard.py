@@ -102,15 +102,6 @@ class DashboardView(PyHtmlView):
 class VpnStatusView(PyHtmlView):
     DOM_ELEMENT_EXTRAS = "style='width:100%;text-align:center;'"
     TEMPLATE_STR = '''    
-        <script>
-            {% if pyview.subject.session.state.get() == "idle" %}
-                pyhtmlapp.set_icon_state("disconnected")
-            {% elif pyview.subject.session.state.get() == "connected" and pyview.subject.ipcheck.vpn_connected == true %}
-                pyhtmlapp.set_icon_state("connected")
-            {% else %}
-                pyhtmlapp.set_icon_state("working")
-            {% endif %}
-        </script>
         {% if pyview.subject.session.state.get() == "idle" %}
              <h3 class="status_red">{{_("VPN Not Connected")}}</h3>
         {% elif pyview.subject.session.state.get() == "connecting" %}

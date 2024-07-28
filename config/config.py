@@ -15,6 +15,7 @@ for key, value in [line.split("=") for line in open(RUNTIME_CONF, "r").read().st
     RUNTIME_CONF_DATA[key.strip()] = value.strip()
 SHARED_SECRET    = RUNTIME_CONF_DATA["SHARED_SECRET"]
 SERVICE_PORT     = 20420
+FRONTEND_PORT     = 20421
 
 if getattr( sys, 'frozen', False ) == True:  # check if we are bundled by pyinstaller
     content = open(RUNTIME_CONF, "r").read()

@@ -1,5 +1,6 @@
 import logging
 import os
+import queue
 import random
 import threading
 import time
@@ -21,13 +22,17 @@ from .openvpndriver import OpenVpnDriver
 from .devicemanager import DeviceManager
 from .favourites import Favourites
 from .vpnsession.common import VpnConnectionState
-from config.config import PLATFORM
+from config.config import PLATFORM, SHARED_SECRET, FRONTEND_PORT
 from config.constants import PLATFORMS, VPN_PROTOCOLS
 from config.paths import APP_DIR
 from .vpnsession.session import SessionState
+import socket
 if PLATFORM == PLATFORMS.windows:
     import win32com.client
     import pythoncom
+
+
+
 
 class Core(Observable):
 
@@ -45,7 +50,7 @@ class Core(Observable):
         self.frontend_active = False
 
         self._logger = logging.getLogger(self.__class__.__name__)
-
+        self.notificationService = NotificationService()
         self.settings = Settings()
         self.settings.account.attach_observer(self._on_credentials_updated)
         self.settings.startup.start_on_boot.attach_observer(self._on_start_on_boot_updated)
@@ -73,6 +78,7 @@ class Core(Observable):
         self.ipcheck = IpCheck(self)
         self._start_timers.append(Timer(10, self.ipcheck.check_now))
         self.session.state.attach_observer(self._on_session_state_changed)
+        self.ipcheck.attach_observer(self.send_icon_state)
 
         self.trafficDownload = TrafficDownload(self)
         self.trafficDownload._on_data_updated.attach_observer(self._on_trafficDownload_updated)
@@ -140,10 +146,22 @@ class Core(Observable):
         pass
 
     def _on_session_state_changed(self, *args, **kwargs):
-        if self.session.state.get() in [SessionState.DISCONNECTING, SessionState.CONNECTING]:
+        self.send_icon_state()
+        state = self.session.state.get()
+        if state in [SessionState.DISCONNECTING, SessionState.CONNECTING]:
             self.ipcheck.clear()
-        if self.session.state.get() in [SessionState.IDLE, SessionState.CONNECTED]:
+        if state in [SessionState.IDLE, SessionState.CONNECTED]:
             Timer(2, self.ipcheck.check_now).start()
+
+    def send_icon_state(self):
+        state = self.session.state.get()
+        if state == SessionState.IDLE:
+            iconstate = "disconnected"
+        elif state == SessionState.CONNECTED and self.ipcheck.vpn_connected is True:
+            iconstate = "connected"
+        else:
+            iconstate = "working"
+        self.notificationService.send_msg("set_icon_state:%s" % iconstate)
 
     def check_connection(self):
         self.routing.update_async()
@@ -301,3 +319,26 @@ class Core(Observable):
                 "usage.ipv6_is_vpn": self.ipcheck.result6.vpn_connected == True,
             }
             ReporterInstance.report_stats(data=stats)
+
+
+class NotificationService():
+    def __init__(self):
+        super().__init__()
+        self.send_thread = threading.Thread(target=self._send_thread, daemon=True)
+        self.queue = queue.Queue()
+        self.send_thread.start()
+
+    def send_msg(self, msg):
+        self.queue.put(msg)
+
+    def _send_thread(self):
+        while True:
+            msg = self.queue.get()
+            try:
+                client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client.connect(('localhost', FRONTEND_PORT))
+                s = "%s:%s" % (SHARED_SECRET, msg)
+                client.send(s.encode("utf-8"))
+                client.close()
+            except Exception as e:
+                pass

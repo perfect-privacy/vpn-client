@@ -7,17 +7,7 @@ from ...common.translations import Translations
 
 
 class TrayView(PyHtmlView):
-    TEMPLATE_STR = '''
-        <script>
-            {% if pyview.subject.session.state.get() == "idle" %}
-                pyhtmlapp.set_icon_state("disconnected")
-            {% elif pyview.subject.session.state.get() == "connected" and pyview.subject.ipcheck.vpn_connected == true %}
-                pyhtmlapp.set_icon_state("connected")
-            {% else %}
-                pyhtmlapp.set_icon_state("working")
-            {% endif %}
-        </script>
-        
+    TEMPLATE_STR = '''        
         <div id="wrapper">
             <section id="intro" class="wrapper style1 fullheight fade-up">
             {% if pyview.select_server == True %}

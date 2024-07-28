@@ -4,6 +4,9 @@ import subprocess
 import time
 import webbrowser
 from shlex import quote
+import socket
+import threading
+
 
 PROJECT_ROOT_DIRECTORY = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 sys.path.insert(0, PROJECT_ROOT_DIRECTORY)
@@ -11,15 +14,18 @@ sys.path.insert(0, os.path.dirname(PROJECT_ROOT_DIRECTORY))
 
 from core.libs.web.reporter import ReporterInstance
 
-
 import psutil
 try:
     from PyQt6.QtCore import Qt, QTimer
+    from PyQt6 import QtCore
+    from PyQt6.QtGui import QAction
 except:
     from PyQt5.QtCore import Qt, QTimer
+    from PyQt5 import QtCore
+    from PyQt5.QtGui import QAction
 
-from pyhtmlgui.apps.qt import PyHtmlQtApp, PyHtmlQtTray, PyHtmlQtWindow
-from config.config import SHARED_SECRET, PLATFORM, SERVICE_PORT
+from pyhtmlgui.apps.qt import PyHtmlQtApp, PyHtmlQtTray, PyHtmlQtWindow, PyHtmlQtSimpleTray
+from config.config import SHARED_SECRET, PLATFORM, SERVICE_PORT, FRONTEND_PORT
 from config.constants import PLATFORMS
 from config.paths import APP_DIR, SOFTWARE_UPDATE_DIR
 from config.files import SOFTWARE_UPDATE_FILENAME
@@ -89,8 +95,55 @@ class AnimatedTrayIcon():
             self._current_index += self._current_direction
             self._timer.start(130)
 
+class FrontendLock(QtCore.QThread):
+    signal = QtCore.pyqtSignal(str)
+    def __init__(self):
+        super().__init__()
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.lock_thread = threading.Thread(target=self._start_lock_server, daemon=True)
+
+    def aquire(self):
+        try:
+            self.server.bind(('localhost', FRONTEND_PORT))
+            self.server.listen(5)
+            self.lock_thread.start()
+            return True
+        except Exception as e:
+            print("Failed to aquire", e)
+            try:
+                client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client.connect(('localhost', FRONTEND_PORT))
+                client.send(("%s:show_main_window" % SHARED_SECRET).encode("utf-8"))
+                client.close()
+            except:
+                pass
+            return False
+
+    def release(self):
+        try:
+            self.lock_thread = None
+            self.server.close()
+        except:
+            pass
+
+    def _start_lock_server(self):
+        while self.lock_thread is not None:
+            try:
+                client_socket, addr = self.server.accept()
+                request = client_socket.recv(1024)
+                client_socket.close()
+                request = request.decode("utf-8")
+                print("received,", request)
+                if request.startswith(SHARED_SECRET):
+                    secret, command = request.split(":",1)
+                    self.signal.emit(command)
+            except:
+                pass
+
+
 class MainApp():
     def __init__(self):
+
         try:
             self.minimized = sys.argv[1] == "minimized"
         except:
@@ -114,7 +167,7 @@ class MainApp():
 
         self.icon_path = os.path.join(APP_DIR, "gui", "default", "static", "icons", "pp_icon.ico")
 
-        self.app = PyHtmlQtApp(icon_path= self.icon_path)
+        self.app = PyHtmlQtApp(icon_path= self.icon_path, arg=sys.argv)
 
         self.window = PyHtmlQtWindow(self.app, url="http://127.0.0.1:%s/?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[1200, 800], title="Perfect Privacy", icon_path = self.icon_path, error_page=error_page)
         self.window.addJavascriptFunction("exit_app", self.stop)
@@ -123,19 +176,26 @@ class MainApp():
         self.window.addJavascriptFunction("fix_service_as_admin", self.fix_service_as_admin)
         self.window.addJavascriptFunction("open_url", self.open_url)
 
-        self.tray = PyHtmlQtTray(self.app, url="http://127.0.0.1:%s/tray?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[300,400], icon_path = self.icon_path, keep_connected_on_close=True)
+        if PLATFORM == PLATFORMS.linux:
+            self.tray = PyHtmlQtSimpleTray(self.app, icon_path=self.icon_path)
+            submenu = self.tray._get_submenu([])
+            action = QAction(parent=submenu, text="Show Perfect Privacy")
+            action.triggered.connect(self.window.show)
+            submenu.addAction(action)
+            action1 = QAction(parent=submenu, text="Exit App")
+            action1.triggered.connect(self.confirm_exit)
+            submenu.addAction(action1)
+        else:
+            self.tray = PyHtmlQtTray(self.app, url="http://127.0.0.1:%s/tray?token=%s"  % (SERVICE_PORT, SHARED_SECRET), size=[300,400], icon_path = self.icon_path, keep_connected_on_close=True)
+
         self.animatedTrayIcon = AnimatedTrayIcon(self.tray)
-        self.tray.addJavascriptFunction("exit_app", self.stop)
-        self.tray.addJavascriptFunction("show_app", self.window.show)
-        self.tray.addJavascriptFunction("hide_app", self.window.hide)
-        self.tray.addJavascriptFunction("set_icon_state", self.animatedTrayIcon.set_state)
-        self.window.addJavascriptFunction("set_icon_state", self.animatedTrayIcon.set_state)
+        if PLATFORM != PLATFORMS.linux:
+            self.tray.addJavascriptFunction("exit_app", self.stop)
+            self.tray.addJavascriptFunction("show_app", self.window.show)
+            self.tray.addJavascriptFunction("hide_app", self.window.hide)
 
         if PLATFORM == PLATFORMS.macos:
-            def confirm_exit():
-                self.window.show()
-                self.window.runJavascript("confirm_exit()")
-            self.window.addMenuButton(["File", "Exit"], confirm_exit)
+            self.window.addMenuButton(["File", "Exit"], self.confirm_exit)
             self.window.addMenuButton(["File", "Preferences"], lambda x:self.window.runJavascript("eval('window.location.href = \"#preferences\";')"))
             self.window.on_closed_event.attach_observer(self.app.hide_osx_dock)
             self.window.on_show_event.attach_observer(self.app.show_osx_dock)
@@ -149,7 +209,34 @@ class MainApp():
             self.tray.on_left_clicked.attach_observer(self.window.show)
 
         self.window._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
-        self.tray._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+        if PLATFORM != PLATFORMS.linux:
+            self.tray._webWidget.web.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+
+    def confirm_exit(self):
+        try:
+            self.window.on_show_event.detach_observer(self._confirm_exit_js)
+        except:
+            pass
+        if self.window._qMainWindow.isVisible():
+            self.window.runJavascript("confirm_exit()")
+        else:
+            self.window.on_show_event.attach_observer(self._confirm_exit_js)
+        self.window.show()
+
+    def _confirm_exit_js(self):
+        try:
+            self.window.on_show_event.detach_observer(self._confirm_exit_js)
+        except:
+            pass
+        QTimer().singleShot(750, lambda:self.window.runJavascript("confirm_exit()"))
+
+
+    def on_signal_received(self, command):
+        if command == "show_main_window":
+            self.window.show()
+        elif command.startswith("set_icon_state"):
+            command, state = command.split(":", 1)
+            self.animatedTrayIcon.set_state(state)
 
     # on osx arm hide tray menu if window is show, because for some reason the webview will flicker white if its visible more than once
     def hide_tray_menu(self, *args):
@@ -157,13 +244,15 @@ class MainApp():
             self.tray._trayAction.trigger()
         self.tray._webWidget.unload_page()
 
+    def show(self):
+        self.window.show()
+
     def load_tray_page(self, *args):
         if self.tray._menu_is_open is False:
             self.tray._webWidget.load_page()
     def on_tray_close(self, *args):
         if self.window._qMainWindow.isVisible():
             self.tray._webWidget.unload_page() # unload page while main window is visible to prevent flickering on arm mac
-
 
     def open_url(self, url):
         webbrowser.open(url)
@@ -266,5 +355,14 @@ class StartupCheckerWin():
         return errormsg
 
 if __name__ == '__main__':
-    MainApp().run()
+    lock = FrontendLock()
+    if lock.aquire() == False:
+        os._exit(1)
+
+    mainapp = MainApp()
+    lock.signal.connect(mainapp.on_signal_received)
+    try:
+        mainapp.run()
+    finally:
+        lock.release()
     os._exit(0)

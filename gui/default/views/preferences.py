@@ -301,6 +301,8 @@ class PreferencesView(PyHtmlView):
             self.osname = "Windows"
         if PLATFORM == PLATFORMS.macos:
             self.osname = "macOS"
+        if PLATFORM == PLATFORMS.linux:
+            self.osname = "Linux"
         self._last_update_requested = 0
         self.set_openvpn_port_options()
 

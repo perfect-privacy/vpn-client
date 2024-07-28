@@ -33,3 +33,4 @@ thirdparty/macos-arm
 thirdparty/windows
 foo.py
 foo.spec
+qt.py

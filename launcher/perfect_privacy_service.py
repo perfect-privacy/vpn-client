@@ -57,6 +57,10 @@ if __name__ == "__main__":
 
         if option == "prepare":   # just run once so secrets and ids are generated
             pass
+        elif option == "debug":
+            from launcher.services.macos_service import MacOS_Service
+            service = MacOS_Service() # can be used on any platform as debug service
+            service.start()
         elif option == "uninstall":   # run silent uninstall, disable firewall, dns, network stuff we installed
             from core.leakprotection import LeakProtection
             from core.routing import Routing
