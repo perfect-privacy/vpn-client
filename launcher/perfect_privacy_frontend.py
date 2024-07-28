@@ -73,18 +73,19 @@ class AnimatedTrayIcon():
         self._timer.timeout.connect(self._animate_step)
 
     def set_state(self, state):
+        self._timer.stop()
         if self._current_state == state:
             return
-        self._timer.stop()
+        last_state = self._current_state
+        self._current_state = state
         if state == "connected":
             self._tray.set_icon(os.path.join(self._icon_path, "pp_icon.ico"))
         elif state == "disconnected":
             self._tray.set_icon(os.path.join(self._icon_path, "pp_icon_idle.ico"))
         elif state == "working":
             self._current_direction = -1
-            self._current_index = 5 if self._current_state == "connected" else 0
-            self._timer.start(130)
-        self._current_state = state
+            self._current_index = 5 if last_state == "connected" else 0
+            self._timer.start(150)
 
     def _animate_step(self):
         self._timer.stop()
@@ -93,13 +94,15 @@ class AnimatedTrayIcon():
             if self._current_index == 0 or self._current_index == len(self._animation_icons) -1:
                 self._current_direction *= -1
             self._current_index += self._current_direction
-            self._timer.start(130)
+            if self._current_state == "working":
+                self._timer.start(150)
 
 class FrontendLock(QtCore.QThread):
     signal = QtCore.pyqtSignal(str)
     def __init__(self):
         super().__init__()
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.lock_thread = threading.Thread(target=self._start_lock_server, daemon=True)
 
     def aquire(self):

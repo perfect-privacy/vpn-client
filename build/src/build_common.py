@@ -43,6 +43,14 @@ class BuildCommon():
         if python.endswith(".exe"):
             python = "python"
 
+        os.system("%s -m pip install -r %s " % (python, os.path.join(self.SOURCE_DIR, "requirements.txt")))
+        if self.PLATFORM == "windows":
+            os.system("%s -m pip install -r %s " % (python, os.path.join(self.SOURCE_DIR, "requirements_win.txt")))
+        elif self.PLATFORM == "linux":
+            os.system("%s -m pip install -r %s" % (python, os.path.join(self.SOURCE_DIR, "requirements_linux.txt")))
+        elif self.PLATFORM == "macos" or self.PLATFORM == "macos-arm":
+            os.system("%s -m pip install -r %s " % (python, os.path.join(self.SOURCE_DIR, "requirements_mac.txt")))
+
         cmd = '%s -m PyInstaller  "%s" -- perfect-privacy-service  "%s" "%s"' % (
             python,
             os.path.join(self.SOURCE_DIR, "build", "data/pyinstaller", "build-service.spec"),
@@ -57,6 +65,8 @@ class BuildCommon():
             self.SOURCE_DIR,
             os.path.join(self.SOURCE_DIR, "launcher", "perfect_privacy_frontend.py")
         ))
+        os.system("deactivate")
+        os.system("rm -r build_venv")
 
     def _write_runtime_config(self):
         f = open( os.path.join( self.BUILD_DIR_TARGET, "runtime.conf") , "w")

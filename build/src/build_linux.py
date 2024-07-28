@@ -13,11 +13,14 @@ class BuildLinux(BuildCommon):
         branch = "_%s" % self.BRANCH.upper()
         if branch == "_RELEASE":
             branch = ""
-        cmd  ='makeself --needroot "%s/build_tmp/perfect-privacy" %s/build_tmp/Perfect_Privacy%s_Setup.run "Perfect Privacy Installer" ./setup.sh' % (self.SOURCE_DIR, self.SOURCE_DIR ,branch)
+        subname = ""
+        if self.PLATFORM == "linux-arm64":
+            subname = "_ARM64"
+        cmd  ='makeself --complevel 1  "%s/build_tmp/perfect-privacy" %s/build_tmp/Perfect_Privacy%s%s_Setup.run "Perfect Privacy Installer" ./setup.sh ' % (self.SOURCE_DIR, self.SOURCE_DIR, subname, branch)
         os.system(cmd)
         # create version file
         release_data = open(os.path.join(self.SOURCE_DIR, "config", "release.conf"), "r").read()
         APP_VERSION = release_data.split("APP_VERSION=")[1].split("\n")[0]
-        with open(os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup.run.version" % branch), "w") as f:
+        with open(os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s%s_Setup.run.version" % (subname,branch)), "w") as f:
             f.write(APP_VERSION)
 

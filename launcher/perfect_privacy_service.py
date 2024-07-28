@@ -34,6 +34,7 @@ except:
 
 try:
     open(os.path.join(APP_DIR, "var", ".test"), "w").write("success")
+    os.remove(os.path.join(APP_DIR, "var", ".test"))
 except:
     print("Perfect Privacy Service requires higher privileges (root/admin or system)")
     if PLATFORM == PLATFORMS.windows:

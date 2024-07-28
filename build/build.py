@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if PLATFORM == "windows":
         build = BuildWindows()
 
-    elif PLATFORM == "linux":
+    elif PLATFORM == "linux" or PLATFORM == "linux-arm64":
         build = BuildLinux()
 
     elif PLATFORM == "macos" or PLATFORM == "macos-arm":
