@@ -16,7 +16,7 @@ class BuildLinux(BuildCommon):
         subname = ""
         if self.PLATFORM == "linux-arm64":
             subname = "_ARM64"
-        cmd  ='makeself --complevel 1  "%s/build_tmp/perfect-privacy" %s/build_tmp/Perfect_Privacy%s%s_Setup.run "Perfect Privacy Installer" ./setup.sh ' % (self.SOURCE_DIR, self.SOURCE_DIR, subname, branch)
+        cmd  ='makeself "%s/build_tmp/perfect-privacy" %s/build_tmp/Perfect_Privacy%s%s_Setup.run "Perfect Privacy Installer" ./setup.sh ' % (self.SOURCE_DIR, self.SOURCE_DIR, subname, branch)
         os.system(cmd)
         # create version file
         release_data = open(os.path.join(self.SOURCE_DIR, "config", "release.conf"), "r").read()
