@@ -59,14 +59,15 @@ class BuildCommon():
         )
         print(cmd)
         os.system(cmd)
-        os.system('%s -m PyInstaller "%s" -- perfect-privacy-frontend "%s" "%s"' % (
+        cmd = '%s -m PyInstaller "%s" -- perfect-privacy-frontend "%s" "%s"' % (
             python,
             os.path.join(self.SOURCE_DIR, "build", "data/pyinstaller", "build-frontend.spec"),
             self.SOURCE_DIR,
             os.path.join(self.SOURCE_DIR, "launcher", "perfect_privacy_frontend.py")
-        ))
-        os.system("deactivate")
-        os.system("rm -r build_venv")
+        )
+        print(cmd)
+        os.system(cmd)
+
 
     def _write_runtime_config(self):
         f = open( os.path.join( self.BUILD_DIR_TARGET, "runtime.conf") , "w")
