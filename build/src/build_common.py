@@ -121,9 +121,9 @@ class BuildCommon():
                 if os.path.isdir(f):
                     shutil.copytree(
                         f,
-                        os.path.join(self.BUILD_DIR_TARGET,os.path.split(f)[1]))
+                        os.path.join(self.BUILD_DIR_TARGET,os.path.split(f)[1]), symlinks=True )
                 else:
-                    shutil.copy2(f, self.BUILD_DIR_TARGET)
+                    shutil.copy2(f, self.BUILD_DIR_TARGET, follow_symlinks=False)
             except:
                 pass
 
@@ -133,9 +133,9 @@ class BuildCommon():
                 if os.path.isdir(f):
                     shutil.copytree(
                         f,
-                        os.path.join(self.BUILD_DIR_TARGET,os.path.split(f)[1]))
+                        os.path.join(self.BUILD_DIR_TARGET,os.path.split(f)[1]), symlinks=True)
                 else:
-                    shutil.copy2(f, self.BUILD_DIR_TARGET)
+                    shutil.copy2(f, self.BUILD_DIR_TARGET, follow_symlinks=False)
             except:
                 pass
 

@@ -27,11 +27,11 @@ mkdir /opt/perfect-privacy    2>/dev/null
 if test -f "/opt/perfect-privacy/var/storage.db"; then
   cp  /opt/perfect-privacy/var/storage.db /tmp/
 fi
-rm -r /opt/perfect-privacy/*
-cp -ar * /opt/perfect-privacy 1>/dev/null
+rm -fR /opt/perfect-privacy/*
+cp -aR * /opt/perfect-privacy 1>/dev/null
 chmod -R 755 /opt/perfect-privacy
 chmod -R 700 /opt/perfect-privacy/var
-cp install_files/daemon/systemd/perfect-privacy.service /etc/systemd/system/
+cp -fR install_files/daemon/systemd/perfect-privacy.service /etc/systemd/system/
 
 systemctl daemon-reload
 
@@ -39,9 +39,9 @@ echo " Installing dependency"
 apt-get -y install openvpn obfs4proxy stunnel
 
 echo " Installing Desktop Symbols"
-cp    install_files/perfect-privacy.desktop /usr/share/applications/
-cp -r install_files/icons/* /usr/share/icons/hicolor/
-cp -r install_files/polkit/com.perfect-privacy.perfect-privacy.policy /usr/share/polkit-1/actions/
+cp -fR   install_files/perfect-privacy.desktop /usr/share/applications/
+cp -fR install_files/icons/* /usr/share/icons/hicolor/
+cp -fR install_files/polkit/com.perfect-privacy.perfect-privacy.policy /usr/share/polkit-1/actions/
 #cp install_files/man/*.gz /usr/share/man/man1/
 desktop-file-install --dir=/usr/share/applications/ /usr/share/applications/perfect-privacy.desktop
 update-desktop-database
