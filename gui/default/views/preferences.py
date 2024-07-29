@@ -484,6 +484,15 @@ class StatusOpenVpnDriverView(PyHtmlView):
                             </td>
                             <td> {{ pyview.subject.tapwindows.available_version_date }} {{ pyview.subject.tapwindows.available_version_number }} </td>
                         </tr>
+                        <tr>
+                            <td> OvpnDCO </td>
+                            <td> 
+                                {% for installed_driver in pyview.subject.dco.installed_drivers %}
+                                    {{ installed_driver.version_date }} {{ installed_driver.version_number }} <br>
+                                {% endfor  %}
+                            </td>
+                            <td> {{ pyview.subject.dco.available_version_date }} {{ pyview.subject.dco.available_version_number }} </td>
+                        </tr>
                 </tbody>
             </table>
         </section>
