@@ -5,22 +5,26 @@
     - go to Installdir\Browser\TorBrowser\Tor\PluggableTransports and get obfs4proxy.exe  
     - rename to pp.obfs4proxy.exe   
     
-- macos/stealth/pp.obfs4proxy  
-    - https://www.torproject.org/download/  
-    - download, install  
-    - go to TorBrowser.app\Content\MacOS\Tor\PluggableTransports and get obfs4proxy  
-    - rename to pp.obfs4proxy   
-        
+  - macos/stealth/pp.obfs4proxy  
+      - https://www.torproject.org/download/  
+      - download, install  
+      - go to TorBrowser.app\Content\MacOS\Tor\PluggableTransports and get obfs4proxy  
+      - rename to pp.obfs4proxy    
+      OR git clone git@github.com:Yawning/obfs4.git
+      - cd obfs4 
+      -  go build -o obfs4proxy/obfs4proxy ./obfs4proxy
+      - 
+
 - windows/stealth/pp.tstunnel.exe
     - https://www.stunnel.org/downloads.html    
     - download, install
     - go to C:\Program Files (x86)\stunnel\bin, get tstunnel.exe and dll files
     - rename to pp.tstunnel.exe
     
-- macos/stealth/pp.tstunnel
+- macos/stealth/pp.stunnel
     - download stunnel src https://www.stunnel.org/downloads.html
-    - ./configure ; make ; get src/stunnel
-    - rename to pp.tstunnel
+    - ./configure --with-ssl=/opt/homebrew/opt/openssl/ ; make ; 
+    - get src/stunnel , rename to pp.stunnel
         
 - windows/stealth/plink.exe
     - https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
@@ -39,6 +43,7 @@
           -  libcrypto_3_x64.dll   -> libcrypto-3-x64.dll
           -  libpkcs11_helper_1.dll  -> libpkcs11-helper-1.dll
           -  libssl_3_x64.dll      -> libssl-3-x64.dll
+          -  wcruntime140.dll for tapcat
             
 - windows/wintun/latest
     - https://openvpn.net/community-downloads/

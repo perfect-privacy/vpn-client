@@ -149,15 +149,16 @@ class OpenVPNConnection(VPNConnection):
             if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
                 args.extend(["--fragment", "1300"])
 
-
-        if PLATFORM == PLATFORMS.windows:
-            args.append("--disable-dco")
-
         if openvpn_protocol == OPENVPN_PROTOCOLS.udp:
             args.extend(["--mssfix", "1300"])
 
-        if self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.wintun and PLATFORM == PLATFORMS.windows:
-            args.extend(["--windows-driver", "wintun"])
+        if PLATFORM == PLATFORMS.windows:
+            if self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.wintun:
+                args.extend(["--windows-driver", "wintun"])
+            elif  self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.dco:
+                args.extend(["--windows-driver", "ovpn-dco"])
+            else:
+                args.extend(["--windows-driver", "tap-windows6"])
 
         if self.stealth_plugin is not None:
             args.extend(self.stealth_plugin.openvpn_arguments)

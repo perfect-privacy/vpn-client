@@ -1,7 +1,8 @@
 import threading
 import logging
 import time
-from config.files import WINTUN_INF, TAPWINDOW_LATEST_INF, TAPWINDOW_9_00_00_9_INF, TAPWINDOW_9_00_00_21_INF, PNPUTIL
+from config.files import WINTUN_INF, TAPWINDOW_LATEST_INF, TAPWINDOW_9_00_00_9_INF, TAPWINDOW_9_00_00_21_INF, PNPUTIL, \
+    DCO_INF
 from pyhtmlgui import  Observable
 from core.libs.subcommand import SubCommand
 from config.constants import OPENVPN_DRIVER
@@ -25,8 +26,10 @@ class OpenVpnDriver(Observable):
 
         self.wintun = Driver_WinTun(self)
         self.tapwindows = Driver_TapWindows(self)
+        self.dco = Driver_DCO(self)
         self.wintun.attach_observer(self._on_subdriver_changed)
         self.tapwindows.attach_observer(self._on_subdriver_changed)
+        self.dco.attach_observer(self._on_subdriver_changed)
         if self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.tap_windows6_9_00_00_9:
             self.tapwindows.set_version_to_install(TAPWINDOW_9_00_00_9_INF)
         if self.core.settings.vpn.openvpn.driver.get() == OPENVPN_DRIVER.tap_windows6_9_00_00_21:
@@ -82,7 +85,8 @@ class OpenVpnDriver(Observable):
             self.force_reinstall = False
             tun_changed = self.wintun.install(force=force)
             tap_changed = self.tapwindows.install(force=force)
-            if tun_changed or tap_changed:
+            dco_changed = self.dco.install(force=force)
+            if tun_changed or tap_changed or dco_changed:
                 self.on_driver_changed.notify_observers()
 
             self.state.set(OpenVpnDriverState.IDLE)
@@ -230,3 +234,23 @@ class Driver_WinTun(Driver_generic):
 
     def _add_driver(self):
         success, stdout, stderr = SubCommand().run(PNPUTIL, ["/add-driver", WINTUN_INF ])
+
+class Driver_DCO(Driver_generic):
+    def __init__(self, openVpnDriver):
+        self.identifier = "OpenVPN, Inc"
+        super().__init__(self.identifier, openVpnDriver)
+        self._logger = logging.getLogger(self.__class__.__name__)
+        try:
+            parts = open(DCO_INF,"r").read().split("DriverVer")[1].split("=")[1].split("\n")[0].strip().split(",")
+            self.available_version_date   = parts[0].strip()
+            self.available_version_number = parts[1].strip()
+        except Exception as e:
+            self._logger.debug("Failed to get OvpnDCO version, %s" % e)
+            self.available_version_date   = 0
+            self.available_version_number = 0
+
+    def _add_driver(self):
+        success, stdout, stderr = SubCommand().run(PNPUTIL, ["/add-driver", DCO_INF ])
+
+
+

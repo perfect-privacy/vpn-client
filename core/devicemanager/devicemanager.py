@@ -39,6 +39,7 @@ class DeviceManager(Observable):
         self.lock = threading.Lock()
         self.wintun_devices = []
         self.tapwindows_devices = []
+        self.dco_devices = []
         self.state = DeviceManagerState()
         if self.core is not None:
             self.core.openVpnDriver.on_driver_changed.attach_observer(self._on_driver_changed)
@@ -60,6 +61,12 @@ class DeviceManager(Observable):
         if driver == OPENVPN_DRIVER.wintun:
             try:
                 return self.wintun_devices
+            except:
+                pass
+            return None
+        elif driver == OPENVPN_DRIVER.dco:
+            try:
+                return self.dco_devices
             except:
                 pass
             return None
@@ -118,6 +125,7 @@ class DeviceManager(Observable):
         self.existing_devices   = sorted([d for d in self._enum_devices()], key=lambda x:x.guid)
         self.wintun_devices     = [d for d in self.existing_devices if d.type == "wintun"]
         self.tapwindows_devices = [d for d in self.existing_devices if d.type == "tap-windows6"]
+        self.dco_devices = [d for d in self.existing_devices if d.type == "ovpn-dco"]
         self.notify_observers()
 
     def _update(self):
@@ -131,23 +139,25 @@ class DeviceManager(Observable):
 
             self._load_existing_devices()
 
-            nonpp_tapwindows_devices = [d for d in self.tapwindows_devices if not d.name.startswith("Perfect Privacy")]
             pp_tapwindows_devices    = [d for d in self.tapwindows_devices if     d.name.startswith("Perfect Privacy")]
-            nonpp_wintun_devices     = [d for d in self.wintun_devices     if not d.name.startswith("Perfect Privacy")]
             pp_wintun_devices        = [d for d in self.wintun_devices     if     d.name.startswith("Perfect Privacy")]
+            pp_dco_devices        = [d for d in self.dco_devices     if     d.name.startswith("Perfect Privacy")]
 
             force = self.force_reinstall
             self.force_reinstall = False
 
             if driver == OPENVPN_DRIVER.wintun:
-                to_remove = pp_tapwindows_devices
+                to_remove = pp_tapwindows_devices + pp_dco_devices
                 exiting_devices    = pp_wintun_devices
+            elif driver == OPENVPN_DRIVER.dco:
+                to_remove = pp_tapwindows_devices + pp_wintun_devices
+                exiting_devices = pp_dco_devices
             else:
-                to_remove = pp_wintun_devices
+                to_remove = pp_wintun_devices + pp_dco_devices
                 exiting_devices    = pp_tapwindows_devices
 
             if force is True:
-                to_remove = pp_tapwindows_devices + pp_wintun_devices
+                to_remove = pp_tapwindows_devices + pp_wintun_devices + pp_dco_devices
             else:
                 too_many_cnt = len(exiting_devices) - cascading_max_hops
                 if too_many_cnt > 0:
@@ -206,6 +216,10 @@ class DeviceManager(Observable):
         args = ["create", "--name" , "%s" % name]
         if driver == OPENVPN_DRIVER.wintun:
             args.extend([ "--hwid", "wintun"])
+        elif driver == OPENVPN_DRIVER.dco:
+            args.extend([ "--hwid", "ovpn-dco"])
+        else:
+            args.extend(["--hwid", "tap0901"])
         success, stdout, stderr = SubCommand().run(TAPCTL, args)
 
     def _delete(self, guid):

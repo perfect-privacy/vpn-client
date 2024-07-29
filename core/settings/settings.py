@@ -1,6 +1,8 @@
 from pathlib import Path
 import os, uuid
 from pyhtmlgui import Observable
+
+from config.config import ARCH
 from core.libs.permanent_property import PermanentProperty
 
 from config.constants import PROTECTION_SCOPES, OPENVPN_PROTOCOLS, VPN_PROTOCOLS, OPENVPN_CIPHER, STEALTH_METHODS,OPENVPN_DRIVER, OPENVPN_TLS_METHOD
@@ -129,7 +131,7 @@ class Settings_Vpn_OpenVPN(Observable):
         self.cipher = PermanentProperty(self.__class__.__name__ + ".cipher", OPENVPN_CIPHER.aes_256_gcm)
         self.cipher.attach_observer(self._on_subitem_updated)
 
-        self.driver = PermanentProperty(self.__class__.__name__ + ".driver", OPENVPN_DRIVER.wintun)
+        self.driver = PermanentProperty(self.__class__.__name__ + ".driver", OPENVPN_DRIVER.tap_windows6_latest if ARCH=="arm64" else OPENVPN_DRIVER.wintun )
         self.driver.attach_observer(self._on_subitem_updated)
 
         self.tls_method = PermanentProperty(self.__class__.__name__ + ".tls_method", OPENVPN_TLS_METHOD.tls_crypt)

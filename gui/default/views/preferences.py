@@ -6,7 +6,7 @@ from core.libs.web.reporter import ReporterInstance
 from gui.common.components import CheckboxComponent, SelectComponent
 from config.constants import VPN_PROTOCOLS, OPENVPN_CIPHER, OPENVPN_PROTOCOLS, OPENVPN_TLS_METHOD, OPENVPN_DRIVER, \
     PLATFORMS, OPENVPN_PORTS
-from config.config import PLATFORM
+from config.config import PLATFORM, ARCH
 
 
 class PreferencesView(PyHtmlView):
@@ -270,13 +270,21 @@ class PreferencesView(PyHtmlView):
                                                               (3, 3),
                                                               (4, 4),
                                                           ])
+        if ARCH == "arm64":
+            options = [
+                (OPENVPN_DRIVER.dco, "DCO"),
+                (OPENVPN_DRIVER.tap_windows6_latest, "TapWindows"),
+            ]
+        else:
+            options = [
+                (OPENVPN_DRIVER.wintun, "WinTUN"),
+                (OPENVPN_DRIVER.dco, "DCO"),
+                (OPENVPN_DRIVER.tap_windows6_latest, "TapWindows Latest"),
+                (OPENVPN_DRIVER.tap_windows6_9_00_00_9, "TapWindows 9.0.0.9"),
+                (OPENVPN_DRIVER.tap_windows6_9_00_00_21, "TapWindows 9.0.0.21"),
+            ]
         self.openvpn_driver = SelectComponent(subject.settings.vpn.openvpn.driver, self,
-                                              options=[
-                                                  (OPENVPN_DRIVER.wintun, "WinTUN"),
-                                                  (OPENVPN_DRIVER.tap_windows6_latest, "TAP 9.24.6.601"),
-                                                  (OPENVPN_DRIVER.tap_windows6_9_00_00_9, "TAP 9.0.0.9"),
-                                                  (OPENVPN_DRIVER.tap_windows6_9_00_00_21, "TAP 9.0.0.21"),
-                                              ])
+                                              options=options)
 
         self.openvpn_port = SelectComponent(subject.settings.vpn.openvpn.port, self,
                                             options=[],

@@ -42,6 +42,7 @@ FRONTEND    = RELEASE_CONF_DATA["FRONTEND"]
 APP_VERSION = RELEASE_CONF_DATA["APP_VERSION"]
 APP_BUILD   = RELEASE_CONF_DATA["APP_BUILD"]
 BRANCH      = RELEASE_CONF_DATA["BRANCH"]
+ARCH        = RELEASE_CONF_DATA["ARCH"]
 
 APP_VERSION_FULL = "{version}-{branch} ({build}) ".format(version=APP_VERSION, branch=BRANCH, build=APP_BUILD).rstrip()
 APP_IDENTIFIER   = "{name} {full_version}".format(name=APP_NAME, full_version=APP_VERSION_FULL)

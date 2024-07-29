@@ -22,12 +22,13 @@ TAPWINDOW_9_00_00_21_INF = os.path.join(APP_THIRDPARTY_DIR, "tapwindows", "9_00_
 TAPWINDOW_9_00_00_9_INF = os.path.join(APP_THIRDPARTY_DIR, "tapwindows", "9_00_00_9", "tap0901.inf")
 TAPWINDOW_LATEST_INF = os.path.join(APP_THIRDPARTY_DIR, "tapwindows", "latest", "tap0901.inf")
 WINTUN_INF = os.path.join(APP_THIRDPARTY_DIR, "wintun", "latest", "wintun.inf")
+DCO_INF = os.path.join(APP_THIRDPARTY_DIR, "dco", "ovpn-dco.inf")
 PNPUTIL = None
 TAPCTL = None
 
 if PLATFORM == PLATFORMS.windows:
-    OPENVPN       = os.path.join(APP_THIRDPARTY_DIR, "openvpn", "2.6.0", "pp.openvpn.exe")
-    TAPCTL        = os.path.join(APP_THIRDPARTY_DIR, "openvpn", "2.6.0", "pp.tapctl.exe" )
+    OPENVPN       = os.path.join(APP_THIRDPARTY_DIR, "openvpn", "pp.openvpn.exe")
+    TAPCTL        = os.path.join(APP_THIRDPARTY_DIR, "openvpn", "pp.tapctl.exe" )
     SSH           = os.path.join(APP_THIRDPARTY_DIR, "stealth", "pp.plink.exe")
     OBFS          = os.path.join(APP_THIRDPARTY_DIR, "stealth", "pp.obfs4proxy.exe")
     STUNNEL       = os.path.join(APP_THIRDPARTY_DIR, "stealth", "pp.tstunnel.exe")
@@ -42,7 +43,7 @@ if PLATFORM == PLATFORMS.windows:
         NETSH   = os.path.join(os.environ["WINDIR"], "Sysnative", "netsh.exe")
 
 if PLATFORM == PLATFORMS.macos:
-    OPENVPN       = os.path.join(APP_THIRDPARTY_DIR, "openvpn", "2.6.0", "pp.openvpn")
+    OPENVPN       = os.path.join(APP_THIRDPARTY_DIR, "openvpn", "pp.openvpn")
     SSH       = os.path.join("/usr","bin", "ssh")
     OBFS          = os.path.join(APP_THIRDPARTY_DIR, "stealth", "pp.obfs4proxy")
     if platform.processor() == "arm":

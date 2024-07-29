@@ -1,6 +1,6 @@
 from pyhtmlgui import PyHtmlView
 
-from config.config import PLATFORM
+from config.config import PLATFORM, ARCH
 from gui.common.components import CheckboxComponent, SelectComponent, TextinputComponent
 from config.constants import STEALTH_METHODS, STEALTH_PORTS, VPN_PROTOCOLS, OPENVPN_TLS_METHOD, PLATFORMS
 
@@ -98,10 +98,13 @@ class StealthView(PyHtmlView):
              (STEALTH_METHODS.no_stealth, "No Stealth"),
              (STEALTH_METHODS.socks     , "Socks"),
              (STEALTH_METHODS.http      , "HTTP"),
-             (STEALTH_METHODS.obfs      , "OBFS"),
+
         ]
+        if not (PLATFORM == PLATFORMS.windows and ARCH == "arm64"):
+            options.append((STEALTH_METHODS.obfs, "OBFS"))
         if PLATFORM == PLATFORMS.windows:
-            options.append((STEALTH_METHODS.stunnel, "Stunnel"))
+            if ARCH != "arm64":
+                options.append((STEALTH_METHODS.stunnel, "Stunnel"))
             options.append((STEALTH_METHODS.ssh, "SSH"))
         self.stealth_method = SelectComponent(subject.settings.stealth.stealth_method, self, options=options)
         self.add_observable(self.subject.settings.stealth.stealth_method, self._on_stealth_method_changed)

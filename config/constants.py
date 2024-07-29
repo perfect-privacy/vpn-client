@@ -45,6 +45,7 @@ class OPENVPN_PROXY_MODE():
 
 class OPENVPN_DRIVER():
     wintun       = "wintun"
+    dco       = "dco"
     tap_windows6_latest = "tap-windows6 latest"
     tap_windows6_9_00_00_21 = "tap-windows6 9.0.0.21"
     tap_windows6_9_00_00_9  = "tap-windows6 9.0.0.9"

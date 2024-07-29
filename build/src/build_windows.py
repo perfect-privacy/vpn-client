@@ -6,10 +6,14 @@ from .build_common import BuildCommon
 
 class BuildWindows(BuildCommon):
     def _copy_files(self):
-        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", self.PLATFORM, "openvpn")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "openvpn") )
-        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", self.PLATFORM, "stealth")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "stealth") )
-        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", self.PLATFORM, "tapwindows") , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "tapwindows") )
-        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", self.PLATFORM, "wintun")     , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "wintun") )
+        folder = self.PLATFORM
+        if self.ARCH == "arm64" and self.PLATFORM == "windows":
+            folder = "%s-arm64" % folder
+        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "openvpn")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "openvpn") )
+        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "stealth")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "stealth") )
+        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "tapwindows") , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "tapwindows") )
+        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "wintun")     , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "wintun") )
+        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "dco")     , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "dco") )
         super(BuildWindows, self)._copy_files()
         os.rename(os.path.join(self.BUILD_DIR_TARGET, "perfect-privacy-frontend.exe")         , os.path.join(self.BUILD_DIR_TARGET, "perfect-privacy.exe"))
 
