@@ -18,8 +18,8 @@ a = Analysis(
     hiddenimports   = ["sqlite3"],
     hookspath       = [os.path.join(root_folder, "build", "data", "pyinstaller")],
     runtime_hooks   = [],
-    excludes        = ["PyQt6" if platform.system() == "windows" else "PyQt5" ],
-    win_no_prefer_redirects = False,
+    excludes        = ["PyQt6" if platform.system() == "Windows" else "PyQt5" ],
+    win_no_prefer_redirects = False
     win_private_assemblies  = False,
     cipher          = None,
     noarchive       = False
