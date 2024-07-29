@@ -29,14 +29,17 @@ class BuildWindows(BuildCommon):
         branch = "_%s" % self.BRANCH.upper()
         if branch == "_RELEASE":
             branch = ""
+        arch = ""
+        if self.PLATFORM == "arm64":
+            arch = "_ARM64"
         outputfile = os.path.join(self.SOURCE_DIR, "build","data", "nsis", "Perfect_Privacy_Setup.exe")
-        targetfile = os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup.exe"  % branch)
+        targetfile = os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup%s.exe"  % (branch, arch))
         if os.path.isfile(targetfile):
             os.remove(targetfile)
         os.rename(outputfile, targetfile )
 
         # create version file
-        with open(os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup.exe.version" % branch),"w") as f:
+        with open(os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup%s.exe.version" % (branch, arch)),"w") as f:
             f.write(APP_VERSION)
 
         print(targetfile, " CREATED")

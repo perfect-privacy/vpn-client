@@ -23,10 +23,10 @@ class BuildMacos(BuildCommon):
             branch = ""
         release_data = open(os.path.join(self.SOURCE_DIR, "config", "release.conf"), "r").read()
         APP_VERSION = release_data.split("APP_VERSION=")[1].split("\n")[0]
-        subname = ""
-        if self.PLATFORM == "macos-arm":
-            subname = "_ARM"
-        with open(os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup%s.pkg.version" % (branch, subname)), "w") as f:
+        arch = ""
+        if self.ARCH == "arm64":
+            arch = "_ARM"
+        with open(os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup%s.pkg.version" % (branch, arch)), "w") as f:
             f.write(APP_VERSION)
 
         self._create_uninstaller()
@@ -78,10 +78,10 @@ class BuildMacos(BuildCommon):
             --distribution "%(target_dir)s/pkg/distribution.xml" \
             --resources    "%(target_dir)s/pkg/resources"    \
             --package-path "%(target_dir)s/pkg/package"      \
-            "%(target_dir)s/Perfect_Privacy%(branch)s_Setup%(subname)s.pkg"' % {
+            "%(target_dir)s/Perfect_Privacy%(branch)s_Setup%(arch)s.pkg"' % {
                 "target_dir" : self.BUILD_DIR_TMP,
                 "branch"     : branch,
-                "subname"    : subname,
+                "arch"    : arch,
             }
         print(cmd)
         os.system(cmd)

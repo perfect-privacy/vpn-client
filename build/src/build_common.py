@@ -11,6 +11,7 @@ class BuildCommon():
         self.BUILD_DIR_TMP = os.path.join(self.SOURCE_DIR, "build_tmp")
         self.BUILD_DIR_TARGET = os.path.join(self.BUILD_DIR_TMP, "perfect-privacy")
         self.PLATFORM    = None
+        self.ARCH        = None
         self.FRONTEND    = None
         self.BRANCH      = None
         self.BUILDNUMBER = None
@@ -27,9 +28,10 @@ class BuildCommon():
 
     def _parse_commandline(self):
         self.PLATFORM    = sys.argv[1]
-        self.FRONTEND    = sys.argv[2]
-        self.BRANCH      = sys.argv[3]
-        self.BUILDNUMBER = sys.argv[4]
+        self.ARCH        = sys.argv[2]
+        self.FRONTEND    = sys.argv[3]
+        self.BRANCH      = sys.argv[4]
+        self.BUILDNUMBER = sys.argv[5]
 
     def _prepare_directorys(self):
         if os.path.exists(self.BUILD_DIR_TMP): shutil.rmtree(self.BUILD_DIR_TMP)
@@ -81,6 +83,7 @@ class BuildCommon():
         f.write("APP_VERSION=%s\n" % VERSION)
         f.write("APP_BUILD=%s\n" % self.BUILDNUMBER)
         f.write("BRANCH=%s\n" % self.BRANCH)
+        f.write("ARCH=%s\n" % self.ARCH)
         f.close()
 
     def download_configs(self):
