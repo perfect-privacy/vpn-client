@@ -106,6 +106,7 @@ class BuildCommon():
             if self.PLATFORM == "windows":
                 os.system("cd \"%s\" & powershell -command \"Expand-Archive '%s'\"" % (os.path.join(self.SOURCE_DIR, "thirdparty"), "thirdparty.zip"))
                 shutil.copytree(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty", "windows"),os.path.join(self.SOURCE_DIR, "thirdparty", "windows"))
+                shutil.copytree(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty", "windows-arm64"),os.path.join(self.SOURCE_DIR, "thirdparty", "windows-arm64"))
                 shutil.copytree(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty", "macos"),os.path.join(self.SOURCE_DIR, "thirdparty", "macos"))
                 shutil.rmtree(os.path.join(self.SOURCE_DIR, "thirdparty", "thirdparty"))
             else:
