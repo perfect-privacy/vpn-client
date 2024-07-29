@@ -20,9 +20,12 @@ try:
     from PyQt6 import QtCore
     from PyQt6.QtGui import QAction
 except:
-    from PyQt5.QtCore import Qt, QTimer
-    from PyQt5 import QtCore
-    from PyQt5.QtGui import QAction
+    from PyQt5 import QtWidgets, QtCore
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+
+
+
 
 from pyhtmlgui.apps.qt import PyHtmlQtApp, PyHtmlQtTray, PyHtmlQtWindow, PyHtmlQtSimpleTray
 from config.config import SHARED_SECRET, PLATFORM, SERVICE_PORT, FRONTEND_PORT
