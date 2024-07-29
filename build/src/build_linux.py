@@ -14,13 +14,13 @@ class BuildLinux(BuildCommon):
         if branch == "_RELEASE":
             branch = ""
         arch = ""
-        if self.PLATFORM == "arm64":
+        if self.ARCH == "arm64":
             arch = "_ARM64"
         cmd  ='makeself "%s/build_tmp/perfect-privacy" %s/build_tmp/Perfect_Privacy%s_Setup%s.run "Perfect Privacy Installer" ./setup.sh ' % (self.SOURCE_DIR, self.SOURCE_DIR, branch, arch)
         os.system(cmd)
         # create version file
         release_data = open(os.path.join(self.SOURCE_DIR, "config", "release.conf"), "r").read()
         APP_VERSION = release_data.split("APP_VERSION=")[1].split("\n")[0]
-        with open(os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup%s.run.version" % (branch, arch,)), "w") as f:
+        with open(os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup%s.run.version" % (branch, arch)), "w") as f:
             f.write(APP_VERSION)
 

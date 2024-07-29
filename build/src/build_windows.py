@@ -30,7 +30,7 @@ class BuildWindows(BuildCommon):
         if branch == "_RELEASE":
             branch = ""
         arch = ""
-        if self.PLATFORM == "arm64":
+        if self.ARCH == "arm64":
             arch = "_ARM64"
         outputfile = os.path.join(self.SOURCE_DIR, "build","data", "nsis", "Perfect_Privacy_Setup.exe")
         targetfile = os.path.join(self.SOURCE_DIR, "build_tmp", "Perfect_Privacy%s_Setup%s.exe"  % (branch, arch))
