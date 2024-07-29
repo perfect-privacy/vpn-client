@@ -1,20 +1,23 @@
 import os, sys, platform
 from .config import BRANCH
-from .config import PLATFORM
+from .config import PLATFORM, ARCH
 from .constants import PLATFORMS
 from .paths import APP_THIRDPARTY_DIR, APP_DIR, APP_VAR_DIR
 
 branch = "_%s" % BRANCH.upper()
 if branch == "_RELEASE": branch = ""
+arch = ""
+if ARCH == "arm64":
+    arch = "_ARM64"
 if PLATFORM == PLATFORMS.windows:
-    SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.exe" % branch
+    SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup%s.exe" % (branch, arch)
 if PLATFORM == PLATFORMS.macos:
     if platform.processor() == "arm":
         SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup_ARM.pkg" % branch
     else:
         SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.pkg" % branch
 if PLATFORM == PLATFORMS.linux:
-    SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.run" % branch
+    SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup%s.run" % (branch, arch)
 
 CONFIG_UPDATE_FILENAME =  "Perfect_Privacy_App_Configs.zip"
 
