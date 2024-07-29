@@ -541,6 +541,13 @@ class StatusNetworkDevicesView(PyHtmlView):
                             <td> {{ tapwindows_device.guid }} </td>
                         </tr>
                     {% endfor  %}
+                    {% for dco_device in pyview.subject.dco_devices %}
+                        <tr>
+                            <td> {{ dco_device.name }} </td>
+                            <td> {{ dco_device.type }} </td>
+                            <td> {{ dco_device.guid }} </td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </section>
