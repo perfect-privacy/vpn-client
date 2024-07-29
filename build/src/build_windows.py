@@ -12,7 +12,8 @@ class BuildWindows(BuildCommon):
         shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "openvpn")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "openvpn") )
         shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "stealth")    , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "stealth") )
         shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "tapwindows") , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "tapwindows") )
-        shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "wintun")     , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "wintun") )
+        if self.ARCH != "arm64":
+            shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "wintun")     , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "wintun") )
         shutil.copytree( os.path.join(self.SOURCE_DIR, "thirdparty", folder, "dco")     , os.path.join(self.BUILD_DIR_TARGET, "thirdparty", "dco") )
         super(BuildWindows, self)._copy_files()
         os.rename(os.path.join(self.BUILD_DIR_TARGET, "perfect-privacy-frontend.exe")         , os.path.join(self.BUILD_DIR_TARGET, "perfect-privacy.exe"))
