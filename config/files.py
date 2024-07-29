@@ -12,7 +12,7 @@ if ARCH == "arm64":
 if PLATFORM == PLATFORMS.windows:
     SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup%s.exe" % (branch, arch)
 if PLATFORM == PLATFORMS.macos:
-    if platform.processor() == "arm":
+    if "ARM64" in platform.uname().version or ARCH == "arm64" or platform.processor() == "arm":
         SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup_ARM.pkg" % branch
     else:
         SOFTWARE_UPDATE_FILENAME = "Perfect_Privacy%s_Setup.pkg" % branch
