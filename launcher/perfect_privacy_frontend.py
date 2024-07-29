@@ -73,9 +73,9 @@ class AnimatedTrayIcon():
         self._timer.timeout.connect(self._animate_step)
 
     def set_state(self, state):
-        self._timer.stop()
         if self._current_state == state:
             return
+        self._timer.stop()
         last_state = self._current_state
         self._current_state = state
         if state == "connected":
