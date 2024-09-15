@@ -41,13 +41,13 @@ ERROR_PAGE = '''
     <div style="text-align:center;color:gray">
         <h3>
             <br><br>
-            Failed to connect to VPN background service  <br><br>
+            Verbindung zum VPN-Hintergrunddienst fehlgeschlagen  <br><br>
             :( <br><br>
             %s<br><br>
             <button style="cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" 
                 onclick="pyhtmlapp.__default_exit_qtapp()">EXIT NOW
             </button><br>
-            Retrying in a few seconds <br> <br>            
+            Erneuter Versuch in ein paar Sekunden <br> <br>            
         </h3>
     </div>
 '''
@@ -155,7 +155,7 @@ class MainApp():
         except:
             self.minimized = False
 
-        errormsg = '<button style="background-image:linear-gradient(to bottom,#5cb85c 0,#419641 100%);  border-color: #3e8f3e; cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" onclick="pyhtmlapp.fix_service_as_admin()">Try to repair background service (as Admin)</button><br>'
+        errormsg = '<button style="background-image:linear-gradient(to bottom,#5cb85c 0,#419641 100%);  border-color: #3e8f3e; cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" onclick="pyhtmlapp.fix_service_as_admin()">Versuche, den Hintergrunddienst zu reparieren (als Admin)</button><br>'
         self.restart = False
         self.update_on_exit = False
 
@@ -348,16 +348,16 @@ class StartupCheckerWin():
 
     def get_error_msg(self):
         errormsg = None
-        msg = "If this happens repeatedly, make sure no other security software is blocking our service.<br><br>" \
-            '<button style="background-image:linear-gradient(to bottom,#5cb85c 0,#419641 100%);  border-color: #3e8f3e; cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" onclick="pyhtmlapp.fix_service_as_admin()">Repair Background Service (as Admin)</button><br><br>' \
-            'If you repair the service, it might take up to 30 seconds to load.<br>'\
-            "If all else fails, please contact Perfect Privacy support<br>"
+        msg = "Wenn dies wiederholt passiert, stelle sicher, dass keine andere Sicherheitssoftware unseren Dienst blockiert.<br><br>" \
+            '<button style="background-image:linear-gradient(to bottom,#5cb85c 0,#419641 100%);  border-color: #3e8f3e; cursor: pointer;webkit-user-select: none;user-select: none;border: 1px solid;border-radius: 6px;line-height: 20px;font-size:14px;" onclick="pyhtmlapp.fix_service_as_admin()">Reparatur-Hintergrunddienst (als Admin)</button><br><br>' \
+            'Wenn du den Dienst reparierst, kann es bis zu 30 Sekunden dauern, bis er geladen ist.<br>'\
+            "Wenn alles andere fehlschlägt, kontaktiere bitte den Perfect Privacy Support<br>"
         if self.check_service_exe() == False:
-            errormsg = "Some installation files are missing, make sure they have not been quarantined by your anti virus software.<br> Please reinstall Perfect Privacy"
+            errormsg = "Einige Installationsdateien fehlen. Vergewissere dich, dass sie nicht von deiner Antivirensoftware unter Quarantäne gestellt wurden.<br> Bitte installiere Perfect Privacy neu"
         elif self.check_service_installed() == False:
-            errormsg = "The VPN background service is not installed<br>" + msg
+            errormsg = "Der VPN-Hintergrunddienst ist nicht installiert<br>" + msg
         elif self.check_service_running() == False:
-            errormsg = "The VPN background service is not running, but no reason is apparent. <br>" + msg
+            errormsg = "Der VPN-Hintergrunddienst läuft nicht, aber es ist kein Grund ersichtlich. <br>" + msg
         return errormsg
 
 if __name__ == '__main__':
